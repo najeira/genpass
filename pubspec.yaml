@@ -1,5 +1,5 @@
 name: genpass
-description: A password generator.
+description: A password generator app written by Flutter/Dart.
 
 dependencies:
   flutter:
