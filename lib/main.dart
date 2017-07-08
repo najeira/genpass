@@ -30,6 +30,8 @@ class GenPassPage extends StatefulWidget {
 }
 
 class GenPassPageState extends State<GenPassPage> {
+  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  
   final GlobalKey<FormFieldState<String>> siteTextKey = new GlobalKey<FormFieldState<String>>();
   TextEditingController siteTextController;
   String siteError;
@@ -64,10 +66,11 @@ class GenPassPageState extends State<GenPassPage> {
     
     final String siteText = siteTextController.text ?? "";
     final String passText = passTextController.text ?? "";
-    final String hassText = valid ? generatePassword(siteText, passText) : "";
+    final String hashText = valid ? generatePassword(siteText, passText) : "";
     final String pinText = valid ? generatePin(siteText, passText) : "";
     
     return new Scaffold(
+      key: scaffoldKey,
       appBar: new AppBar(
         leading: new Icon(Icons.business_center),
         title: new Text("Gen Pass"),
@@ -88,7 +91,7 @@ class GenPassPageState extends State<GenPassPage> {
               key: siteTextKey,
               controller: siteTextController,
               inputIcon: Icons.business,
-              labelText: "domain/site",
+              labelText: "domain / site",
               hintText: "example.com",
               errorText: siteError,
               onChanged: (String value) {
@@ -107,7 +110,7 @@ class GenPassPageState extends State<GenPassPage> {
               controller: passTextController,
               inputIcon: Icons.bubble_chart,
               labelText: "password",
-              hintText: "master password",
+              hintText: "your master password",
               errorText: passError,
               obscureText: !showPassword,
               onChanged: (String value) {
@@ -133,14 +136,21 @@ class GenPassPageState extends State<GenPassPage> {
             child: buildPasswordRow(
               context,
               icon: Icons.vpn_key,
-              value: hassText,
+              value: hashText,
               obscure: !showHash,
               onVisibilityChanged: () {
                 setState(() {
                   showHash = !showHash;
                 });
               },
-              onCopy: () {},
+              onCopy: () {
+                Clipboard.setData(new ClipboardData(text: hashText)).then((Null _){
+                  scaffoldKey.currentState.showSnackBar(new SnackBar(
+                    content: new Text("Password copied to clipboard")));
+                }).catchError((ex) {
+                  debugPrint(ex.toString());
+                });
+              },
             ),
           ),
           new Container(
@@ -155,7 +165,14 @@ class GenPassPageState extends State<GenPassPage> {
                   showPin = !showPin;
                 });
               },
-              onCopy: () {},
+              onCopy: () {
+                Clipboard.setData(new ClipboardData(text: pinText)).then((Null _){
+                  scaffoldKey.currentState.showSnackBar(new SnackBar(
+                    content: new Text("PIN copied to clipboard")));
+                }).catchError((ex) {
+                  debugPrint(ex.toString());
+                });
+              },
             ),
           ),
         ],
