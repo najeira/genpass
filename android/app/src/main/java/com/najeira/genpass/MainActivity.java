@@ -1,4 +1,4 @@
-package com.yourcompany.genpass;
+package com.najeira.genpass;
 
 import android.os.Bundle;
 
