@@ -1,0 +1,10 @@
+name: genpass
+description: A password generator.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  crypto: "^2.0.1"
+
+flutter:
+  uses-material-design: true
