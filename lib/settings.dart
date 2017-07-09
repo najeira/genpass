@@ -173,7 +173,15 @@ class SettingsPageState extends State<SettingsPage> {
   
   void onItemPressed(String value) {
     switch (value) {
-      case "help":
+      case "about":
+        showDialog(context: context, child: new SimpleDialog(
+          children: <Widget>[
+            new Container(
+              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+              child: new Text("Icon made by Freepik from www.flaticon.com"),
+            ),
+          ],
+        ));
         break;
     }
   }
