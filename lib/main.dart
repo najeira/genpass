@@ -44,16 +44,21 @@ class GenPassPageState extends State<GenPassPage> {
   bool showHash = false;
   bool showPin = false;
   
-  Settings settings;
+  Settings settings = new Settings();
   
   @override
   void initState() {
     super.initState();
+    
     siteTextController = new TextEditingController();
     passTextController = new TextEditingController();
     
-    // TODO: load from preference.
-    settings = new Settings();
+    // load from preference.
+    Settings.load().then((Settings settings) {
+      setState(() {
+        this.settings = settings;
+      });
+    });
   }
   
   @override
@@ -303,6 +308,11 @@ class GenPassPageState extends State<GenPassPage> {
     future.then((Settings settings) {
       setState(() {
         this.settings = settings;
+      });
+      Settings.save(settings).then((_){
+        debugPrint("settings saved");
+      }).catchError((ex) {
+        debugPrint(ex.toString());
       });
     });
   }
