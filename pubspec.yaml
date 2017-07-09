@@ -5,6 +5,7 @@ dependencies:
   flutter:
     sdk: flutter
   crypto: "^2.0.1"
+  shared_preferences: "^0.2.4"
 
 flutter:
   uses-material-design: true
