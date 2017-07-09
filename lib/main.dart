@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 
 import 'crypto.dart';
 import 'service.dart';
+
+import 'history.dart';
 import 'settings.dart';
 
 void main() {
@@ -116,7 +118,7 @@ class GenPassPageState extends State<GenPassPage> {
                 });
               },
               actionIcon: Icons.assignment,
-              onPressed: null,
+              onPressed: onHistoryPressed,
             ),
           ),
           new Container(
@@ -295,6 +297,24 @@ class GenPassPageState extends State<GenPassPage> {
       return "over 8 characters";
     }
     return null;
+  }
+  
+  void onHistoryPressed() {
+    final String siteText = siteTextController.text;
+    var future = Navigator.of(context)?.push(
+      new MaterialPageRoute<String>(
+        builder: (BuildContext context) {
+          return new HistoryPage(siteText);
+        },
+      ),
+    );
+    future.then((String siteText) {
+      if (siteText != null && siteText.isNotEmpty) {
+        setState(() {
+          this.siteTextController.text = siteText;
+        });
+      }
+    });
   }
   
   void onSettingsPressed() {
