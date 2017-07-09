@@ -81,7 +81,7 @@ class GenPassPageState extends State<GenPassPage> {
     final bool valid = validSite && validPass;
     
     final String hashText = valid ? Crypto.generatePassword(
-      siteText, passText, settings.passwordLength) : "";
+      settings.hashAlgorithm, siteText, passText, settings.passwordLength) : "";
     final String pinText = valid ? Crypto.generatePin(
       siteText, passText, settings.pinLength) : "";
     

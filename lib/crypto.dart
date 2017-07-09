@@ -2,16 +2,30 @@ import 'dart:convert' show BASE64;
 
 import 'package:crypto/crypto.dart' as crypto;
 
+import 'service.dart';
+
 class Crypto {
   factory Crypto._() {
     throw new UnsupportedError("Not supported");
   }
   
   // Super Gen Pass Algorithm
-  static String generatePassword(String domain, String password, int length) {
+  static String generatePassword(HashAlgorithm algo, String domain, String password, int length) {
+    crypto.Hash hash = crypto.md5;
+    switch (algo) {
+      case HashAlgorithm.md5:
+        hash = crypto.md5;
+        break;
+      case HashAlgorithm.sha1:
+        hash = crypto.sha1;
+        break;
+      case HashAlgorithm.sha256:
+        hash = crypto.sha256;
+        break;
+    }
     final String secret = "";
     final String targetText = "${password}${secret}:${domain}";
-    final String generated = _hashRound(targetText, length, crypto.md5, 10);
+    final String generated = _hashRound(targetText, length, hash, 10);
     return generated;
   }
   
