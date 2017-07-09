@@ -42,11 +42,16 @@ class GenPassPageState extends State<GenPassPage> {
   bool showHash = false;
   bool showPin = false;
   
+  Settings settings;
+  
   @override
   void initState() {
     super.initState();
     siteTextController = new TextEditingController();
     passTextController = new TextEditingController();
+    
+    // TODO: load from preference.
+    settings = new Settings();
   }
   
   @override
@@ -58,12 +63,16 @@ class GenPassPageState extends State<GenPassPage> {
   
   @override
   Widget build(BuildContext context) {
+    final String siteText = siteTextController.text ?? "";
+    siteError = validateSiteValue(siteText);
+    
+    final String passText = passTextController.text ?? "";
+    passError = validatePassValue(passText);
+    
     final bool validSite = (siteError == null || siteError.isEmpty);
     final bool validPass = (passError == null || passError.isEmpty);
     final bool valid = validSite && validPass;
     
-    final String siteText = siteTextController.text ?? "";
-    final String passText = passTextController.text ?? "";
     final String hashText = valid ? Crypto.generatePassword(
       siteText, passText, settings.passwordLength) : "";
     final String pinText = valid ? Crypto.generatePin(
@@ -144,7 +153,7 @@ class GenPassPageState extends State<GenPassPage> {
                 });
               },
               onCopy: () {
-                Clipboard.setData(new ClipboardData(text: hashText)).then((Null _){
+                Clipboard.setData(new ClipboardData(text: hashText)).then((Null _) {
                   scaffoldKey.currentState.showSnackBar(new SnackBar(
                     content: new Text("Password copied to clipboard")));
                 }).catchError((ex) {
@@ -166,7 +175,7 @@ class GenPassPageState extends State<GenPassPage> {
                 });
               },
               onCopy: () {
-                Clipboard.setData(new ClipboardData(text: pinText)).then((Null _){
+                Clipboard.setData(new ClipboardData(text: pinText)).then((Null _) {
                   scaffoldKey.currentState.showSnackBar(new SnackBar(
                     content: new Text("PIN copied to clipboard")));
                 }).catchError((ex) {
@@ -282,16 +291,26 @@ class GenPassPageState extends State<GenPassPage> {
   }
   
   void onSettingsPressed() {
-    Navigator.of(context)?.push(
-      new MaterialPageRoute(
+    var future = Navigator.of(context)?.push(
+      new MaterialPageRoute<Settings>(
         builder: (BuildContext context) {
-          return new SettingsPage();
-        }),
+          return new SettingsPage(settings);
+        },
+      ),
     );
+    future.then((Settings settings) {
+      setState(() {
+        this.settings = settings;
+      });
+    });
   }
 }
 
 class SettingsPage extends StatefulWidget {
+  final Settings settings;
+  
+  SettingsPage(this.settings);
+  
   @override
   State<StatefulWidget> createState() {
     return new SettingsPageState();
@@ -299,11 +318,19 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsPageState extends State<SettingsPage> {
-  HashAlgorithm hashAlgorithm = HashAlgorithm.md5;
-  
   bool confirmAlgorithm = false;
+  
   int passwordLength = 10;
   int pinLength = 4;
+  HashAlgorithm hashAlgorithm = HashAlgorithm.md5;
+  
+  @override
+  void initState() {
+    super.initState();
+    passwordLength = widget.settings.passwordLength;
+    pinLength = widget.settings.pinLength;
+    hashAlgorithm = widget.settings.hashAlgorithm;
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -315,6 +342,17 @@ class SettingsPageState extends State<SettingsPage> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text("Settings"),
+        leading: new IconButton(
+          icon: const BackButtonIcon(),
+          tooltip: 'Back',
+          onPressed: () {
+            Navigator.of(context).maybePop(new Settings(
+              passwordLength: passwordLength,
+              pinLength: pinLength,
+              hashAlgorithm: hashAlgorithm,
+            ));
+          }
+        ),
       ),
       body: new ListView(
         children: <Widget>[
@@ -492,7 +530,13 @@ enum HashAlgorithm {
 }
 
 class Settings {
-  int passwordLength;
-  int pinLength;
-  HashAlgorithm hashAlgorithm;
+  final int passwordLength;
+  final int pinLength;
+  final HashAlgorithm hashAlgorithm;
+  
+  Settings({
+    this.passwordLength: 10,
+    this.pinLength: 4,
+    this.hashAlgorithm: HashAlgorithm.md5,
+  });
 }
