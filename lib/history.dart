@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'service.dart';
+
 class HistoryPage extends StatefulWidget {
   final String text;
+  final History history;
   
-  HistoryPage(this.text);
+  HistoryPage({this.text, this.history});
   
   @override
   State<StatefulWidget> createState() {
@@ -26,9 +29,11 @@ class HistoryPageState extends State<HistoryPage> {
     
     textEditingController = new TextEditingController(text: widget.text);
     
-    entries.add("twitter.com");
-    entries.add("facebook.com");
-    entries.add("google.com");
+    if (widget.history != null) {
+      widget.history.entries.forEach((String value){
+        entries.add(value);
+      });
+    }
     
     onSearchTextChanged(widget.text);
   }

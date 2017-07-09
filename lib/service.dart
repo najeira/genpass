@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +10,7 @@ const HashAlgorithm defaultHashAlgorithm = HashAlgorithm.md5;
 const String _keyPasswordLength = "passwordLength";
 const String _keyPinLength = "pinLength";
 const String _keyHashAlgorithm = "hashAlgorithm";
+const String _keyHistoryEntries = "historyEntries";
 
 enum HashAlgorithm {
   md5,
@@ -70,5 +72,41 @@ class Settings {
     prefs.setInt(_keyPinLength, settings.pinLength);
     prefs.setString(_keyHashAlgorithm, _getHashAlgorithmName(settings.hashAlgorithm));
     return prefs.commit();
+  }
+}
+
+class History {
+  final Set<String> entries = new LinkedHashSet<String>();
+  
+  History.list(List<String> value) {
+    if (value != null && value.isNotEmpty) {
+      entries.addAll(value);
+    }
+  }
+  
+  void add(String entry) {
+    entries.remove(entry);
+    entries.add(entry);
+    
+    final int overflow = (entries.length - 100);
+    for (int i = 0; i < overflow; i++) {
+      entries.remove(entries.first);
+    }
+  }
+  
+  static Future<History> load() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var value = prefs.getStringList(_keyHistoryEntries);
+    return new History.list(value);
+  }
+  
+  static Future<Null> save(History history) async {
+    if (history == null) {
+      return;
+    }
+    var value = history.entries.toList();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setStringList(_keyHistoryEntries, value);
+    prefs.commit();
   }
 }

@@ -31,7 +31,7 @@ class GenPassPage extends StatefulWidget {
   }
 }
 
-class GenPassPageState extends State<GenPassPage> {
+class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   
   final GlobalKey<FormFieldState<String>> siteTextKey = new GlobalKey<FormFieldState<String>>();
@@ -48,9 +48,12 @@ class GenPassPageState extends State<GenPassPage> {
   
   Settings settings = new Settings();
   
+  History history;
+  
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     
     siteTextController = new TextEditingController();
     passTextController = new TextEditingController();
@@ -61,13 +64,37 @@ class GenPassPageState extends State<GenPassPage> {
         this.settings = settings;
       });
     });
+    
+    History.load().then((History history) {
+      this.history = history;
+    });
   }
   
   @override
   void dispose() {
-    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     siteTextController.dispose();
     passTextController.dispose();
+    super.dispose();
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive) {
+      final bool validSite = (siteError == null || siteError.isEmpty);
+      final bool validPass = (passError == null || passError.isEmpty);
+      if (validSite && validPass) {
+        final String siteText = siteTextController.text;
+        if (siteText != null && siteText.isNotEmpty) {
+          history.add(siteText);
+          History.save(history).then((_){
+            debugPrint("history saved");
+          }).catchError((ex){
+            debugPrint(ex.toString());
+          });
+        }
+      }
+    }
   }
   
   @override
@@ -304,7 +331,7 @@ class GenPassPageState extends State<GenPassPage> {
     var future = Navigator.of(context)?.push(
       new MaterialPageRoute<String>(
         builder: (BuildContext context) {
-          return new HistoryPage(siteText);
+          return new HistoryPage(text: siteText, history: history);
         },
       ),
     );
@@ -329,7 +356,7 @@ class GenPassPageState extends State<GenPassPage> {
       setState(() {
         this.settings = settings;
       });
-      Settings.save(settings).then((_){
+      Settings.save(settings).then((_) {
         debugPrint("settings saved");
       }).catchError((ex) {
         debugPrint(ex.toString());
