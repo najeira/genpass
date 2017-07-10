@@ -80,19 +80,13 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive) {
-      final bool validSite = (siteError == null || siteError.isEmpty);
-      final bool validPass = (passError == null || passError.isEmpty);
-      if (validSite && validPass) {
-        final String siteText = siteTextController.text;
-        if (siteText != null && siteText.isNotEmpty) {
-          history.add(siteText);
-          History.save(history).then((_){
-            debugPrint("history saved");
-          }).catchError((ex){
-            debugPrint(ex.toString());
-          });
-        }
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      if (addHistory()) {
+        History.save(history).then((_) {
+          debugPrint("history saved");
+        }).catchError((ex) {
+          debugPrint(ex.toString());
+        });
       }
     }
   }
@@ -355,6 +349,20 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
         debugPrint(ex.toString());
       });
     });
+  }
+  
+  bool addHistory() {
+    final bool validSite = (siteError == null || siteError.isEmpty);
+    final bool validPass = (passError == null || passError.isEmpty);
+    if (!validSite || !validPass) {
+      return false;
+    }
+    final String siteText = siteTextController.text;
+    if (siteText == null || siteText.isEmpty) {
+      return false;
+    }
+    history.add(siteText);
+    return true;
   }
   
   void copyTextToClipboard(String title, String text) {
