@@ -189,12 +189,7 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
                 });
               },
               onCopy: () {
-                Clipboard.setData(new ClipboardData(text: hashText)).then((Null _) {
-                  scaffoldKey.currentState.showSnackBar(new SnackBar(
-                    content: new Text("Password copied to clipboard")));
-                }).catchError((ex) {
-                  debugPrint(ex.toString());
-                });
+                copyTextToClipboard("Password", hashText);
               },
             ),
           ),
@@ -211,12 +206,7 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
                 });
               },
               onCopy: () {
-                Clipboard.setData(new ClipboardData(text: pinText)).then((Null _) {
-                  scaffoldKey.currentState.showSnackBar(new SnackBar(
-                    content: new Text("PIN copied to clipboard")));
-                }).catchError((ex) {
-                  debugPrint(ex.toString());
-                });
+                copyTextToClipboard("PIN", pinText);
               },
             ),
           ),
@@ -361,6 +351,16 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       }).catchError((ex) {
         debugPrint(ex.toString());
       });
+    });
+  }
+  
+  void copyTextToClipboard(String title, String text) {
+    Clipboard.setData(new ClipboardData(text: text)).then((_) {
+      scaffoldKey.currentState?.showSnackBar(new SnackBar(
+        content: new Text("${title} copied to clipboard")));
+      addHistory();
+    }).catchError((ex) {
+      debugPrint(ex.toString());
     });
   }
 }
