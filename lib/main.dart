@@ -343,6 +343,9 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       ),
     );
     future.then((Settings settings) {
+      if (settings == null) {
+        return;
+      }
       setState(() {
         this.settings = settings;
       });
