@@ -117,7 +117,7 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
     return new Scaffold(
       key: scaffoldKey,
       appBar: new AppBar(
-        leading: new Icon(Icons.business_center),
+        //leading: new Icon(Icons.business_center),
         title: new Text("Gen Pass"),
         actions: <Widget>[
           new IconButton(
