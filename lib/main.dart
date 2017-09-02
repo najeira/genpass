@@ -80,19 +80,13 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive) {
-      final bool validSite = (siteError == null || siteError.isEmpty);
-      final bool validPass = (passError == null || passError.isEmpty);
-      if (validSite && validPass) {
-        final String siteText = siteTextController.text;
-        if (siteText != null && siteText.isNotEmpty) {
-          history.add(siteText);
-          History.save(history).then((_){
-            debugPrint("history saved");
-          }).catchError((ex){
-            debugPrint(ex.toString());
-          });
-        }
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      if (addHistory()) {
+        History.save(history).then((_) {
+          debugPrint("history saved");
+        }).catchError((ex) {
+          debugPrint(ex.toString());
+        });
       }
     }
   }
@@ -189,12 +183,7 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
                 });
               },
               onCopy: () {
-                Clipboard.setData(new ClipboardData(text: hashText)).then((Null _) {
-                  scaffoldKey.currentState.showSnackBar(new SnackBar(
-                    content: new Text("Password copied to clipboard")));
-                }).catchError((ex) {
-                  debugPrint(ex.toString());
-                });
+                copyTextToClipboard("Password", hashText);
               },
             ),
           ),
@@ -211,12 +200,7 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
                 });
               },
               onCopy: () {
-                Clipboard.setData(new ClipboardData(text: pinText)).then((Null _) {
-                  scaffoldKey.currentState.showSnackBar(new SnackBar(
-                    content: new Text("PIN copied to clipboard")));
-                }).catchError((ex) {
-                  debugPrint(ex.toString());
-                });
+                copyTextToClipboard("PIN", pinText);
               },
             ),
           ),
@@ -353,6 +337,9 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       ),
     );
     future.then((Settings settings) {
+      if (settings == null) {
+        return;
+      }
       setState(() {
         this.settings = settings;
       });
@@ -361,6 +348,30 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       }).catchError((ex) {
         debugPrint(ex.toString());
       });
+    });
+  }
+  
+  bool addHistory() {
+    final bool validSite = (siteError == null || siteError.isEmpty);
+    final bool validPass = (passError == null || passError.isEmpty);
+    if (!validSite || !validPass) {
+      return false;
+    }
+    final String siteText = siteTextController.text;
+    if (siteText == null || siteText.isEmpty) {
+      return false;
+    }
+    history.add(siteText);
+    return true;
+  }
+  
+  void copyTextToClipboard(String title, String text) {
+    Clipboard.setData(new ClipboardData(text: text)).then((_) {
+      scaffoldKey.currentState?.showSnackBar(new SnackBar(
+        content: new Text("${title} copied to clipboard")));
+      addHistory();
+    }).catchError((ex) {
+      debugPrint(ex.toString());
     });
   }
 }
