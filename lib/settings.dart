@@ -9,7 +9,7 @@ class SettingsPage extends StatefulWidget {
   
   @override
   State<StatefulWidget> createState() {
-    return new SettingsPageState();
+    return SettingsPageState();
   }
 }
 
@@ -30,19 +30,19 @@ class SettingsPageState extends State<SettingsPage> {
   
   @override
   Widget build(BuildContext context) {
-    final BoxDecoration decoration = new BoxDecoration(
-      border: new Border(
-        bottom: new BorderSide(color: Colors.grey[400], width: 1.0)),
+    final BoxDecoration decoration = BoxDecoration(
+      border: Border(
+        bottom: BorderSide(color: Colors.grey[400], width: 1.0)),
     );
     
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Settings"),
-        leading: new IconButton(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Settings"),
+        leading: IconButton(
           icon: const BackButtonIcon(),
           tooltip: 'Back',
           onPressed: () {
-            Navigator.of(context).maybePop(new Settings(
+            Navigator.of(context).maybePop(Settings(
               passwordLength: passwordLength,
               pinLength: pinLength,
               hashAlgorithm: hashAlgorithm,
@@ -50,9 +50,9 @@ class SettingsPageState extends State<SettingsPage> {
           }
         ),
       ),
-      body: new ListView(
+      body: ListView(
         children: <Widget>[
-          new Container(
+          Container(
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
             decoration: decoration,
             child: buildSlider(
@@ -68,7 +68,7 @@ class SettingsPageState extends State<SettingsPage> {
               },
             ),
           ),
-          new Container(
+          Container(
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
             decoration: decoration,
             child: buildSlider(
@@ -84,18 +84,18 @@ class SettingsPageState extends State<SettingsPage> {
               },
             ),
           ),
-          new Container(
+          Container(
             padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
             decoration: decoration,
-            child: new Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                new Text("Algorithms", style: const TextStyle(
+                Text("Algorithms", style: const TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.w500,
                 )),
-                new RadioListTile<HashAlgorithm>(
-                  title: new Text("MD5"),
+                RadioListTile<HashAlgorithm>(
+                  title: Text("MD5"),
                   value: HashAlgorithm.md5,
                   groupValue: hashAlgorithm,
                   onChanged: onHashAlgorithmChanged,
@@ -122,14 +122,14 @@ class SettingsPageState extends State<SettingsPage> {
     int max,
     ValueChanged<int> onChanged,
   }) {
-    return new Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        new Text(title, style: const TextStyle(
+        Text(title, style: const TextStyle(
           fontSize: 18.0,
           fontWeight: FontWeight.w500,
         )),
-        new Slider(
+        Slider(
           label: value.toString(),
           value: value.toDouble(),
           min: min.toDouble(),
@@ -150,14 +150,14 @@ class SettingsPageState extends State<SettingsPage> {
     String value,
     BoxDecoration decoration,
   }) {
-    return new InkWell(
+    return InkWell(
       onTap: () {
         onItemPressed(value);
       },
-      child: new Container(
+      child: Container(
         padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
         decoration: decoration,
-        child: new Text(title, style: const TextStyle(
+        child: Text(title, style: const TextStyle(
           fontSize: 18.0,
           fontWeight: FontWeight.w500,
         )),
@@ -168,11 +168,11 @@ class SettingsPageState extends State<SettingsPage> {
   void onItemPressed(String value) {
     switch (value) {
       case "about":
-        showDialog(context: context, child: new SimpleDialog(
+        showDialog(context: context, child: SimpleDialog(
           children: <Widget>[
-            new Container(
+            Container(
               padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-              child: new Text("Icon made by Freepik from www.flaticon.com"),
+              child: Text("Icon made by Freepik from www.flaticon.com"),
             ),
           ],
         ));
@@ -190,19 +190,19 @@ class SettingsPageState extends State<SettingsPage> {
     
     var future = showDialog<bool>(
       context: context,
-      child: new AlertDialog(
-        content: new Text(
+      child: AlertDialog(
+        content: Text(
           "Changing the algorithm changes the generated password.",
           maxLines: null),
         actions: <Widget>[
-          new FlatButton(
-            child: new Text("Cacel"),
+          FlatButton(
+            child: Text("Cacel"),
             onPressed: () {
               Navigator.of(context).pop(false);
             },
           ),
-          new FlatButton(
-            child: new Text("OK"),
+          FlatButton(
+            child: Text("OK"),
             onPressed: () {
               Navigator.of(context).pop(true);
             },
