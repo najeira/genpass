@@ -100,15 +100,9 @@ class SettingsPageState extends State<SettingsPage> {
                   groupValue: hashAlgorithm,
                   onChanged: onHashAlgorithmChanged,
                 ),
-                new RadioListTile<HashAlgorithm>(
-                  title: new Text("SHA1"),
-                  value: HashAlgorithm.sha1,
-                  groupValue: hashAlgorithm,
-                  onChanged: onHashAlgorithmChanged,
-                ),
-                new RadioListTile<HashAlgorithm>(
-                  title: new Text("SHA256"),
-                  value: HashAlgorithm.sha256,
+                RadioListTile<HashAlgorithm>(
+                  title: Text("SHA512"),
+                  value: HashAlgorithm.sha512,
                   groupValue: hashAlgorithm,
                   onChanged: onHashAlgorithmChanged,
                 ),

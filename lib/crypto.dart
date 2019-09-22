@@ -16,11 +16,8 @@ class Crypto {
       case HashAlgorithm.md5:
         hash = crypto.md5;
         break;
-      case HashAlgorithm.sha1:
-        hash = crypto.sha1;
-        break;
-      case HashAlgorithm.sha256:
-        hash = crypto.sha256;
+      case HashAlgorithm.sha512:
+        hash = crypto.sha512;
         break;
     }
     final String secret = "";

@@ -14,18 +14,15 @@ const String _keyHistoryEntries = "historyEntries";
 
 enum HashAlgorithm {
   md5,
-  sha1,
-  sha256,
+  sha512,
 }
 
 HashAlgorithm _getHashAlgorithm(String name) {
   switch (name) {
     case "md5":
       return HashAlgorithm.md5;
-    case "sha1":
-      return HashAlgorithm.sha1;
-    case "sha256":
-      return HashAlgorithm.sha256;
+    case "sha512":
+      return HashAlgorithm.sha512;
   }
   return null;
 }
@@ -34,10 +31,8 @@ String _getHashAlgorithmName(HashAlgorithm algo) {
   switch (algo) {
     case HashAlgorithm.md5:
       return "md5";
-    case HashAlgorithm.sha1:
-      return "sha1";
-    case HashAlgorithm.sha256:
-      return "sha256";
+    case HashAlgorithm.sha512:
+      return "sha512";
   }
   return null;
 }
