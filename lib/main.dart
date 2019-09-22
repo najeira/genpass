@@ -3,42 +3,32 @@ import 'package:flutter/services.dart';
 
 import 'package:provider/provider.dart';
 
-import 'crypto.dart';
-import 'service.dart';
-
 import 'history.dart';
+import 'model.dart';
+import 'service.dart';
 import 'settings.dart';
 
 const String kAppName = "Gen Pass";
 
 void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: kAppName,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: GenPassPage(),
-    );
-  }
+  runApp(MaterialApp(
+    title: kAppName,
+    theme: ThemeData(
+      primarySwatch: Colors.blue,
+    ),
+    home: GenPassPage(),
+  ));
 }
 
 class GenPassPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return GenPassPageState();
+    return _GenPassPageState();
   }
 }
 
-class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
-  final ValueNotifier<Settings> _settingsNotifier = ValueNotifier<Settings>(Settings());
-  final ValueNotifier<String> _siteNotifier = ValueNotifier<String>("");
-  final ValueNotifier<String> _passNotifier = ValueNotifier<String>("");
+class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
+  final GenPassData data = GenPassData();
 
   History history;
 
@@ -49,7 +39,7 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
 
     // load from preference.
     Settings.load().then((Settings settings) {
-      _settingsNotifier.value = settings;
+      data.settingsNotifier.value = settings;
     });
 
     History.load().then((History history) {
@@ -60,16 +50,14 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _settingsNotifier?.dispose();
-    _siteNotifier?.dispose();
-    _passNotifier?.dispose();
+    data?.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
-      if (addHistory()) {
+      if (_addHistory()) {
         History.save(history).then((_) {
           debugPrint("history saved");
         }).catchError((Object ex) {
@@ -104,24 +92,25 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
           children: <Widget>[
             Container(
               padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
-              child: _PassInputRow(textNotifier: _passNotifier),
+              child: _MasterInputRow(
+                textNotifier: data.masterNotifier,
+                errorNotifier: data.masterErrorNotifier,
+              ),
             ),
             Container(
-              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-              child: _SiteInputRow(
-                textNotifier: _siteNotifier,
+              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 16.0),
+              child: _DomainInputRow(
+                textNotifier: data.domainNotifier,
+                errorNotifier: data.domainErrorNotifier,
                 onPressed: _onHistoryPressed,
               ),
             ),
             const Divider(),
             Container(
-              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 0.0),
               child: _ResultRow(
                 icon: Icons.vpn_key,
-                settingsNotifier: _settingsNotifier,
-                passNotifier: _passNotifier,
-                siteNotifier: _siteNotifier,
-                generator: _generatePassword,
+                textNotifier: data.passNotifier,
                 onCopy: (String value) {
                   _onCopyTextToClipboard(context, "Password", value);
                 },
@@ -131,10 +120,7 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
               padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
               child: _ResultRow(
                 icon: Icons.casino,
-                settingsNotifier: _settingsNotifier,
-                passNotifier: _passNotifier,
-                siteNotifier: _siteNotifier,
-                generator: _generatePin,
+                textNotifier: data.pinNotifier,
                 onCopy: (String value) {
                   _onCopyTextToClipboard(context, "PIN", value);
                 },
@@ -146,38 +132,9 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
     );
   }
 
-  String _generatePassword(Settings settings, String password, String site) {
-    if (_Validator.validatePassword(password) != null) {
-      return null;
-    }
-    if (_Validator.validateSite(site) != null) {
-      return null;
-    }
-    return Crypto.generatePassword(
-      settings.hashAlgorithm,
-      site,
-      password,
-      settings.passwordLength,
-    );
-  }
-
-  String _generatePin(Settings settings, String password, String site) {
-    if (_Validator.validatePassword(password) != null) {
-      return null;
-    }
-    if (_Validator.validateSite(site) != null) {
-      return null;
-    }
-    return Crypto.generatePin(
-      site,
-      password,
-      settings.pinLength,
-    );
-  }
-
   Future<void> _onCopyTextToClipboard(BuildContext context, String title, String text) {
     _copyTextToClipboard(context, title, text).then((_) {
-      addHistory();
+      _addHistory();
     });
   }
 
@@ -186,15 +143,15 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       MaterialPageRoute<String>(
         builder: (BuildContext context) {
           return HistoryPage(
-            text: _siteNotifier.value,
+            text: data.domainNotifier.value,
             history: history,
           );
         },
       ),
-    )?.then((String siteText) {
-      if (siteText != null && siteText.isNotEmpty) {
-        debugPrint("siteText is ${siteText}");
-        _siteNotifier.value = siteText;
+    )?.then((String domainText) {
+      if (domainText != null && domainText.isNotEmpty) {
+        debugPrint("domainText is ${domainText}");
+        data.domainNotifier.value = domainText;
       }
     });
   }
@@ -203,14 +160,14 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
     Navigator.of(context)?.push(
       MaterialPageRoute<Settings>(
         builder: (BuildContext context) {
-          return SettingsPage(_settingsNotifier.value);
+          return SettingsPage(data.settingsNotifier.value);
         },
       ),
     )?.then((Settings settings) {
       if (settings == null) {
         return;
       }
-      _settingsNotifier.value = settings;
+      data.settingsNotifier.value = settings;
       Settings.save(settings).then((_) {
         debugPrint("settings saved");
       }).catchError((Object ex) {
@@ -219,23 +176,25 @@ class GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
     });
   }
 
-  bool addHistory() {
-    final String siteText = _siteNotifier.value;
-    if (siteText == null || siteText.isEmpty) {
+  bool _addHistory() {
+    final String domainText = data.domainNotifier.value;
+    if (domainText == null || domainText.isEmpty) {
       return false;
     }
-    history.add(siteText);
+    history.add(domainText);
     return true;
   }
 }
 
-class _PassInputRow extends StatelessWidget {
-  _PassInputRow({
+class _MasterInputRow extends StatelessWidget {
+  _MasterInputRow({
     Key key,
     this.textNotifier,
+    this.errorNotifier,
   }) : super(key: key);
 
   final ValueNotifier<String> textNotifier;
+  final ValueNotifier<String> errorNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -246,11 +205,11 @@ class _PassInputRow extends StatelessWidget {
           final bool show = showNotifier.value ?? false;
           return _InputRow(
             textNotifier: textNotifier,
+            errorNotifier: errorNotifier,
             textInputType: TextInputType.visiblePassword,
             inputIcon: Icons.bubble_chart,
             labelText: "password",
             hintText: "your master password",
-            validator: _Validator.validatePassword,
             obscureText: !show,
             actionIcon: show ? Icons.visibility : Icons.visibility_off,
             onPressed: () {
@@ -263,38 +222,38 @@ class _PassInputRow extends StatelessWidget {
   }
 }
 
-class _SiteInputRow extends StatelessWidget {
-  _SiteInputRow({
+class _DomainInputRow extends StatelessWidget {
+  _DomainInputRow({
     Key key,
     @required this.textNotifier,
+    @required this.errorNotifier,
     @required this.onPressed,
   }) : super(key: key);
 
   final ValueNotifier<String> textNotifier;
+  final ValueNotifier<String> errorNotifier;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return _InputRow(
       textNotifier: textNotifier,
+      errorNotifier: errorNotifier,
       textInputType: TextInputType.url,
       inputIcon: Icons.business,
       labelText: "domain / site",
       hintText: "example.com",
-      validator: _Validator.validateSite,
       actionIcon: Icons.assignment,
       onPressed: onPressed,
     );
   }
 }
 
-typedef _ValidatorFunc = String Function(String);
-
 class _InputRow extends StatelessWidget {
   _InputRow({
     Key key,
     @required this.textNotifier,
-    @required this.validator,
+    @required this.errorNotifier,
     @required this.inputIcon,
     @required this.textInputType,
     @required this.labelText,
@@ -305,7 +264,7 @@ class _InputRow extends StatelessWidget {
   }) : super(key: key);
 
   final ValueNotifier<String> textNotifier;
-  final _ValidatorFunc validator;
+  final ValueNotifier<String> errorNotifier;
   final IconData inputIcon;
   final TextInputType textInputType;
   final String labelText;
@@ -319,93 +278,83 @@ class _InputRow extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     final TextStyle inputStyle = themeData.textTheme.subhead;
     return ValueListenableBuilder(
-      valueListenable: textNotifier,
-      builder: (BuildContext context, String text, Widget child) {
-        return Row(
-          children: <Widget>[
-            Expanded(
-              child: TextField(
-                decoration: InputDecoration(
-                  icon: Icon(inputIcon, size: 24.0),
-                  labelText: labelText,
-                  hintText: hintText,
-                  errorText: validator(text),
+      valueListenable: errorNotifier,
+      builder: (BuildContext context, String error, Widget child) {
+        return ValueListenableBuilder(
+          valueListenable: textNotifier,
+          builder: (BuildContext context, String text, Widget child) {
+            return Row(
+              children: <Widget>[
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      icon: Icon(inputIcon, size: 24.0),
+                      labelText: labelText,
+                      hintText: hintText,
+                      errorText: error,
+                    ),
+                    style: inputStyle.copyWith(
+                      fontSize: 18.0,
+                    ),
+                    keyboardType: textInputType,
+                    obscureText: obscureText ?? false,
+                    onChanged: (String value) {
+                      textNotifier.value = value;
+                    },
+                    onSubmitted: (String value) {
+                      textNotifier.value = value;
+                    },
+                  ),
                 ),
-                style: inputStyle.copyWith(
-                  fontSize: 18.0,
+                IconButton(
+                  icon: Icon(
+                    actionIcon,
+                    size: 28.0,
+                    color: themeData.primaryColor,
+                  ),
+                  onPressed: onPressed,
                 ),
-                keyboardType: textInputType,
-                obscureText: obscureText ?? false,
-                onChanged: (String value) {
-                  textNotifier.value = value;
-                },
-                onSubmitted: (String value) {
-                  textNotifier.value = value;
-                },
-              ),
-            ),
-            IconButton(
-              icon: Icon(
-                actionIcon,
-                size: 28.0,
-                color: themeData.primaryColor,
-              ),
-              onPressed: onPressed,
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );
   }
 }
 
-typedef _Generator = String Function(Settings, String, String);
-
 typedef _CopyCallback = void Function(String);
 
 class _ResultRow extends StatelessWidget {
   _ResultRow({
     Key key,
-    @required this.settingsNotifier,
-    @required this.passNotifier,
-    @required this.siteNotifier,
-    @required this.generator,
+    @required this.textNotifier,
     @required this.icon,
     @required this.onCopy,
   }) : super(key: key);
 
-  final ValueNotifier<Settings> settingsNotifier;
-  final ValueNotifier<String> passNotifier;
-  final ValueNotifier<String> siteNotifier;
-  final _Generator generator;
+  final ValueNotifier<String> textNotifier;
   final IconData icon;
   final _CopyCallback onCopy;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Settings>(
-      valueListenable: settingsNotifier,
-      builder: (BuildContext context, Settings settings, Widget child) {
-        return ValueListenableBuilder<String>(
-          valueListenable: passNotifier,
-          builder: (BuildContext context, String password, Widget child) {
-            return ValueListenableBuilder<String>(
-              valueListenable: siteNotifier,
-              builder: (BuildContext context, String site, Widget child) {
-                final String text = generator(settings, password, site);
-                return ChangeNotifierProvider<ValueNotifier<bool>>(
-                  builder: (BuildContext context) => ValueNotifier<bool>(false),
-                  child: Consumer<ValueNotifier<bool>>(
-                    builder: (BuildContext context, ValueNotifier<bool> showNotifier, Widget child) {
-                      return _buildRow(context, showNotifier: showNotifier, text: text);
-                    },
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
+    return ChangeNotifierProvider<ValueNotifier<bool>>(
+      builder: (BuildContext context) => ValueNotifier<bool>(false),
+      child: Consumer<ValueNotifier<bool>>(
+        builder: (BuildContext context, ValueNotifier<bool> showNotifier, Widget child) {
+          return ValueListenableBuilder<String>(
+            valueListenable: textNotifier,
+            builder: (BuildContext context, String text, Widget child) {
+              return _buildRow(
+                context,
+                showNotifier: showNotifier,
+                text: text,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -468,24 +417,6 @@ class _ResultRow extends StatelessWidget {
         ),
       ],
     );
-  }
-}
-
-class _Validator {
-  _Validator._();
-
-  static String validatePassword(String value) {
-    if (value == null || value.isEmpty || value.length < 8) {
-      return "enter 8 or more characters";
-    }
-    return null;
-  }
-
-  static String validateSite(String value) {
-    if (value == null || value.isEmpty) {
-      return "enter";
-    }
-    return null;
   }
 }
 
