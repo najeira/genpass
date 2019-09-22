@@ -250,7 +250,7 @@ class _AlgorithmsState extends State<_Algorithms> {
         ],
       ),
     ).then((bool confirm) {
-      if (confirm) {
+      if (confirm == true) {
         confirmChanging = true;
         widget.valueNotifier.value = value;
       }
