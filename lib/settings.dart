@@ -1,222 +1,293 @@
 import 'package:flutter/material.dart';
+import 'package:genpass/model.dart';
 
 import 'service.dart';
 
 class SettingsPage extends StatefulWidget {
   final Settings settings;
-  
+
   SettingsPage(this.settings);
-  
+
   @override
   State<StatefulWidget> createState() {
-    return SettingsPageState();
+    return _SettingsPageState();
   }
 }
 
-class SettingsPageState extends State<SettingsPage> {
-  bool confirmAlgorithm = false;
-  
-  int passwordLength = 10;
-  int pinLength = 4;
-  HashAlgorithm hashAlgorithm = HashAlgorithm.md5;
-  
+class _SettingsPageState extends State<SettingsPage> {
+  final ValueNotifier<int> passwordLengthNotifier = ValueNotifier<int>(10);
+  final ValueNotifier<int> pinLengthNotifier = ValueNotifier<int>(4);
+  final ValueNotifier<HashAlgorithm> hashAlgorithmNotifier = ValueNotifier<HashAlgorithm>(HashAlgorithm.md5);
+
   @override
   void initState() {
     super.initState();
-    passwordLength = widget.settings.passwordLength;
-    pinLength = widget.settings.pinLength;
-    hashAlgorithm = widget.settings.hashAlgorithm;
+    passwordLengthNotifier.value = widget.settings.passwordLength;
+    pinLengthNotifier.value = widget.settings.pinLength;
+    hashAlgorithmNotifier.value = widget.settings.hashAlgorithm;
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    final BoxDecoration decoration = BoxDecoration(
-      border: Border(
-        bottom: BorderSide(color: Colors.grey[400], width: 1.0)),
-    );
-    
     return Scaffold(
       appBar: AppBar(
-        title: Text("Settings"),
+        title: const Text("Settings"),
         leading: IconButton(
           icon: const BackButtonIcon(),
           tooltip: 'Back',
           onPressed: () {
-            Navigator.of(context).maybePop(Settings(
-              passwordLength: passwordLength,
-              pinLength: pinLength,
-              hashAlgorithm: hashAlgorithm,
-            ));
-          }
+            Navigator.of(context).maybePop(
+              Settings(
+                passwordLength: passwordLengthNotifier.value,
+                pinLength: pinLengthNotifier.value,
+                hashAlgorithm: hashAlgorithmNotifier.value,
+              ),
+            );
+          },
         ),
       ),
       body: ListView(
         children: <Widget>[
           Container(
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-            decoration: decoration,
-            child: buildSlider(
-              context,
+            child: _Slider(
+              valueNotifier: passwordLengthNotifier,
               title: "Password length",
-              value: passwordLength,
+              icon: kIconPassword,
               min: 8,
               max: 20,
-              onChanged: (int value) {
-                setState(() {
-                  passwordLength = value;
-                });
-              },
             ),
           ),
+          const Divider(),
           Container(
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-            decoration: decoration,
-            child: buildSlider(
-              context,
+            child: _Slider(
+              valueNotifier: pinLengthNotifier,
               title: "PIN length",
-              value: pinLength,
+              icon: kIconPin,
               min: 3,
               max: 10,
-              onChanged: (int value) {
-                setState(() {
-                  pinLength = value;
-                });
-              },
             ),
           ),
+          const Divider(),
           Container(
-            padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-            decoration: decoration,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text("Algorithms", style: const TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.w500,
-                )),
-                RadioListTile<HashAlgorithm>(
-                  title: Text("MD5"),
-                  value: HashAlgorithm.md5,
-                  groupValue: hashAlgorithm,
-                  onChanged: onHashAlgorithmChanged,
-                ),
-                RadioListTile<HashAlgorithm>(
-                  title: Text("SHA512"),
-                  value: HashAlgorithm.sha512,
-                  groupValue: hashAlgorithm,
-                  onChanged: onHashAlgorithmChanged,
-                ),
-              ],
-            ),
+            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+            child: _Algorithms(valueNotifier: hashAlgorithmNotifier),
           ),
-          buildItem(context, title: "About", value: "about", decoration: decoration),
+          const Divider(),
+          buildItem(
+            context,
+            title: "About",
+            icon: Icons.info_outline,
+            value: "about",
+          ),
+          const Divider(),
         ],
       ),
     );
   }
-  
-  Widget buildSlider(BuildContext context, {
+
+  Widget buildItem(
+    BuildContext context, {
     String title,
-    int value,
-    int min,
-    int max,
-    ValueChanged<int> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(title, style: const TextStyle(
-          fontSize: 18.0,
-          fontWeight: FontWeight.w500,
-        )),
-        Slider(
-          label: value.toString(),
-          value: value.toDouble(),
-          min: min.toDouble(),
-          max: max.toDouble(),
-          divisions: (max - min),
-          onChanged: (double value) {
-            if (onChanged != null) {
-              onChanged(value.toInt());
-            }
-          },
-        ),
-      ],
-    );
-  }
-  
-  Widget buildItem(BuildContext context, {
-    String title,
+    IconData icon,
     String value,
     BoxDecoration decoration,
   }) {
     return InkWell(
       onTap: () {
-        onItemPressed(value);
+        _onItemPressed(value);
       },
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 4.0),
         decoration: decoration,
-        child: Text(title, style: const TextStyle(
-          fontSize: 18.0,
-          fontWeight: FontWeight.w500,
-        )),
+        child: _Caption(
+          icon: icon,
+          title: title,
+        ),
       ),
     );
   }
-  
-  void onItemPressed(String value) {
+
+  void _onItemPressed(String value) {
     switch (value) {
       case "about":
-        showDialog(context: context, child: SimpleDialog(
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-              child: Text("Icon made by Freepik from www.flaticon.com"),
-            ),
-          ],
-        ));
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return SimpleDialog(
+              children: <Widget>[
+                Container(
+                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const <Widget>[
+                      Text("GenPass app is made by najeira."),
+                      Text("Icon made by Freepik from www.flaticon.com"),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
         break;
     }
   }
-  
-  void onHashAlgorithmChanged(HashAlgorithm value) {
-    if (confirmAlgorithm) {
-      setState(() {
-        hashAlgorithm = value;
-      });
+}
+
+class _Slider extends StatelessWidget {
+  _Slider({
+    @required this.valueNotifier,
+    @required this.icon,
+    @required this.title,
+    @required this.min,
+    @required this.max,
+  });
+
+  final ValueNotifier<int> valueNotifier;
+  final IconData icon;
+  final String title;
+  final int min;
+  final int max;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        _Caption(
+          title: title,
+          icon: icon,
+        ),
+        ValueListenableBuilder<int>(
+          valueListenable: valueNotifier,
+          builder: (BuildContext context, int value, Widget child) {
+            return Slider(
+              label: value.toString(),
+              value: value.toDouble(),
+              min: min.toDouble(),
+              max: max.toDouble(),
+              divisions: (max - min),
+              onChanged: (double value) {
+                valueNotifier.value = value.toInt();
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _Algorithms extends StatefulWidget {
+  _Algorithms({
+    @required this.valueNotifier,
+  });
+
+  final ValueNotifier<HashAlgorithm> valueNotifier;
+
+  @override
+  _AlgorithmsState createState() => _AlgorithmsState();
+}
+
+class _AlgorithmsState extends State<_Algorithms> {
+  bool confirmChanging = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<HashAlgorithm>(
+      valueListenable: widget.valueNotifier,
+      builder: (BuildContext context, HashAlgorithm value, Widget child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const _Caption(
+              title: "Algorithms",
+              icon: kIconAlgorithm,
+            ),
+            RadioListTile<HashAlgorithm>(
+              title: const Text("MD5"),
+              value: HashAlgorithm.md5,
+              groupValue: value,
+              onChanged: _onHashAlgorithmChanged,
+            ),
+            RadioListTile<HashAlgorithm>(
+              title: const Text("SHA512"),
+              value: HashAlgorithm.sha512,
+              groupValue: value,
+              onChanged: _onHashAlgorithmChanged,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _onHashAlgorithmChanged(HashAlgorithm value) {
+    if (confirmChanging) {
+      widget.valueNotifier.value = value;
       return;
     }
-    
-    var future = showDialog<bool>(
+
+    showDialog<bool>(
       context: context,
       child: AlertDialog(
-        content: Text(
-          "Changing the algorithm changes the generated password.",
-          maxLines: null),
+        content: const Text("Changing the algorithm changes the generating password."),
         actions: <Widget>[
           FlatButton(
-            child: Text("Cacel"),
+            child: const Text("Cancel"),
             onPressed: () {
               Navigator.of(context).pop(false);
             },
           ),
           FlatButton(
-            child: Text("OK"),
+            child: const Text("OK"),
             onPressed: () {
               Navigator.of(context).pop(true);
             },
           ),
         ],
       ),
-    );
-    future.then((bool confirm) {
+    ).then((bool confirm) {
       if (confirm) {
-        setState(() {
-          confirmAlgorithm = true;
-          hashAlgorithm = value;
-        });
+        confirmChanging = true;
+        widget.valueNotifier.value = value;
       }
     });
+  }
+}
+
+class _Caption extends StatelessWidget {
+  const _Caption({
+    @required this.icon,
+    @required this.title,
+  });
+
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    const double fontSize = 18.0;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            icon,
+            size: fontSize,
+          ),
+          const SizedBox(width: 8.0),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

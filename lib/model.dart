@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'crypto.dart';
 import 'service.dart';
 
+const IconData kIconPassword = Icons.vpn_key;
+const IconData kIconPin = Icons.casino;
+const IconData kIconAlgorithm = Icons.card_travel;
+
 class GenPassData {
   final ValueNotifier<Settings> settingsNotifier = ValueNotifier<Settings>(Settings());
   final ValueNotifier<String> masterNotifier = ValueNotifier<String>("");

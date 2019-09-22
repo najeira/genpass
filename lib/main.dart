@@ -109,7 +109,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
             Container(
               padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 0.0),
               child: _ResultRow(
-                icon: Icons.vpn_key,
+                icon: kIconPassword,
                 textNotifier: data.passNotifier,
                 onCopy: (String value) {
                   _onCopyTextToClipboard(context, "Password", value);
@@ -119,7 +119,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
             Container(
               padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
               child: _ResultRow(
-                icon: Icons.casino,
+                icon: kIconPin,
                 textNotifier: data.pinNotifier,
                 onCopy: (String value) {
                   _onCopyTextToClipboard(context, "PIN", value);
