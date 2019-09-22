@@ -3,9 +3,9 @@ import 'dart:collection';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-const int defaultPasswordLength = 10;
-const int defaultPinLength = 4;
-const HashAlgorithm defaultHashAlgorithm = HashAlgorithm.md5;
+const int _defaultPasswordLength = 10;
+const int _defaultPinLength = 4;
+const HashAlgorithm _defaultHashAlgorithm = HashAlgorithm.md5;
 
 const String _keyPasswordLength = "passwordLength";
 const String _keyPinLength = "pinLength";
@@ -43,70 +43,72 @@ String _getHashAlgorithmName(HashAlgorithm algo) {
 }
 
 class Settings {
+  Settings({
+    this.passwordLength: _defaultPasswordLength,
+    this.pinLength: _defaultPinLength,
+    this.hashAlgorithm: _defaultHashAlgorithm,
+  });
+
   final int passwordLength;
   final int pinLength;
   final HashAlgorithm hashAlgorithm;
-  
-  Settings({
-    this.passwordLength: defaultPasswordLength,
-    this.pinLength: defaultPinLength,
-    this.hashAlgorithm: defaultHashAlgorithm,
-  });
-  
+
   static Future<Settings> load() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var pass = prefs.getInt(_keyPasswordLength) ?? defaultPasswordLength;
-    var pin = prefs.getInt(_keyPinLength) ?? defaultPinLength;
-    var algo = prefs.getString(_keyHashAlgorithm);
-    HashAlgorithm hash = _getHashAlgorithm(algo) ?? defaultHashAlgorithm;
-    return new Settings(
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final int pass = prefs.getInt(_keyPasswordLength) ?? _defaultPasswordLength;
+    final int pin = prefs.getInt(_keyPinLength) ?? _defaultPinLength;
+    final String algo = prefs.getString(_keyHashAlgorithm);
+    final HashAlgorithm hash = _getHashAlgorithm(algo) ?? _defaultHashAlgorithm;
+    return Settings(
       passwordLength: pass,
       pinLength: pin,
       hashAlgorithm: hash,
     );
   }
-  
-  static Future<Null> save(Settings settings) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt(_keyPasswordLength, settings.passwordLength);
-    prefs.setInt(_keyPinLength, settings.pinLength);
-    prefs.setString(_keyHashAlgorithm, _getHashAlgorithmName(settings.hashAlgorithm));
-    return prefs.commit();
+
+  static Future<void> save(Settings settings) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyPasswordLength, settings.passwordLength);
+    await prefs.setInt(_keyPinLength, settings.pinLength);
+    await prefs.setString(_keyHashAlgorithm, _getHashAlgorithmName(settings.hashAlgorithm));
   }
 }
 
 class History {
-  final Set<String> entries = new LinkedHashSet<String>();
-  
+  final Set<String> entries = LinkedHashSet<String>();
+
   History.list(List<String> value) {
     if (value != null && value.isNotEmpty) {
       entries.addAll(value);
     }
   }
-  
+
   void add(String entry) {
     entries.remove(entry);
     entries.add(entry);
-    
+
     final int overflow = (entries.length - 100);
     for (int i = 0; i < overflow; i++) {
       entries.remove(entries.first);
     }
   }
-  
-  static Future<History> load() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var value = prefs.getStringList(_keyHistoryEntries);
-    return new History.list(value);
+
+  void remove(String entry) {
+    entries.remove(entry);
   }
-  
-  static Future<Null> save(History history) async {
+
+  static Future<History> load() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final List<String> value = prefs.getStringList(_keyHistoryEntries);
+    return History.list(value);
+  }
+
+  static Future<void> save(History history) async {
     if (history == null) {
       return;
     }
-    var value = history.entries.toList();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setStringList(_keyHistoryEntries, value);
-    prefs.commit();
+    final List<String> value = history.entries.toList();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_keyHistoryEntries, value);
   }
 }
