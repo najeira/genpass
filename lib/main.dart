@@ -161,7 +161,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
     Navigator.of(context)?.push(
       MaterialPageRoute<Settings>(
         builder: (BuildContext context) {
-          return SettingsPage(data.settingsNotifier.value);
+          return SettingsPage(settings: data.settingsNotifier.value);
         },
       ),
     )?.then((Settings settings) {

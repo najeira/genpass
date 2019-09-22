@@ -1,35 +1,65 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:genpass/model.dart';
+
+import 'package:provider/provider.dart';
 
 import 'main.dart';
+import 'model.dart';
 import 'service.dart';
 
-class SettingsPage extends StatefulWidget {
-  final Settings settings;
-
-  SettingsPage(this.settings);
-
-  @override
-  State<StatefulWidget> createState() {
-    return _SettingsPageState();
-  }
+class _PasswordLengthNotifier extends ValueNotifier<int> {
+  _PasswordLengthNotifier(int value) : super(value);
 }
 
-class _SettingsPageState extends State<SettingsPage> {
-  final ValueNotifier<int> passwordLengthNotifier = ValueNotifier<int>(10);
-  final ValueNotifier<int> pinLengthNotifier = ValueNotifier<int>(4);
-  final ValueNotifier<HashAlgorithm> hashAlgorithmNotifier = ValueNotifier<HashAlgorithm>(HashAlgorithm.md5);
+class _PinLengthNotifier extends ValueNotifier<int> {
+  _PinLengthNotifier(int value) : super(value);
+}
 
-  @override
-  void initState() {
-    super.initState();
-    passwordLengthNotifier.value = widget.settings.passwordLength;
-    pinLengthNotifier.value = widget.settings.pinLength;
-    hashAlgorithmNotifier.value = widget.settings.hashAlgorithm;
-  }
+class _HashAlgorithmNotifier extends ValueNotifier<HashAlgorithm> {
+  _HashAlgorithmNotifier(HashAlgorithm value) : super(value);
+}
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({
+    Key key,
+    this.settings,
+  }) : super(key: key);
+
+  final Settings settings;
 
   @override
   Widget build(BuildContext context) {
+    return _buildPasswordLengthNotifier(context);
+  }
+
+  Widget _buildPasswordLengthNotifier(BuildContext context) {
+    return ChangeNotifierProvider<_PasswordLengthNotifier>(
+      builder: (BuildContext context) => _PasswordLengthNotifier(settings.passwordLength),
+      child: _buildPinLengthNotifier(context),
+    );
+  }
+
+  Widget _buildPinLengthNotifier(BuildContext context) {
+    return ChangeNotifierProvider<_PinLengthNotifier>(
+      builder: (BuildContext context) => _PinLengthNotifier(settings.pinLength),
+      child: _buildHashAlgorithmNotifier(context),
+    );
+  }
+
+  Widget _buildHashAlgorithmNotifier(BuildContext context) {
+    return ChangeNotifierProvider<_HashAlgorithmNotifier>(
+      builder: (BuildContext context) => _HashAlgorithmNotifier(settings.hashAlgorithm),
+      child: _buildBuilder(context),
+    );
+  }
+
+  Widget _buildBuilder(BuildContext context) {
+    return Builder(
+      builder: (BuildContext context) => _buildScaffold(context),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
@@ -37,22 +67,15 @@ class _SettingsPageState extends State<SettingsPage> {
           icon: const BackButtonIcon(),
           tooltip: 'Back',
           onPressed: () {
-            Navigator.of(context).maybePop(
-              Settings(
-                passwordLength: passwordLengthNotifier.value,
-                pinLength: pinLengthNotifier.value,
-                hashAlgorithm: hashAlgorithmNotifier.value,
-              ),
-            );
+            _onBackPressed(context);
           },
         ),
       ),
       body: ListView(
         children: <Widget>[
-          Container(
-            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-            child: _Slider(
-              valueNotifier: passwordLengthNotifier,
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+            child: _Slider<_PasswordLengthNotifier>(
               title: "Password length",
               icon: kIconPassword,
               min: 8,
@@ -60,10 +83,9 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           const Divider(),
-          Container(
-            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-            child: _Slider(
-              valueNotifier: pinLengthNotifier,
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+            child: _Slider<_PinLengthNotifier>(
               title: "PIN length",
               icon: kIconPin,
               min: 3,
@@ -71,12 +93,12 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           const Divider(),
-          Container(
-            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-            child: _Algorithms(valueNotifier: hashAlgorithmNotifier),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+            child: _Algorithms(),
           ),
           const Divider(),
-          buildItem(
+          _buildItem(
             context,
             title: "About",
             icon: Icons.info_outline,
@@ -88,20 +110,18 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget buildItem(
+  Widget _buildItem(
     BuildContext context, {
     String title,
     IconData icon,
     String value,
-    BoxDecoration decoration,
   }) {
     return InkWell(
       onTap: () {
-        _onItemPressed(value);
+        _onItemPressed(context, value);
       },
-      child: Container(
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 4.0),
-        decoration: decoration,
         child: _Caption(
           icon: icon,
           title: title,
@@ -110,7 +130,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _onItemPressed(String value) {
+  void _onItemPressed(BuildContext context, String value) {
     switch (value) {
       case "about":
         showDialog(
@@ -118,7 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
           builder: (BuildContext context) {
             return SimpleDialog(
               children: <Widget>[
-                Container(
+                Padding(
                   padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,18 +155,26 @@ class _SettingsPageState extends State<SettingsPage> {
         break;
     }
   }
+
+  void _onBackPressed(BuildContext context) {
+    Navigator.of(context).maybePop(
+      Settings(
+        passwordLength: Provider.of<_PasswordLengthNotifier>(context, listen: false).value,
+        pinLength: Provider.of<_PinLengthNotifier>(context, listen: false).value,
+        hashAlgorithm: Provider.of<_HashAlgorithmNotifier>(context, listen: false).value,
+      ),
+    );
+  }
 }
 
-class _Slider extends StatelessWidget {
-  _Slider({
-    @required this.valueNotifier,
+class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
+  const _Slider({
     @required this.icon,
     @required this.title,
     @required this.min,
     @required this.max,
   });
 
-  final ValueNotifier<int> valueNotifier;
   final IconData icon;
   final String title;
   final int min;
@@ -161,9 +189,9 @@ class _Slider extends StatelessWidget {
           title: title,
           icon: icon,
         ),
-        ValueListenableBuilder<int>(
-          valueListenable: valueNotifier,
-          builder: (BuildContext context, int value, Widget child) {
+        Consumer<T>(
+          builder: (BuildContext context, T valueNotifier, Widget child) {
+            final int value = valueNotifier.value;
             return Slider(
               label: value.toString(),
               value: value.toDouble(),
@@ -181,25 +209,26 @@ class _Slider extends StatelessWidget {
   }
 }
 
-class _Algorithms extends StatefulWidget {
-  _Algorithms({
-    @required this.valueNotifier,
-  });
-
-  final ValueNotifier<HashAlgorithm> valueNotifier;
-
-  @override
-  _AlgorithmsState createState() => _AlgorithmsState();
-}
-
-class _AlgorithmsState extends State<_Algorithms> {
-  bool confirmChanging = false;
+class _Algorithms extends StatelessWidget {
+  const _Algorithms({
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<HashAlgorithm>(
-      valueListenable: widget.valueNotifier,
-      builder: (BuildContext context, HashAlgorithm value, Widget child) {
+    return ChangeNotifierProvider<ValueNotifier<bool>>(
+      builder: (BuildContext context) => ValueNotifier<bool>(false),
+      child: _build(context),
+    );
+  }
+
+  Widget _build(BuildContext context) {
+    return Consumer<_HashAlgorithmNotifier>(
+      builder: (
+        BuildContext context,
+        _HashAlgorithmNotifier valueNotifier,
+        Widget child,
+      ) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -210,14 +239,22 @@ class _AlgorithmsState extends State<_Algorithms> {
             RadioListTile<HashAlgorithm>(
               title: const Text("MD5"),
               value: HashAlgorithm.md5,
-              groupValue: value,
-              onChanged: _onHashAlgorithmChanged,
+              groupValue: valueNotifier.value,
+              onChanged: (HashAlgorithm value) => _onHashAlgorithmChanged(
+                context,
+                valueNotifier,
+                value,
+              ),
             ),
             RadioListTile<HashAlgorithm>(
               title: const Text("SHA512"),
               value: HashAlgorithm.sha512,
-              groupValue: value,
-              onChanged: _onHashAlgorithmChanged,
+              groupValue: valueNotifier.value,
+              onChanged: (HashAlgorithm value) => _onHashAlgorithmChanged(
+                context,
+                valueNotifier,
+                value,
+              ),
             ),
           ],
         );
@@ -225,35 +262,42 @@ class _AlgorithmsState extends State<_Algorithms> {
     );
   }
 
-  void _onHashAlgorithmChanged(HashAlgorithm value) {
-    if (confirmChanging) {
-      widget.valueNotifier.value = value;
+  void _onHashAlgorithmChanged(
+    BuildContext context,
+    _HashAlgorithmNotifier valueNotifier,
+    HashAlgorithm value,
+  ) {
+    final ValueNotifier<bool> confirmation = Provider.of<ValueNotifier<bool>>(context, listen: false);
+    if (confirmation.value == true) {
+      valueNotifier.value = value;
       return;
     }
 
     showDialog<bool>(
       context: context,
-      child: AlertDialog(
-        content: const Text("Changing the algorithm changes the generating password."),
-        actions: <Widget>[
-          FlatButton(
-            child: const Text("Cancel"),
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-          ),
-          FlatButton(
-            child: const Text("OK"),
-            onPressed: () {
-              Navigator.of(context).pop(true);
-            },
-          ),
-        ],
-      ),
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: const Text("Changing the algorithm changes the generating password."),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            FlatButton(
+              child: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
     ).then((bool confirm) {
       if (confirm == true) {
-        confirmChanging = true;
-        widget.valueNotifier.value = value;
+        confirmation.value = true;
+        valueNotifier.value = value;
       }
     });
   }
