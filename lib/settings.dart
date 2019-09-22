@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genpass/model.dart';
 
+import 'main.dart';
 import 'service.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -269,20 +270,19 @@ class _Caption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double fontSize = 18.0;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         children: <Widget>[
           Icon(
             icon,
-            size: fontSize,
+            size: kFontSize,
           ),
           const SizedBox(width: 8.0),
           Text(
             title,
             style: const TextStyle(
-              fontSize: fontSize,
+              fontSize: kFontSize,
               fontWeight: FontWeight.w500,
             ),
           ),

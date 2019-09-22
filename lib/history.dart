@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'main.dart';
 import 'service.dart';
 
 class HistoryPage extends StatefulWidget {
@@ -80,7 +81,7 @@ class HistoryPageState extends State<HistoryPage> {
         child: Text(
           value,
           style: const TextStyle(
-            fontSize: 18.0,
+            fontSize: kFontSize,
           ),
         ),
       ),
@@ -88,7 +89,6 @@ class HistoryPageState extends State<HistoryPage> {
   }
 
   Widget _buildTextField(BuildContext context) {
-    const double fontSize = 18.0;
     final ThemeData themeData = Theme.of(context);
     final TextStyle inputStyle = themeData.textTheme.subhead;
     return TextField(
@@ -98,12 +98,12 @@ class HistoryPageState extends State<HistoryPage> {
         hintText: "example.com",
         hintStyle: inputStyle.copyWith(
           color: Colors.white38,
-          fontSize: fontSize,
+          fontSize: kFontSize,
         ),
       ),
       style: inputStyle.copyWith(
         color: Colors.white,
-        fontSize: fontSize,
+        fontSize: kFontSize,
       ),
       keyboardType: TextInputType.url,
       onChanged: (String value) => _textNotifier.value = value,

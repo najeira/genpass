@@ -9,6 +9,7 @@ import 'service.dart';
 import 'settings.dart';
 
 const String kAppName = "Gen Pass";
+const double kFontSize = 18.0;
 
 void main() {
   runApp(MaterialApp(
@@ -311,7 +312,7 @@ class _InputRowState extends State<_InputRow> {
                       errorText: error,
                     ),
                     style: inputStyle.copyWith(
-                      fontSize: 18.0,
+                      fontSize: kFontSize,
                     ),
                     keyboardType: widget.textInputType,
                     obscureText: widget.obscureText ?? false,
@@ -405,7 +406,7 @@ class _ResultRow extends StatelessWidget {
           child: Text(
             showText ?? "",
             style: const TextStyle(
-              fontSize: 18.0,
+              fontSize: kFontSize,
             ),
           ),
         ),
