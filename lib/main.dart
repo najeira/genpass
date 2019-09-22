@@ -111,17 +111,24 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
           children: <Widget>[
             Container(
               padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
-              child: _MasterInputRow(
-                textNotifier: data.masterNotifier,
-                errorNotifier: data.masterErrorNotifier,
+              child: MultiProvider(
+                providers: [
+                  ChangeNotifierProvider<ValueNotifier<String>>.value(value: data.masterNotifier),
+                  ValueListenableProvider<String>.value(value: data.masterErrorNotifier),
+                ],
+                child: _MasterInputRow(),
               ),
             ),
             Container(
               padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 16.0),
-              child: _DomainInputRow(
-                textNotifier: data.domainNotifier,
-                errorNotifier: data.domainErrorNotifier,
-                onPressed: _onHistoryPressed,
+              child: MultiProvider(
+                providers: [
+                  ChangeNotifierProvider<ValueNotifier<String>>.value(value: data.domainNotifier),
+                  ValueListenableProvider<String>.value(value: data.domainErrorNotifier),
+                ],
+                child: _DomainInputRow(
+                  onPressed: _onHistoryPressed,
+                ),
               ),
             ),
             const Divider(),
@@ -212,40 +219,32 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
 class _MasterInputRow extends StatelessWidget {
   _MasterInputRow({
     Key key,
-    this.textNotifier,
-    this.errorNotifier,
   }) : super(key: key);
-
-  final ValueNotifier<String> textNotifier;
-
-  final ValueNotifier<String> errorNotifier;
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ValueNotifier<bool>>(
-      builder: (BuildContext context) => ValueNotifier<bool>(false),
+    return MultiProvider(
+      providers: [
+        ListenableProvider<TextEditingController>.value(
+          value: Provider.of<_MasterTextEditingController>(context, listen: false),
+        ),
+        ChangeNotifierProvider<ValueNotifier<bool>>(
+          builder: (BuildContext context) => ValueNotifier<bool>(false),
+        ),
+      ],
       child: Consumer<ValueNotifier<bool>>(
         builder: (BuildContext context, ValueNotifier<bool> showNotifier, Widget child) {
           final bool show = showNotifier.value ?? false;
-          return MultiProvider(
-            providers: [
-              ListenableProvider<TextEditingController>.value(
-                value: Provider.of<_MasterTextEditingController>(context, listen:false),
-              ),
-              ChangeNotifierProvider<ValueNotifier<String>>.value(value: textNotifier),
-              ValueListenableProvider<String>.value(value: errorNotifier),
-            ],
-            child: _InputRow(
-              textInputType: TextInputType.visiblePassword,
-              inputIcon: Icons.bubble_chart,
-              labelText: "password",
-              hintText: "your master password",
-              obscureText: !show,
-              actionIcon: show ? Icons.visibility : Icons.visibility_off,
-              onPressed: () {
-                showNotifier.value = !show;
-              },
-            ),
+          return _InputRow(
+            textInputType: TextInputType.visiblePassword,
+            inputIcon: Icons.bubble_chart,
+            labelText: "password",
+            hintText: "your master password",
+            obscureText: !show,
+            actionIcon: show ? Icons.visibility : Icons.visibility_off,
+            onPressed: () {
+              showNotifier.value = !show;
+            },
           );
         },
       ),
@@ -256,27 +255,15 @@ class _MasterInputRow extends StatelessWidget {
 class _DomainInputRow extends StatelessWidget {
   _DomainInputRow({
     Key key,
-    @required this.textNotifier,
-    @required this.errorNotifier,
     @required this.onPressed,
   }) : super(key: key);
-
-  final ValueNotifier<String> textNotifier;
-
-  final ValueNotifier<String> errorNotifier;
 
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ListenableProvider<TextEditingController>.value(
-          value: Provider.of<_DomainTextEditingController>(context, listen:false),
-        ),
-        ChangeNotifierProvider<ValueNotifier<String>>.value(value: textNotifier),
-        ValueListenableProvider<String>.value(value: errorNotifier),
-      ],
+    return ListenableProvider<TextEditingController>.value(
+      value: Provider.of<_DomainTextEditingController>(context, listen: false),
       child: _InputRow(
         textInputType: TextInputType.url,
         inputIcon: Icons.business,
