@@ -48,6 +48,9 @@ class GenPassData {
         master,
         settings.pinLength,
       );
+    } else {
+      passNotifier.value = "";
+      pinNotifier.value = "";
     }
   }
 }
