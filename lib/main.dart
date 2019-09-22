@@ -21,6 +21,10 @@ void main() {
   ));
 }
 
+class _MasterTextEditingController extends TextEditingController {}
+
+class _DomainTextEditingController extends TextEditingController {}
+
 class GenPassPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -70,6 +74,20 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ListenableProvider<_MasterTextEditingController>(
+          builder: (BuildContext context) => _MasterTextEditingController(),
+        ),
+        ListenableProvider<_DomainTextEditingController>(
+          builder: (BuildContext context) => _DomainTextEditingController(),
+        ),
+      ],
+      child: _build(context),
+    );
+  }
+
+  Widget _build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(kAppName),
@@ -109,22 +127,26 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
             const Divider(),
             Container(
               padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 0.0),
-              child: _ResultRow(
-                icon: kIconPassword,
-                textNotifier: data.passNotifier,
-                onCopy: (String value) {
-                  _onCopyTextToClipboard(context, "Password", value);
-                },
+              child: ValueListenableProvider<String>.value(
+                value: data.passNotifier,
+                child: _ResultRow(
+                  icon: kIconPassword,
+                  onCopy: (String value) {
+                    _onCopyTextToClipboard(context, "Password", value);
+                  },
+                ),
               ),
             ),
             Container(
               padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-              child: _ResultRow(
-                icon: kIconPin,
-                textNotifier: data.pinNotifier,
-                onCopy: (String value) {
-                  _onCopyTextToClipboard(context, "PIN", value);
-                },
+              child: ValueListenableProvider<String>.value(
+                value: data.pinNotifier,
+                child: _ResultRow(
+                  icon: kIconPin,
+                  onCopy: (String value) {
+                    _onCopyTextToClipboard(context, "PIN", value);
+                  },
+                ),
               ),
             ),
           ],
@@ -195,6 +217,7 @@ class _MasterInputRow extends StatelessWidget {
   }) : super(key: key);
 
   final ValueNotifier<String> textNotifier;
+
   final ValueNotifier<String> errorNotifier;
 
   @override
@@ -204,18 +227,25 @@ class _MasterInputRow extends StatelessWidget {
       child: Consumer<ValueNotifier<bool>>(
         builder: (BuildContext context, ValueNotifier<bool> showNotifier, Widget child) {
           final bool show = showNotifier.value ?? false;
-          return _InputRow(
-            textNotifier: textNotifier,
-            errorNotifier: errorNotifier,
-            textInputType: TextInputType.visiblePassword,
-            inputIcon: Icons.bubble_chart,
-            labelText: "password",
-            hintText: "your master password",
-            obscureText: !show,
-            actionIcon: show ? Icons.visibility : Icons.visibility_off,
-            onPressed: () {
-              showNotifier.value = !show;
-            },
+          return MultiProvider(
+            providers: [
+              ListenableProvider<TextEditingController>.value(
+                value: Provider.of<_MasterTextEditingController>(context, listen:false),
+              ),
+              ChangeNotifierProvider<ValueNotifier<String>>.value(value: textNotifier),
+              ValueListenableProvider<String>.value(value: errorNotifier),
+            ],
+            child: _InputRow(
+              textInputType: TextInputType.visiblePassword,
+              inputIcon: Icons.bubble_chart,
+              labelText: "password",
+              hintText: "your master password",
+              obscureText: !show,
+              actionIcon: show ? Icons.visibility : Icons.visibility_off,
+              onPressed: () {
+                showNotifier.value = !show;
+              },
+            ),
           );
         },
       ),
@@ -232,20 +262,29 @@ class _DomainInputRow extends StatelessWidget {
   }) : super(key: key);
 
   final ValueNotifier<String> textNotifier;
+
   final ValueNotifier<String> errorNotifier;
+
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return _InputRow(
-      textNotifier: textNotifier,
-      errorNotifier: errorNotifier,
-      textInputType: TextInputType.url,
-      inputIcon: Icons.business,
-      labelText: "domain / site",
-      hintText: "example.com",
-      actionIcon: Icons.assignment,
-      onPressed: onPressed,
+    return MultiProvider(
+      providers: [
+        ListenableProvider<TextEditingController>.value(
+          value: Provider.of<_DomainTextEditingController>(context, listen:false),
+        ),
+        ChangeNotifierProvider<ValueNotifier<String>>.value(value: textNotifier),
+        ValueListenableProvider<String>.value(value: errorNotifier),
+      ],
+      child: _InputRow(
+        textInputType: TextInputType.url,
+        inputIcon: Icons.business,
+        labelText: "domain / site",
+        hintText: "example.com",
+        actionIcon: Icons.assignment,
+        onPressed: onPressed,
+      ),
     );
   }
 }
@@ -253,8 +292,6 @@ class _DomainInputRow extends StatelessWidget {
 class _InputRow extends StatefulWidget {
   _InputRow({
     Key key,
-    @required this.textNotifier,
-    @required this.errorNotifier,
     @required this.inputIcon,
     @required this.textInputType,
     @required this.labelText,
@@ -264,8 +301,6 @@ class _InputRow extends StatefulWidget {
     @required this.onPressed,
   }) : super(key: key);
 
-  final ValueNotifier<String> textNotifier;
-  final ValueNotifier<String> errorNotifier;
   final IconData inputIcon;
   final TextInputType textInputType;
   final String labelText;
@@ -279,65 +314,56 @@ class _InputRow extends StatefulWidget {
 }
 
 class _InputRowState extends State<_InputRow> {
-  final TextEditingController controller = TextEditingController();
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TextStyle inputStyle = themeData.textTheme.subhead;
-    return ValueListenableBuilder(
-      valueListenable: widget.errorNotifier,
-      builder: (BuildContext context, String error, Widget child) {
-        return ValueListenableBuilder(
-          valueListenable: widget.textNotifier,
-          builder: (BuildContext context, String text, Widget child) {
-            if (controller.text != text) {
-              controller.text = text;
-            }
-            return Row(
-              children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    decoration: InputDecoration(
-                      icon: Icon(widget.inputIcon, size: 24.0),
-                      labelText: widget.labelText,
-                      hintText: widget.hintText,
-                      errorText: error,
-                    ),
-                    style: inputStyle.copyWith(
-                      fontSize: kFontSize,
-                    ),
-                    keyboardType: widget.textInputType,
-                    obscureText: widget.obscureText ?? false,
-                    onChanged: (String value) {
-                      widget.textNotifier.value = value;
-                    },
-                    onSubmitted: (String value) {
-                      widget.textNotifier.value = value;
-                    },
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    widget.actionIcon,
-                    size: 28.0,
-                    color: themeData.primaryColor,
-                  ),
-                  onPressed: widget.onPressed,
-                ),
-              ],
-            );
-          },
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: _buildTextField(context),
+        ),
+        IconButton(
+          icon: Icon(
+            widget.actionIcon,
+            size: 28.0,
+            color: themeData.primaryColor,
+          ),
+          onPressed: widget.onPressed,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(BuildContext context) {
+    return Consumer2<TextEditingController, String>(
+      builder: (
+        BuildContext context,
+        TextEditingController controller,
+        String errorText,
+        Widget child,
+      ) {
+        return TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            icon: Icon(widget.inputIcon, size: 24.0),
+            labelText: widget.labelText,
+            hintText: widget.hintText,
+            errorText: errorText,
+          ),
+          style: const TextStyle(
+            fontSize: kFontSize,
+          ),
+          keyboardType: widget.textInputType,
+          obscureText: widget.obscureText ?? false,
+          onChanged: (String value) => _onTextChanged(context, value),
+          onSubmitted: (String value) => _onTextChanged(context, value),
         );
       },
     );
+  }
+
+  void _onTextChanged(BuildContext context, String value) {
+    Provider.of<ValueNotifier<String>>(context, listen: false)?.value = value;
   }
 }
 
@@ -346,30 +372,29 @@ typedef _CopyCallback = void Function(String);
 class _ResultRow extends StatelessWidget {
   _ResultRow({
     Key key,
-    @required this.textNotifier,
     @required this.icon,
     @required this.onCopy,
   }) : super(key: key);
 
-  final ValueNotifier<String> textNotifier;
   final IconData icon;
+
   final _CopyCallback onCopy;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ValueNotifier<bool>>(
       builder: (BuildContext context) => ValueNotifier<bool>(false),
-      child: Consumer<ValueNotifier<bool>>(
-        builder: (BuildContext context, ValueNotifier<bool> showNotifier, Widget child) {
-          return ValueListenableBuilder<String>(
-            valueListenable: textNotifier,
-            builder: (BuildContext context, String text, Widget child) {
-              return _buildRow(
-                context,
-                showNotifier: showNotifier,
-                text: text,
-              );
-            },
+      child: Consumer2<String, ValueNotifier<bool>>(
+        builder: (
+          BuildContext context,
+          String text,
+          ValueNotifier<bool> showNotifier,
+          Widget child,
+        ) {
+          return _buildRow(
+            context,
+            showNotifier: showNotifier,
+            text: text,
           );
         },
       ),
