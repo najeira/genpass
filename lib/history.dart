@@ -15,36 +15,41 @@ class HistoryPage extends StatefulWidget {
 }
 
 class HistoryPageState extends State<HistoryPage> {
-  FocusNode focusNode = FocusNode();
-  TextEditingController textEditingController;
-
-  String searchText;
-
+  final ValueNotifier<String> _textNotifier = ValueNotifier<String>(null);
   final List<String> entries = <String>[];
-  List<String> targets = <String>[];
+
+  final FocusNode _focusNode = FocusNode();
+
+  TextEditingController _textEditingController;
+  ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
 
-    textEditingController = TextEditingController(text: widget.text);
+    _textEditingController = TextEditingController(text: widget.text);
+    _textNotifier.value = widget.text;
+
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScrolled);
 
     if (widget.history != null) {
-      widget.history.entries.forEach((String value) {
-        entries.add(value);
-      });
+      entries.addAll(widget.history.entries);
     }
+  }
 
-    onSearchTextChanged(widget.text);
+  @override
+  void dispose() {
+    _textNotifier?.dispose();
+    _focusNode?.dispose();
+    _textEditingController?.dispose();
+    _scrollController?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final String text = textEditingController.text;
-    final bool hasText = text != null && text.isNotEmpty;
-
     final ThemeData themeData = Theme.of(context);
-    final TextStyle inputStyle = themeData.textTheme.subhead;
     return Scaffold(
       appBar: AppBar(
         title: Theme(
@@ -53,88 +58,92 @@ class HistoryPageState extends State<HistoryPage> {
             primaryColor: Colors.white70,
             hintColor: Colors.white30,
           ),
-          child: TextField(
-            controller: textEditingController,
-            focusNode: focusNode,
-            decoration: InputDecoration(
-              //icon: Icon(Icons.search),
-              //hideDivider: true,
-              hintText: "example.com",
-              hintStyle: inputStyle.copyWith(
-                color: Colors.white30,
-                fontSize: 18.0,
-              ),
-            ),
-            style: inputStyle.copyWith(
-              color: focusNode.hasFocus ? Colors.white : Colors.white70,
-              fontSize: 18.0,
-            ),
-            keyboardType: TextInputType.emailAddress,
-            onChanged: onSearchTextChanged,
-            //onSubmitted: (String value) {
-            //  onSearchTextChanged(value);
-            //},
-            autofocus: !hasText,
-          ),
+          child: _buildTextField(context),
         ),
       ),
-      body: ListView(
-        children: List.generate(targets.length, (int index) {
-          return buildItem(context, targets[index]);
-        }),
-      ),
+      body: _buildListView(context),
     );
   }
 
-  Widget buildItem(BuildContext context, String value) {
+  Widget _buildItem(BuildContext context, String value) {
     return InkWell(
       onTap: () {
-        onItemPressed(value);
+        _onItemPressed(value);
       },
       child: Container(
         padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
         decoration: BoxDecoration(
           border: Border(
-              bottom: BorderSide(
-            color: Colors.grey[300],
-          )),
+            bottom: Divider.createBorderSide(context),
+          ),
         ),
-        child: Text(value,
-            style: const TextStyle(
-              fontSize: 18.0,
-              //fontWeight: FontWeight.w500,
-            )),
+        child: Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18.0,
+          ),
+        ),
       ),
     );
   }
 
-  void onItemPressed(String value) {
+  Widget _buildTextField(BuildContext context) {
+    const double fontSize = 18.0;
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle inputStyle = themeData.textTheme.subhead;
+    return TextField(
+      controller: _textEditingController,
+      focusNode: _focusNode,
+      decoration: InputDecoration(
+        hintText: "example.com",
+        hintStyle: inputStyle.copyWith(
+          color: Colors.white38,
+          fontSize: fontSize,
+        ),
+      ),
+      style: inputStyle.copyWith(
+        color: Colors.white,
+        fontSize: fontSize,
+      ),
+      keyboardType: TextInputType.url,
+      onChanged: (String value) => _textNotifier.value = value,
+      onSubmitted: (String value) => _textNotifier.value = value,
+      autofocus: false,
+      autocorrect: false,
+      showCursor: true,
+      cursorColor: Colors.white,
+    );
+  }
+
+  Widget _buildListView(BuildContext context) {
+    return ValueListenableBuilder<String>(
+      valueListenable: _textNotifier,
+      builder: (BuildContext context, String value, Widget child) {
+        List<String> targets;
+        if (value == null || value.isEmpty) {
+          targets = entries;
+        } else {
+          targets = entries.where((String entry) {
+            return entry.contains(value);
+          }).toList();
+        }
+
+        return ListView.builder(
+          controller: _scrollController,
+          itemCount: targets.length,
+          itemBuilder: (BuildContext context, int index) {
+            return _buildItem(context, targets[index]);
+          },
+        );
+      },
+    );
+  }
+
+  void _onItemPressed(String value) {
     Navigator.of(context)?.maybePop(value);
   }
 
-  void onSearchTextChanged(String value) {
-    searchText = value;
-
-    if (value == null || value.isEmpty) {
-      setState(() {
-        targets = entries;
-      });
-      return;
-    }
-
-    var matches = entries.where((String entry) {
-      if (entry.contains(value)) {
-        return true;
-      }
-      return false;
-    }).toList();
-
-    if (targets.length == matches.length) {
-      return;
-    }
-
-    setState(() {
-      targets = matches;
-    });
+  void _onScrolled() {
+    _focusNode?.unfocus();
   }
 }
