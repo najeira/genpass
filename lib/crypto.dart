@@ -6,9 +6,9 @@ import 'service.dart';
 
 class Crypto {
   factory Crypto._() {
-    throw new UnsupportedError("Not supported");
+    throw UnsupportedError("Not supported");
   }
-  
+
   // Super Gen Pass Algorithm
   static String generatePassword(HashAlgorithm algo, String domain, String password, int length) {
     crypto.Hash hash = crypto.md5;
@@ -25,31 +25,29 @@ class Crypto {
     final String generated = _hashRound(targetText, length, hash, 10);
     return generated;
   }
-  
+
   static String _hashRound(String input, int length, crypto.Hash hash, int round) {
     if (round > 0 || !_validatePassword(input)) {
       return _hashRound(_hashPassword(input, hash), length, hash, round - 1);
     }
     return input.substring(0, length);
   }
-  
+
   static String _hashPassword(String input, crypto.Hash hash) {
-    var digest = hash.convert(input.codeUnits);
-    var output = base64.encode(digest.bytes);
+    final crypto.Digest digest = hash.convert(input.codeUnits);
+    String output = base64.encode(digest.bytes);
     output = output.replaceAll(r"+", r"9");
     output = output.replaceAll(r"/", r"8");
     output = output.replaceAll(r"=", r"A");
     return output;
   }
-  
+
   static bool _validatePassword(String value) {
-    return value.startsWith(new RegExp(r"[a-z]")) &&
-      value.contains(new RegExp(r"[A-Z]")) &&
-      value.contains(new RegExp(r"[0-9]"));
+    return value.startsWith(RegExp(r"[a-z]")) && value.contains(RegExp(r"[A-Z]")) && value.contains(RegExp(r"[0-9]"));
   }
-  
+
   static String generatePin(String domain, String password, int length) {
-    var pin = _generateOtp(domain, password, length);
+    String pin = _generateOtp(domain, password, length);
     int suffix = 0;
     int loopOverrun = 0;
     while (!_validatePin(pin)) {
@@ -63,25 +61,25 @@ class Crypto {
     }
     return pin;
   }
-  
+
   // OATH HOTP Algorithm
   static String _generateOtp(String domain, String secret, int length) {
-    var hmac = new crypto.Hmac(crypto.sha1, secret.codeUnits);
-    var digest = hmac.convert(domain.codeUnits);
-    var hash = digest.bytes;
+    final crypto.Hmac hmac = crypto.Hmac(crypto.sha1, secret.codeUnits);
+    final crypto.Digest digest = hmac.convert(domain.codeUnits);
+    final List<int> hash = digest.bytes;
     final int offset = hash[hash.length - 1] & 0xf;
-    final int binary = (((hash[offset] & 0x7f) << 24)
-    | ((hash[offset + 1] & 0xff) << 16)
-    | ((hash[offset + 2] & 0xff) << 8)
-    | (hash[offset + 3] & 0xff));
+    final int binary = (((hash[offset] & 0x7f) << 24) |
+        ((hash[offset + 1] & 0xff) << 16) |
+        ((hash[offset + 2] & 0xff) << 8) |
+        (hash[offset + 3] & 0xff));
     final int otp = binary % _digitsPower[length];
-    var result = otp.toString();
+    String result = otp.toString();
     while (result.length < length) {
       result = "0" + result;
     }
     return result;
   }
-  
+
   static bool _validatePin(String pin) {
     if (pin.length == 4) {
       final int start = int.parse(pin.substring(0, 2));
@@ -93,7 +91,7 @@ class Crypto {
         return false;
       }
     }
-    
+
     if (pin.length % 2 == 0) {
       bool paired = true;
       for (int i = 0; i < pin.length - 1; i += 2) {
@@ -105,7 +103,7 @@ class Crypto {
         return false;
       }
     }
-    
+
     if (_isNumericalRun(pin)) {
       return false;
     } else if (_isIncompleteNumericalRun(pin)) {
@@ -115,7 +113,7 @@ class Crypto {
     }
     return true;
   }
-  
+
   static bool _isNumericalRun(String pin) {
     int prevDigit = int.parse(pin[0]);
     int prevDiff = 0x7FFFFFFF;
@@ -131,7 +129,7 @@ class Crypto {
     }
     return isRun;
   }
-  
+
   static bool _isIncompleteNumericalRun(String pin) {
     int consecutive = 0;
     int last = pin.codeUnitAt(0);
@@ -149,13 +147,22 @@ class Crypto {
     }
     return false;
   }
-  
-  static final List<int> _digitsPower = [
-    1, 10, 100, 1000, 10000, 100000, 1000000,
-    10000000, 100000000, 1000000000, 10000000000
+
+  static const List<int> _digitsPower = [
+    1,
+    10,
+    100,
+    1000,
+    10000,
+    100000,
+    1000000,
+    10000000,
+    100000000,
+    1000000000,
+    10000000000
   ];
-  
-  static final List<String> _blacklistedPins = <String>[
+
+  static const List<String> _blacklistedPins = <String>[
     "90210", "8675309" /* Jenny */, "1004" /* 10-4 */,
     // in this document http://www.datagenetics.com/blog/september32012/index.html
     // these were shown to be the least commonly used. Now they won't be used at all.
