@@ -276,7 +276,7 @@ class _DomainInputRow extends StatelessWidget {
   }
 }
 
-class _InputRow extends StatefulWidget {
+class _InputRow extends StatelessWidget {
   _InputRow({
     Key key,
     @required this.inputIcon,
@@ -297,11 +297,6 @@ class _InputRow extends StatefulWidget {
   final VoidCallback onPressed;
 
   @override
-  _InputRowState createState() => _InputRowState();
-}
-
-class _InputRowState extends State<_InputRow> {
-  @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     return Row(
@@ -311,11 +306,11 @@ class _InputRowState extends State<_InputRow> {
         ),
         IconButton(
           icon: Icon(
-            widget.actionIcon,
+            actionIcon,
             size: 28.0,
             color: themeData.primaryColor,
           ),
-          onPressed: widget.onPressed,
+          onPressed: onPressed,
         ),
       ],
     );
@@ -332,16 +327,16 @@ class _InputRowState extends State<_InputRow> {
         return TextField(
           controller: controller,
           decoration: InputDecoration(
-            icon: Icon(widget.inputIcon, size: 24.0),
-            labelText: widget.labelText,
-            hintText: widget.hintText,
+            icon: Icon(inputIcon, size: 24.0),
+            labelText: labelText,
+            hintText: hintText,
             errorText: errorText,
           ),
           style: const TextStyle(
             fontSize: kFontSize,
           ),
-          keyboardType: widget.textInputType,
-          obscureText: widget.obscureText ?? false,
+          keyboardType: textInputType,
+          obscureText: obscureText ?? false,
           onChanged: (String value) => _onTextChanged(context, value),
           onSubmitted: (String value) => _onTextChanged(context, value),
         );
