@@ -29,33 +29,21 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildPasswordLengthNotifier(context);
-  }
-
-  Widget _buildPasswordLengthNotifier(BuildContext context) {
-    return ChangeNotifierProvider<_PasswordLengthNotifier>(
-      builder: (BuildContext context) => _PasswordLengthNotifier(settings.passwordLength),
-      child: _buildPinLengthNotifier(context),
-    );
-  }
-
-  Widget _buildPinLengthNotifier(BuildContext context) {
-    return ChangeNotifierProvider<_PinLengthNotifier>(
-      builder: (BuildContext context) => _PinLengthNotifier(settings.pinLength),
-      child: _buildHashAlgorithmNotifier(context),
-    );
-  }
-
-  Widget _buildHashAlgorithmNotifier(BuildContext context) {
-    return ChangeNotifierProvider<_HashAlgorithmNotifier>(
-      builder: (BuildContext context) => _HashAlgorithmNotifier(settings.hashAlgorithm),
-      child: _buildBuilder(context),
-    );
-  }
-
-  Widget _buildBuilder(BuildContext context) {
-    return Builder(
-      builder: (BuildContext context) => _buildScaffold(context),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<_PasswordLengthNotifier>(
+          builder: (BuildContext context) => _PasswordLengthNotifier(settings.passwordLength),
+        ),
+        ChangeNotifierProvider<_PinLengthNotifier>(
+          builder: (BuildContext context) => _PinLengthNotifier(settings.pinLength),
+        ),
+        ChangeNotifierProvider<_HashAlgorithmNotifier>(
+          builder: (BuildContext context) => _HashAlgorithmNotifier(settings.hashAlgorithm),
+        ),
+      ],
+      child: Builder(
+        builder: (BuildContext context) => _buildScaffold(context),
+      ),
     );
   }
 

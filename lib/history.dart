@@ -18,26 +18,18 @@ class HistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildFocusNode(context);
-  }
-
-  Widget _buildFocusNode(BuildContext context) {
-    return ListenableProvider<FocusNode>(
-      builder: (BuildContext context) => FocusNode(),
-      child: _buildTextNotifier(context),
-    );
-  }
-
-  Widget _buildTextNotifier(BuildContext context) {
-    return ChangeNotifierProvider<ValueNotifier<String>>(
-      builder: (BuildContext context) => ValueNotifier<String>(text),
-      child: _buildBuilder(context),
-    );
-  }
-
-  Widget _buildBuilder(BuildContext context) {
-    return Builder(
-      builder: (BuildContext context) => _buildScaffold(context),
+    return MultiProvider(
+      providers: [
+        ListenableProvider<FocusNode>(
+          builder: (BuildContext context) => FocusNode(),
+        ),
+        ChangeNotifierProvider<ValueNotifier<String>>(
+          builder: (BuildContext context) => ValueNotifier<String>(text),
+        ),
+      ],
+      child: Builder(
+        builder: (BuildContext context) => _buildScaffold(context),
+      ),
     );
   }
 
