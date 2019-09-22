@@ -1,4 +1,4 @@
-import 'dart:convert' show BASE64;
+import 'dart:convert' show base64;
 
 import 'package:crypto/crypto.dart' as crypto;
 
@@ -38,7 +38,7 @@ class Crypto {
   
   static String _hashPassword(String input, crypto.Hash hash) {
     var digest = hash.convert(input.codeUnits);
-    var output = BASE64.encode(digest.bytes);
+    var output = base64.encode(digest.bytes);
     output = output.replaceAll(r"+", r"9");
     output = output.replaceAll(r"/", r"8");
     output = output.replaceAll(r"=", r"A");
