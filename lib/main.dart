@@ -382,7 +382,8 @@ class _ResultRow extends StatelessWidget {
   }) {
     final ThemeData themeData = Theme.of(context);
     final bool valid = ((text != null) && text.isNotEmpty);
-    final Color iconColor = valid ? themeData.primaryColor : Colors.grey[300];
+    final Color textColor = valid ? themeData.textTheme.caption.color : themeData.disabledColor;
+    final Color iconColor = valid ? themeData.primaryColor : themeData.disabledColor;
     final bool show = showNotifier.value ?? false;
 
     String showText = text;
@@ -397,7 +398,7 @@ class _ResultRow extends StatelessWidget {
           child: Icon(
             icon,
             size: 24.0,
-            color: valid ? Colors.grey[800] : Colors.grey[500],
+            color: textColor,
           ),
         ),
         Expanded(
