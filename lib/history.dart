@@ -22,7 +22,7 @@ class HistoryPage extends StatelessWidget {
   }
 
   Widget _buildFocusNode(BuildContext context) {
-    return ChangeNotifierProvider<FocusNode>(
+    return ListenableProvider<FocusNode>(
       builder: (BuildContext context) => FocusNode(),
       child: _buildTextNotifier(context),
     );
@@ -60,7 +60,7 @@ class HistoryPage extends StatelessWidget {
   }
 
   Widget _buildTextField(BuildContext context) {
-    return ChangeNotifierProvider<TextEditingController>(
+    return ListenableProvider<TextEditingController>(
       builder: (BuildContext context) => TextEditingController(text: text),
       child: Consumer2<TextEditingController, FocusNode>(
         builder: (
