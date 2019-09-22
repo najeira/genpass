@@ -249,7 +249,7 @@ class _DomainInputRow extends StatelessWidget {
   }
 }
 
-class _InputRow extends StatelessWidget {
+class _InputRow extends StatefulWidget {
   _InputRow({
     Key key,
     @required this.textNotifier,
@@ -274,45 +274,62 @@ class _InputRow extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
+  _InputRowState createState() => _InputRowState();
+}
+
+class _InputRowState extends State<_InputRow> {
+  final TextEditingController controller = TextEditingController();
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TextStyle inputStyle = themeData.textTheme.subhead;
     return ValueListenableBuilder(
-      valueListenable: errorNotifier,
+      valueListenable: widget.errorNotifier,
       builder: (BuildContext context, String error, Widget child) {
         return ValueListenableBuilder(
-          valueListenable: textNotifier,
+          valueListenable: widget.textNotifier,
           builder: (BuildContext context, String text, Widget child) {
+            if (controller.text != text) {
+              controller.text = text;
+            }
             return Row(
               children: <Widget>[
                 Expanded(
                   child: TextField(
+                    controller: controller,
                     decoration: InputDecoration(
-                      icon: Icon(inputIcon, size: 24.0),
-                      labelText: labelText,
-                      hintText: hintText,
+                      icon: Icon(widget.inputIcon, size: 24.0),
+                      labelText: widget.labelText,
+                      hintText: widget.hintText,
                       errorText: error,
                     ),
                     style: inputStyle.copyWith(
                       fontSize: 18.0,
                     ),
-                    keyboardType: textInputType,
-                    obscureText: obscureText ?? false,
+                    keyboardType: widget.textInputType,
+                    obscureText: widget.obscureText ?? false,
                     onChanged: (String value) {
-                      textNotifier.value = value;
+                      widget.textNotifier.value = value;
                     },
                     onSubmitted: (String value) {
-                      textNotifier.value = value;
+                      widget.textNotifier.value = value;
                     },
                   ),
                 ),
                 IconButton(
                   icon: Icon(
-                    actionIcon,
+                    widget.actionIcon,
                     size: 28.0,
                     color: themeData.primaryColor,
                   ),
-                  onPressed: onPressed,
+                  onPressed: widget.onPressed,
                 ),
               ],
             );
