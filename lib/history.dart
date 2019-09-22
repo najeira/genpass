@@ -85,41 +85,27 @@ class HistoryPage extends StatelessWidget {
       builder: (BuildContext context) => TextEditingController(text: text),
       child: Consumer<TextEditingController>(
         builder: (BuildContext context, TextEditingController controller, Widget child) {
-          return _buildTextFieldInner(
-            context,
-            focusNode: focusNode,
-            textNotifier: textNotifier,
+          return TextField(
             controller: controller,
+            focusNode: focusNode,
+            decoration: const InputDecoration(
+              hintText: "example.com",
+              hintStyle: TextStyle(
+                fontSize: kFontSize,
+              ),
+            ),
+            style: const TextStyle(
+              fontSize: kFontSize,
+            ),
+            keyboardType: TextInputType.url,
+            onChanged: (String value) => textNotifier.value = value,
+            onSubmitted: (String value) => textNotifier.value = value,
+            autofocus: false,
+            autocorrect: false,
+            cursorColor: Colors.white,
           );
         },
       ),
-    );
-  }
-
-  Widget _buildTextFieldInner(
-    BuildContext context, {
-    FocusNode focusNode,
-    ValueNotifier<String> textNotifier,
-    TextEditingController controller,
-  }) {
-    return TextField(
-      controller: controller,
-      focusNode: focusNode,
-      decoration: const InputDecoration(
-        hintText: "example.com",
-        hintStyle: TextStyle(
-          fontSize: kFontSize,
-        ),
-      ),
-      style: const TextStyle(
-        fontSize: kFontSize,
-      ),
-      keyboardType: TextInputType.url,
-      onChanged: (String value) => textNotifier.value = value,
-      onSubmitted: (String value) => textNotifier.value = value,
-      autofocus: false,
-      autocorrect: false,
-      cursorColor: Colors.white,
     );
   }
 }
