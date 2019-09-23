@@ -455,7 +455,7 @@ class _ResultRow extends StatelessWidget {
   }) {
     final ThemeData themeData = Theme.of(context);
     final bool valid = (text != null && text.isNotEmpty);
-    final Color textColor = valid ? themeData.textTheme.caption.color : themeData.disabledColor;
+    final Color textColor = valid ? themeData.textTheme.body1.color : themeData.disabledColor;
     final Color iconColor = valid ? themeData.primaryColor : themeData.disabledColor;
     final bool show = showNotifier.value ?? false;
 
@@ -466,14 +466,12 @@ class _ResultRow extends StatelessWidget {
 
     return Row(
       children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 10.0),
-          child: Icon(
-            icon,
-            size: 24.0,
-            color: textColor,
-          ),
+        Icon(
+          icon,
+          size: 24.0,
+          color: textColor,
         ),
+        const SizedBox(width: 16.0),
         Expanded(
           child: Text(
             showText ?? "",
