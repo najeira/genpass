@@ -17,7 +17,7 @@ void main() {
     theme: ThemeData(
       primarySwatch: Colors.blue,
     ),
-    home: GenPassPage(),
+    home: const _RootPage(),
   ));
 }
 
@@ -25,7 +25,35 @@ class _MasterTextEditingController extends TextEditingController {}
 
 class _DomainTextEditingController extends TextEditingController {}
 
+class _RootPage extends StatelessWidget {
+  const _RootPage();
+
+  @override
+  Widget build(BuildContext context) {
+    final GenPassData data = GenPassData();
+    return MultiProvider(
+      providers: [
+        FutureProvider<History>(
+          builder: (BuildContext context) => History.load(),
+        ),
+        FutureProvider<GenPassData>(
+          initialData: data,
+          builder: (BuildContext context) {
+            return Settings.load().then<GenPassData>((Settings settings) {
+              data.settingsNotifier.value = settings;
+              return data;
+            });
+          },
+        ),
+      ],
+      child: const GenPassPage(),
+    );
+  }
+}
+
 class GenPassPage extends StatefulWidget {
+  const GenPassPage();
+
   @override
   State<StatefulWidget> createState() {
     return _GenPassPageState();
@@ -33,29 +61,15 @@ class GenPassPage extends StatefulWidget {
 }
 
 class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
-  final GenPassData data = GenPassData();
-
-  History history;
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
-    // load from preference.
-    Settings.load().then((Settings settings) {
-      data.settingsNotifier.value = settings;
-    });
-
-    History.load().then((History history) {
-      this.history = history;
-    });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    data?.dispose();
     super.dispose();
   }
 
@@ -63,9 +77,9 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
       if (_addHistory()) {
-        History.save(history).then((_) {
+        Provider.of<History>(context, listen: false)?.save()?.then((_) {
           debugPrint("history saved");
-        }).catchError((Object ex) {
+        })?.catchError((Object ex) {
           debugPrint(ex.toString());
         });
       }
@@ -83,11 +97,11 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
           builder: (BuildContext context) => _DomainTextEditingController(),
         ),
       ],
-      child: _build(context),
+      child: _buildScaffold(context),
     );
   }
 
-  Widget _build(BuildContext context) {
+  Widget _buildScaffold(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(kAppName),
@@ -105,70 +119,100 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   Widget _buildBody(BuildContext context) {
     return Builder(
       builder: (BuildContext context) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
-              child: MultiProvider(
-                providers: [
-                  ChangeNotifierProvider<ValueNotifier<String>>.value(value: data.masterNotifier),
-                  ValueListenableProvider<String>.value(value: data.masterErrorNotifier),
-                ],
-                child: _MasterInputRow(),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 16.0),
-              child: MultiProvider(
-                providers: [
-                  ChangeNotifierProvider<ValueNotifier<String>>.value(value: data.domainNotifier),
-                  ValueListenableProvider<String>.value(value: data.domainErrorNotifier),
-                ],
-                child: _DomainInputRow(
-                  onPressed: _onHistoryPressed,
-                ),
-              ),
-            ),
-            const Divider(),
-            Container(
-              padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 0.0),
-              child: ValueListenableProvider<String>.value(
-                value: data.passNotifier,
-                child: _ResultRow(
-                  icon: kIconPassword,
-                  onCopy: (String value) {
-                    _onCopyTextToClipboard(context, "Password", value);
-                  },
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-              child: ValueListenableProvider<String>.value(
-                value: data.pinNotifier,
-                child: _ResultRow(
-                  icon: kIconPin,
-                  onCopy: (String value) {
-                    _onCopyTextToClipboard(context, "PIN", value);
-                  },
-                ),
-              ),
-            ),
-          ],
+        return Consumer<GenPassData>(
+          builder: (BuildContext context, GenPassData data, Widget child) {
+            return SingleChildScrollView(
+              child: _buildColumn(context, data),
+            );
+          },
         );
       },
     );
   }
 
+  Widget _buildColumn(BuildContext context, GenPassData data) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
+          child: MultiProvider(
+            providers: [
+              ChangeNotifierProvider<ValueNotifier<String>>.value(
+                value: data.masterNotifier,
+              ),
+              ValueListenableProvider<String>.value(
+                value: data.masterErrorNotifier,
+              ),
+            ],
+            child: const _MasterInputRow(),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 16.0),
+          child: MultiProvider(
+            providers: [
+              ChangeNotifierProvider<ValueNotifier<String>>.value(
+                value: data.domainNotifier,
+              ),
+              ValueListenableProvider<String>.value(
+                value: data.domainErrorNotifier,
+              ),
+            ],
+            child: _DomainInputRow(
+              onPressed: _onHistoryPressed,
+            ),
+          ),
+        ),
+        const Divider(),
+        Container(
+          padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 0.0),
+          child: ValueListenableProvider<String>.value(
+            value: data.passNotifier,
+            child: _ResultRow(
+              icon: kIconPassword,
+              onCopy: (String value) {
+                _onCopyTextToClipboard(context, "Password", value);
+              },
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
+          child: ValueListenableProvider<String>.value(
+            value: data.pinNotifier,
+            child: _ResultRow(
+              icon: kIconPin,
+              onCopy: (String value) {
+                _onCopyTextToClipboard(context, "PIN", value);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _onCopyTextToClipboard(BuildContext context, String title, String text) {
-    _copyTextToClipboard(context, title, text).then((_) {
-      _addHistory();
+    return copyTextToClipboard(context, title, text).then<void>((_) {
+      return _addHistory();
     });
   }
 
   void _onHistoryPressed() {
+    final History history = Provider.of<History>(context, listen: false);
+    if (history == null) {
+      debugPrint("History is not provided");
+      return;
+    }
+
+    final GenPassData data = Provider.of<GenPassData>(context, listen: false);
+    if (data == null) {
+      debugPrint("GenPassData is not provided");
+      return;
+    }
+
     Navigator.of(context)?.push(
       MaterialPageRoute<String>(
         builder: (BuildContext context) {
@@ -180,13 +224,19 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       ),
     )?.then((String domainText) {
       if (domainText != null && domainText.isNotEmpty) {
-        debugPrint("domainText is ${domainText}");
         data.domainNotifier.value = domainText;
+        debugPrint("domainText is ${domainText}");
       }
     });
   }
 
   void _onSettingsPressed() {
+    final GenPassData data = Provider.of<GenPassData>(context, listen: false);
+    if (data == null) {
+      debugPrint("GenPassData is not provided");
+      return;
+    }
+
     Navigator.of(context)?.push(
       MaterialPageRoute<Settings>(
         builder: (BuildContext context) {
@@ -207,17 +257,32 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   }
 
   bool _addHistory() {
-    final String domainText = data.domainNotifier.value;
-    if (domainText == null || domainText.isEmpty) {
+    final History history = Provider.of<History>(context, listen: false);
+    if (history == null) {
+      debugPrint("History is not provided");
       return false;
     }
+
+    final GenPassData data = Provider.of<GenPassData>(context, listen: false);
+    if (data == null) {
+      debugPrint("GenPassData is not provided");
+      return false;
+    }
+
+    final String domainText = data.domainNotifier.value;
+    if (domainText == null || domainText.isEmpty) {
+      debugPrint("domainText is empty");
+      return false;
+    }
+
     history.add(domainText);
+    debugPrint("${domainText} is added to history");
     return true;
   }
 }
 
 class _MasterInputRow extends StatelessWidget {
-  _MasterInputRow({
+  const _MasterInputRow({
     Key key,
   }) : super(key: key);
 
@@ -253,7 +318,7 @@ class _MasterInputRow extends StatelessWidget {
 }
 
 class _DomainInputRow extends StatelessWidget {
-  _DomainInputRow({
+  const _DomainInputRow({
     Key key,
     @required this.onPressed,
   }) : super(key: key);
@@ -277,7 +342,7 @@ class _DomainInputRow extends StatelessWidget {
 }
 
 class _InputRow extends StatelessWidget {
-  _InputRow({
+  const _InputRow({
     Key key,
     @required this.inputIcon,
     @required this.textInputType,
@@ -389,7 +454,7 @@ class _ResultRow extends StatelessWidget {
     String text,
   }) {
     final ThemeData themeData = Theme.of(context);
-    final bool valid = ((text != null) && text.isNotEmpty);
+    final bool valid = (text != null && text.isNotEmpty);
     final Color textColor = valid ? themeData.textTheme.caption.color : themeData.disabledColor;
     final Color iconColor = valid ? themeData.primaryColor : themeData.disabledColor;
     final bool show = showNotifier.value ?? false;
@@ -446,7 +511,7 @@ class _ResultRow extends StatelessWidget {
   }
 }
 
-Future<void> _copyTextToClipboard(BuildContext context, String title, String text) {
+Future<void> copyTextToClipboard(BuildContext context, String title, String text) {
   return Clipboard.setData(ClipboardData(text: text)).then((_) {
     Scaffold.of(context, nullOk: true)?.showSnackBar(
       SnackBar(

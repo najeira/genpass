@@ -98,11 +98,8 @@ class History {
     return History.list(value);
   }
 
-  static Future<void> save(History history) async {
-    if (history == null) {
-      return;
-    }
-    final List<String> value = history.entries.toList();
+  Future<void> save() async {
+    final List<String> value = entries.toList();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_keyHistoryEntries, value);
   }
