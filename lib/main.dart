@@ -10,6 +10,8 @@ import 'settings.dart';
 
 const String kAppName = "Gen Pass";
 const double kFontSize = 18.0;
+const double kInputIconSize = 24.0;
+const double kActionIconSize = 28.0;
 
 void main() {
   runApp(MaterialApp(
@@ -82,13 +84,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
-      if (_addHistory()) {
-        Provider.of<History>(context, listen: false)?.save()?.then((_) {
-          debugPrint("history saved");
-        })?.catchError((Object ex) {
-          debugPrint(ex.toString());
-        });
-      }
+      _addHistory();
     }
   }
 
@@ -127,7 +123,6 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const SizedBox(height: 8.0),
         const _SectionTitle(title: "Form"),
         Padding(
           padding: const EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
@@ -144,7 +139,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 16.0),
+          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 24.0),
           child: MultiProvider(
             providers: [
               ChangeNotifierProvider<ValueNotifier<String>>.value(
@@ -193,7 +188,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
 
   Future<void> _onCopyTextToClipboard(BuildContext context, String title, String text) {
     return copyTextToClipboard(context, title, text).then<void>((_) {
-      return _addHistory();
+      _addHistory();
     });
   }
 
@@ -276,6 +271,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
     }
 
     history.add(domainText);
+    history.save();
     debugPrint("${domainText} is added to history");
     return true;
   }
@@ -372,7 +368,7 @@ class _InputRow extends StatelessWidget {
         IconButton(
           icon: Icon(
             actionIcon,
-            size: 28.0,
+            size: kActionIconSize,
             color: themeData.primaryColor,
           ),
           onPressed: onPressed,
@@ -392,7 +388,7 @@ class _InputRow extends StatelessWidget {
         return TextField(
           controller: controller,
           decoration: InputDecoration(
-            icon: Icon(inputIcon, size: 24.0),
+            icon: Icon(inputIcon, size: kInputIconSize),
             labelText: labelText,
             hintText: hintText,
             errorText: errorText,
@@ -441,31 +437,10 @@ class _ResultRow extends StatelessWidget {
           ValueNotifier<bool> showNotifier,
           Widget child,
         ) {
-          final ThemeData themeData = Theme.of(context);
-          final TextStyle textStyle = themeData.textTheme.body1;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Icon(
-                    icon,
-                    size: kFontSize,
-                    color: textStyle.color,
-                  ),
-                  const SizedBox(width: 4.0),
-                  Text(
-                    title,
-                    style: textStyle,
-                  ),
-                ],
-              ),
-              _buildRow(
-                context,
-                showNotifier: showNotifier,
-                text: text,
-              ),
-            ],
+          return _buildRow(
+            context,
+            showNotifier: showNotifier,
+            text: text,
           );
         },
       ),
@@ -478,31 +453,53 @@ class _ResultRow extends StatelessWidget {
     String text,
   }) {
     final ThemeData themeData = Theme.of(context);
+    final TextTheme textTheme = themeData.textTheme;
     final bool valid = (text != null && text.isNotEmpty);
-    final Color iconColor = valid ? themeData.primaryColor : themeData.disabledColor;
+    final Color buttonColor = valid ? themeData.primaryColor : themeData.disabledColor;
+    final Color iconColor = valid ? textTheme.caption.color : themeData.disabledColor;
     final bool show = showNotifier.value ?? false;
 
     String showText = text;
-    if (valid && !show) {
-      showText = "*".padRight(text.length, "*");
+    if (valid) {
+      if (!show) {
+        showText = "*".padRight(text.length, "*");
+      }
+    } else {
+      showText = "-";
     }
 
     return Row(
       children: <Widget>[
-        const SizedBox(width: 22.0),
+        Icon(
+          icon,
+          size: kInputIconSize,
+          color: iconColor,
+        ),
+        const SizedBox(width: 16.0),
         Expanded(
-          child: Text(
-            showText ?? "",
-            style: const TextStyle(
-              fontSize: kFontSize,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                title,
+                style: textTheme.caption,
+              ),
+              const SizedBox(height: 4.0),
+              Text(
+                showText ?? "",
+                style: TextStyle(
+                  fontSize: kFontSize,
+                  color: textTheme.body1.color,
+                ),
+              ),
+            ],
           ),
         ),
         IconButton(
           icon: Icon(
             show ? Icons.visibility : Icons.visibility_off,
-            size: 28.0,
-            color: iconColor,
+            size: kActionIconSize,
+            color: buttonColor,
           ),
           onPressed: valid
               ? () {
@@ -513,8 +510,8 @@ class _ResultRow extends StatelessWidget {
         IconButton(
           icon: Icon(
             Icons.content_copy,
-            size: 28.0,
-            color: iconColor,
+            size: kActionIconSize,
+            color: buttonColor,
           ),
           onPressed: valid
               ? () {
@@ -549,7 +546,7 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 8.0),
+      padding: const EdgeInsets.fromLTRB(12.0, 16.0, 8.0, 8.0),
       child: Text(
         title,
         style: const TextStyle(
