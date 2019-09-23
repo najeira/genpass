@@ -6,7 +6,7 @@ import 'main.dart';
 import 'service.dart';
 
 class HistoryPage extends StatelessWidget {
-  HistoryPage({
+  const HistoryPage({
     Key key,
     this.text,
     this.history,
@@ -93,7 +93,7 @@ class HistoryPage extends StatelessWidget {
 typedef _ValueSelected<T> = void Function(T value);
 
 class _HistoryListView extends StatefulWidget {
-  _HistoryListView({
+  const _HistoryListView({
     Key key,
     @required this.entries,
     @required this.onSelected,
@@ -112,10 +112,10 @@ class _HistoryListViewState extends State<_HistoryListView> {
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
     _scrollController?.removeListener(_onScroll);
     _scrollController = PrimaryScrollController.of(context);
     _scrollController?.addListener(_onScroll);
-    super.didChangeDependencies();
   }
 
   @override
@@ -144,7 +144,7 @@ class _HistoryListViewState extends State<_HistoryListView> {
         }
 
         return ListView.builder(
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           controller: _scrollController,
           itemCount: targets.length,
           itemBuilder: (BuildContext context, int index) {
