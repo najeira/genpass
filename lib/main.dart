@@ -127,8 +127,10 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Container(
-          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
+        const SizedBox(height: 8.0),
+        const _SectionTitle(title: "Form"),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
           child: MultiProvider(
             providers: [
               ChangeNotifierProvider<ValueNotifier<String>>.value(
@@ -141,8 +143,8 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
             child: const _MasterInputRow(),
           ),
         ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 16.0),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 16.0),
           child: MultiProvider(
             providers: [
               ChangeNotifierProvider<ValueNotifier<String>>.value(
@@ -158,23 +160,26 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
           ),
         ),
         const Divider(),
-        Container(
-          padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 0.0),
+        const _SectionTitle(title: "Generator"),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
           child: ValueListenableProvider<String>.value(
             value: data.passNotifier,
             child: _ResultRow(
+              title: kTitlePassword,
               icon: kIconPassword,
               onCopy: (String value) {
-                _onCopyTextToClipboard(context, "Password", value);
+                _onCopyTextToClipboard(context, kTitlePassword, value);
               },
             ),
           ),
         ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 8.0),
           child: ValueListenableProvider<String>.value(
             value: data.pinNotifier,
             child: _ResultRow(
+              title: kTitlePin,
               icon: kIconPin,
               onCopy: (String value) {
                 _onCopyTextToClipboard(context, "PIN", value);
@@ -216,7 +221,8 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       ),
     )?.then((String domainText) {
       if (domainText != null && domainText.isNotEmpty) {
-        final _DomainTextEditingController controller = Provider.of<_DomainTextEditingController>(context, listen: false);
+        final _DomainTextEditingController controller =
+            Provider.of<_DomainTextEditingController>(context, listen: false);
         controller.text = domainText;
         data.domainNotifier.value = domainText;
         debugPrint("domainText is ${domainText}");
@@ -297,7 +303,7 @@ class _MasterInputRow extends StatelessWidget {
           return _InputRow(
             textInputType: TextInputType.visiblePassword,
             inputIcon: Icons.bubble_chart,
-            labelText: "password",
+            labelText: "master password",
             hintText: "your master password",
             obscureText: !show,
             actionIcon: show ? Icons.visibility : Icons.visibility_off,
@@ -413,9 +419,12 @@ typedef _CopyCallback = void Function(String);
 class _ResultRow extends StatelessWidget {
   _ResultRow({
     Key key,
+    @required this.title,
     @required this.icon,
     @required this.onCopy,
   }) : super(key: key);
+
+  final String title;
 
   final IconData icon;
 
@@ -432,10 +441,31 @@ class _ResultRow extends StatelessWidget {
           ValueNotifier<bool> showNotifier,
           Widget child,
         ) {
-          return _buildRow(
-            context,
-            showNotifier: showNotifier,
-            text: text,
+          final ThemeData themeData = Theme.of(context);
+          final TextStyle textStyle = themeData.textTheme.body1;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Icon(
+                    icon,
+                    size: kFontSize,
+                    color: textStyle.color,
+                  ),
+                  const SizedBox(width: 4.0),
+                  Text(
+                    title,
+                    style: textStyle,
+                  ),
+                ],
+              ),
+              _buildRow(
+                context,
+                showNotifier: showNotifier,
+                text: text,
+              ),
+            ],
           );
         },
       ),
@@ -449,7 +479,6 @@ class _ResultRow extends StatelessWidget {
   }) {
     final ThemeData themeData = Theme.of(context);
     final bool valid = (text != null && text.isNotEmpty);
-    final Color textColor = valid ? themeData.textTheme.body1.color : themeData.disabledColor;
     final Color iconColor = valid ? themeData.primaryColor : themeData.disabledColor;
     final bool show = showNotifier.value ?? false;
 
@@ -460,12 +489,7 @@ class _ResultRow extends StatelessWidget {
 
     return Row(
       children: <Widget>[
-        Icon(
-          icon,
-          size: 24.0,
-          color: textColor,
-        ),
-        const SizedBox(width: 16.0),
+        const SizedBox(width: 22.0),
         Expanded(
           child: Text(
             showText ?? "",
@@ -513,4 +537,26 @@ Future<void> copyTextToClipboard(BuildContext context, String title, String text
   }).catchError((Object ex) {
     debugPrint(ex.toString());
   });
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({
+    this.title,
+  });
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 8.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18.0,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
 }

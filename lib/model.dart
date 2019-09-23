@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'crypto.dart';
 import 'service.dart';
 
+const String kTitlePassword = "Password";
+const String kTitlePin = "PIN";
 const IconData kIconPassword = Icons.vpn_key;
 const IconData kIconPin = Icons.casino;
 const IconData kIconAlgorithm = Icons.card_travel;
