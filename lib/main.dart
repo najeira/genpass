@@ -33,6 +33,12 @@ class _RootPage extends StatelessWidget {
     final GenPassData data = GenPassData();
     return MultiProvider(
       providers: [
+        ListenableProvider<_MasterTextEditingController>(
+          builder: (BuildContext context) => _MasterTextEditingController(),
+        ),
+        ListenableProvider<_DomainTextEditingController>(
+          builder: (BuildContext context) => _DomainTextEditingController(),
+        ),
         FutureProvider<History>(
           builder: (BuildContext context) => History.load(),
         ),
@@ -88,20 +94,6 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ListenableProvider<_MasterTextEditingController>(
-          builder: (BuildContext context) => _MasterTextEditingController(),
-        ),
-        ListenableProvider<_DomainTextEditingController>(
-          builder: (BuildContext context) => _DomainTextEditingController(),
-        ),
-      ],
-      child: _buildScaffold(context),
-    );
-  }
-
-  Widget _buildScaffold(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(kAppName),
@@ -224,6 +216,8 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       ),
     )?.then((String domainText) {
       if (domainText != null && domainText.isNotEmpty) {
+        final _DomainTextEditingController controller = Provider.of<_DomainTextEditingController>(context, listen: false);
+        controller.text = domainText;
         data.domainNotifier.value = domainText;
         debugPrint("domainText is ${domainText}");
       }
