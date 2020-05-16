@@ -606,6 +606,7 @@ class _ResultRow extends StatelessWidget {
 
 Future<void> copyTextToClipboard(BuildContext context, String title, String text) {
   return Clipboard.setData(ClipboardData(text: text)).then((_) {
+    log.config("clipboard: succeeded to copy");
     Scaffold.of(context, nullOk: true)?.showSnackBar(
       SnackBar(
         content: Text("${title} copied to clipboard"),
