@@ -21,10 +21,10 @@ class HistoryPage extends StatelessWidget {
     return MultiProvider(
       providers: [
         ListenableProvider<FocusNode>(
-          builder: (BuildContext context) => FocusNode(),
+          create: (BuildContext context) => FocusNode(),
         ),
         ChangeNotifierProvider<ValueNotifier<String>>(
-          builder: (BuildContext context) => ValueNotifier<String>(null),
+          create: (BuildContext context) => ValueNotifier<String>(null),
         ),
       ],
       child: Builder(
@@ -53,7 +53,7 @@ class HistoryPage extends StatelessWidget {
 
   Widget _buildTextField(BuildContext context) {
     return ListenableProvider<TextEditingController>(
-      builder: (BuildContext context) {
+      create: (BuildContext context) {
         final String value = Provider.of<ValueNotifier<String>>(context, listen: false).value;
         return TextEditingController(text: value);
       },

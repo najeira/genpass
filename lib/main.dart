@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+import 'package:tuple/tuple.dart';
 
 import 'history.dart';
 import 'model.dart';
@@ -13,40 +15,45 @@ const double kFontSize = 18.0;
 const double kInputIconSize = 24.0;
 const double kActionIconSize = 28.0;
 
+final Logger log = Logger(kAppName);
+
 void main() {
+  _initLogging();
   runApp(MaterialApp(
     title: kAppName,
     theme: ThemeData(
       primarySwatch: Colors.blue,
     ),
-    home: const _RootPage(),
+    home: _RootPage(GenPassData()),
   ));
 }
 
-class _MasterTextEditingController extends TextEditingController {}
-
-class _DomainTextEditingController extends TextEditingController {}
+void _initLogging() {
+  Logger.root.level = Level.INFO;
+  assert(() {
+    Logger.root.level = Level.FINE;
+    return true;
+  }());
+  Logger.root.onRecord.listen((LogRecord record) {
+    print("${record.time}: [${record.level.name}] ${record.message}");
+  });
+}
 
 class _RootPage extends StatelessWidget {
-  const _RootPage();
+  const _RootPage(this.data);
+
+  final GenPassData data;
 
   @override
   Widget build(BuildContext context) {
-    final GenPassData data = GenPassData();
     return MultiProvider(
       providers: [
-        ListenableProvider<_MasterTextEditingController>(
-          builder: (BuildContext context) => _MasterTextEditingController(),
-        ),
-        ListenableProvider<_DomainTextEditingController>(
-          builder: (BuildContext context) => _DomainTextEditingController(),
-        ),
         FutureProvider<History>(
-          builder: (BuildContext context) => History.load(),
+          create: (BuildContext context) => History.load(),
         ),
         FutureProvider<GenPassData>(
           initialData: data,
-          builder: (BuildContext context) {
+          create: (BuildContext context) {
             return Settings.load().then<GenPassData>((Settings settings) {
               data.settingsNotifier.value = settings;
               return data;
@@ -105,89 +112,47 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   }
 
   Widget _buildBody(BuildContext context) {
-    return Builder(
-      builder: (BuildContext context) {
-        return Consumer<GenPassData>(
-          builder: (BuildContext context, GenPassData data, Widget child) {
-            return SingleChildScrollView(
-              child: _buildColumn(context, data),
-            );
-          },
-        );
-      },
+    return SingleChildScrollView(
+      child: _buildColumn(context),
     );
   }
 
-  Widget _buildColumn(BuildContext context, GenPassData data) {
+  Widget _buildColumn(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const _SectionTitle(title: "Form"),
-        Padding(
+        const Padding(
           padding: const EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
-          child: MultiProvider(
-            providers: [
-              ChangeNotifierProvider<ValueNotifier<String>>.value(
-                value: data.masterNotifier,
-              ),
-              ValueListenableProvider<String>.value(
-                value: data.masterErrorNotifier,
-              ),
-            ],
-            child: const _MasterInputRow(),
-          ),
+          child: const _MasterInputRow(),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 24.0),
-          child: MultiProvider(
-            providers: [
-              ChangeNotifierProvider<ValueNotifier<String>>.value(
-                value: data.domainNotifier,
-              ),
-              ValueListenableProvider<String>.value(
-                value: data.domainErrorNotifier,
-              ),
-            ],
-            child: _DomainInputRow(
-              onPressed: _onHistoryPressed,
-            ),
+          child: _DomainInputRow(
+            onActionPressed: _onHistoryPressed,
           ),
         ),
         const Divider(),
         const _SectionTitle(title: "Generator"),
         Padding(
           padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
-          child: ValueListenableProvider<String>.value(
-            value: data.passNotifier,
-            child: _ResultRow(
-              title: kTitlePassword,
-              icon: kIconPassword,
-              onCopy: (String value) {
-                _onCopyTextToClipboard(context, kTitlePassword, value);
-              },
-            ),
+          child: _PasswordResultRow(
+            onCopy: _onCopy,
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 8.0),
-          child: ValueListenableProvider<String>.value(
-            value: data.pinNotifier,
-            child: _ResultRow(
-              title: kTitlePin,
-              icon: kIconPin,
-              onCopy: (String value) {
-                _onCopyTextToClipboard(context, "PIN", value);
-              },
-            ),
+          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
+          child: _PinResultRow(
+            onCopy: _onCopy,
           ),
         ),
       ],
     );
   }
 
-  Future<void> _onCopyTextToClipboard(BuildContext context, String title, String text) {
-    return copyTextToClipboard(context, title, text).then<void>((_) {
+  void _onCopy(String title, String text) {
+    copyTextToClipboard(context, title, text).then<void>((_) {
       _addHistory();
     });
   }
@@ -195,13 +160,13 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   void _onHistoryPressed() {
     final History history = Provider.of<History>(context, listen: false);
     if (history == null) {
-      debugPrint("History is not provided");
+      log.warning("History is not provided");
       return;
     }
 
     final GenPassData data = Provider.of<GenPassData>(context, listen: false);
     if (data == null) {
-      debugPrint("GenPassData is not provided");
+      log.warning("GenPassData is not provided");
       return;
     }
 
@@ -209,18 +174,15 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       MaterialPageRoute<String>(
         builder: (BuildContext context) {
           return HistoryPage(
-            text: data.domainNotifier.value,
+            text: data.domainNotifier.text,
             history: history,
           );
         },
       ),
     )?.then((String domainText) {
       if (domainText != null && domainText.isNotEmpty) {
-        final _DomainTextEditingController controller =
-            Provider.of<_DomainTextEditingController>(context, listen: false);
-        controller.text = domainText;
-        data.domainNotifier.value = domainText;
-        debugPrint("domainText is ${domainText}");
+        data.domainNotifier.text = domainText;
+        log.config("domain is ${domainText}");
       }
     });
   }
@@ -228,7 +190,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   void _onSettingsPressed() {
     final GenPassData data = Provider.of<GenPassData>(context, listen: false);
     if (data == null) {
-      debugPrint("GenPassData is not provided");
+      log.warning("GenPassData is not provided");
       return;
     }
 
@@ -244,35 +206,35 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       }
       data.settingsNotifier.value = settings;
       Settings.save(settings).then((_) {
-        debugPrint("settings saved");
-      }).catchError((Object ex) {
-        debugPrint(ex.toString());
+        log.config("settings succeeded to save");
+      }).catchError((Object error, StackTrace stackTrace) {
+        log.warning("settings failed to save", error, stackTrace);
       });
     });
   }
 
-  bool _addHistory() {
+  Future<bool> _addHistory() async {
     final History history = Provider.of<History>(context, listen: false);
     if (history == null) {
-      debugPrint("History is not provided");
+      log.warning("History is not provided");
       return false;
     }
 
     final GenPassData data = Provider.of<GenPassData>(context, listen: false);
     if (data == null) {
-      debugPrint("GenPassData is not provided");
+      log.warning("GenPassData is not provided");
       return false;
     }
 
-    final String domainText = data.domainNotifier.value;
+    final String domainText = data.domainNotifier.text;
     if (domainText == null || domainText.isEmpty) {
-      debugPrint("domainText is empty");
+      log.config("domain is empty");
       return false;
     }
 
     history.add(domainText);
-    history.save();
-    debugPrint("${domainText} is added to history");
+    await history.save();
+    log.config("domain ${domainText} is added to history");
     return true;
   }
 }
@@ -284,31 +246,55 @@ class _MasterInputRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ListenableProvider<TextEditingController>.value(
-          value: Provider.of<_MasterTextEditingController>(context, listen: false),
-        ),
-        ChangeNotifierProvider<ValueNotifier<bool>>(
-          builder: (BuildContext context) => ValueNotifier<bool>(false),
-        ),
-      ],
-      child: Consumer<ValueNotifier<bool>>(
-        builder: (BuildContext context, ValueNotifier<bool> showNotifier, Widget child) {
-          final bool show = showNotifier.value ?? false;
-          return _InputRow(
-            textInputType: TextInputType.visiblePassword,
-            inputIcon: Icons.bubble_chart,
-            labelText: "master password",
-            hintText: "your master password",
-            obscureText: !show,
-            actionIcon: show ? Icons.visibility : Icons.visibility_off,
-            onPressed: () {
-              showNotifier.value = !show;
-            },
-          );
-        },
-      ),
+    log.fine("_MasterInputRow.build");
+    return Selector<GenPassData, Tuple2<TextEditingController, ErrorMessageNotifier>>(
+      selector: (BuildContext context, GenPassData value) {
+        log.fine("_MasterInputRow.Selector.selector");
+        return Tuple2<TextEditingController, ErrorMessageNotifier>(
+          value.masterNotifier,
+          value.masterErrorNotifier,
+        );
+      },
+      builder: (BuildContext context, Tuple2<TextEditingController, ErrorMessageNotifier> value, Widget child) {
+        log.fine("_MasterInputRow.Selector.builder");
+        return MultiProvider(
+          providers: [
+            ListenableProvider<TextEditingController>.value(
+              value: value.item1,
+            ),
+            ValueListenableProvider<ErrorMessage>.value(
+              value: value.item2,
+              child: child,
+            ),
+            ChangeNotifierProvider<ValueNotifier<bool>>(
+              create: (BuildContext context) => ValueNotifier<bool>(false),
+            ),
+          ],
+          child: child,
+        );
+      },
+      child: _build(context),
+    );
+  }
+
+  Widget _build(BuildContext context) {
+    log.fine("_MasterInputRow.Consumer");
+    return Consumer<ValueNotifier<bool>>(
+      builder: (BuildContext context, ValueNotifier<bool> showNotifier, Widget child) {
+        log.fine("_MasterInputRow.Consumer.builder");
+        final bool show = showNotifier.value ?? false;
+        return _InputRow(
+          textInputType: TextInputType.visiblePassword,
+          inputIcon: Icons.bubble_chart,
+          labelText: "master password",
+          hintText: "your master password",
+          obscureText: !show,
+          actionIcon: show ? Icons.visibility : Icons.visibility_off,
+          onActionPressed: () {
+            showNotifier.value = !show;
+          },
+        );
+      },
     );
   }
 }
@@ -316,23 +302,51 @@ class _MasterInputRow extends StatelessWidget {
 class _DomainInputRow extends StatelessWidget {
   const _DomainInputRow({
     Key key,
-    @required this.onPressed,
-  }) : super(key: key);
+    @required this.onActionPressed,
+  })  : assert(onActionPressed != null),
+        super(key: key);
 
-  final VoidCallback onPressed;
+  final VoidCallback onActionPressed;
 
   @override
   Widget build(BuildContext context) {
-    return ListenableProvider<TextEditingController>.value(
-      value: Provider.of<_DomainTextEditingController>(context, listen: false),
-      child: _InputRow(
-        textInputType: TextInputType.url,
-        inputIcon: Icons.business,
-        labelText: "domain / site",
-        hintText: "example.com",
-        actionIcon: Icons.assignment,
-        onPressed: onPressed,
-      ),
+    log.fine("_DomainInputRow.build");
+    return Selector<GenPassData, Tuple2<TextEditingController, ErrorMessageNotifier>>(
+      selector: (BuildContext context, GenPassData value) {
+        log.fine("_DomainInputRow.Selector.selector");
+        return Tuple2<TextEditingController, ErrorMessageNotifier>(
+          value.domainNotifier,
+          value.domainErrorNotifier,
+        );
+      },
+      builder: (BuildContext context, Tuple2<TextEditingController, ErrorMessageNotifier> value, Widget child) {
+        log.fine("_DomainInputRow.Selector.builder");
+        return MultiProvider(
+          providers: [
+            ListenableProvider<TextEditingController>.value(
+              value: value.item1,
+            ),
+            ValueListenableProvider<ErrorMessage>.value(
+              value: value.item2,
+              child: child,
+            ),
+          ],
+          child: child,
+        );
+      },
+      child: _build(context),
+    );
+  }
+
+  Widget _build(BuildContext context) {
+    log.fine("_DomainInputRow._InputRow");
+    return _InputRow(
+      textInputType: TextInputType.url,
+      inputIcon: Icons.business,
+      labelText: "domain / site",
+      hintText: "example.com",
+      actionIcon: Icons.assignment,
+      onActionPressed: onActionPressed,
     );
   }
 }
@@ -346,7 +360,7 @@ class _InputRow extends StatelessWidget {
     @required this.hintText,
     this.obscureText = false,
     @required this.actionIcon,
-    @required this.onPressed,
+    @required this.onActionPressed,
   }) : super(key: key);
 
   final IconData inputIcon;
@@ -355,10 +369,11 @@ class _InputRow extends StatelessWidget {
   final String hintText;
   final bool obscureText;
   final IconData actionIcon;
-  final VoidCallback onPressed;
+  final VoidCallback onActionPressed;
 
   @override
   Widget build(BuildContext context) {
+    log.fine("_InputRow(${labelText}).build");
     final ThemeData themeData = Theme.of(context);
     return Row(
       children: <Widget>[
@@ -371,46 +386,106 @@ class _InputRow extends StatelessWidget {
             size: kActionIconSize,
             color: themeData.primaryColor,
           ),
-          onPressed: onPressed,
+          onPressed: onActionPressed,
         ),
       ],
     );
   }
 
   Widget _buildTextField(BuildContext context) {
-    return Consumer2<TextEditingController, String>(
+    log.fine("_InputRow(${labelText}).Consumer2");
+    final TextEditingController controller = Provider.of<TextEditingController>(context, listen: false);
+    return Consumer<ErrorMessage>(
       builder: (
         BuildContext context,
-        TextEditingController controller,
-        String errorText,
+        ErrorMessage errorMessage,
         Widget child,
       ) {
+        log.fine("_InputRow(${labelText}).Consumer2.builder");
         return TextField(
           controller: controller,
           decoration: InputDecoration(
             icon: Icon(inputIcon, size: kInputIconSize),
             labelText: labelText,
             hintText: hintText,
-            errorText: errorText,
+            errorText: errorMessage?.value,
           ),
           style: const TextStyle(
             fontSize: kFontSize,
           ),
           keyboardType: textInputType,
           obscureText: obscureText ?? false,
-          onChanged: (String value) => _onTextChanged(context, value),
-          onSubmitted: (String value) => _onTextChanged(context, value),
         );
       },
     );
   }
+}
 
-  void _onTextChanged(BuildContext context, String value) {
-    Provider.of<ValueNotifier<String>>(context, listen: false)?.value = value;
+typedef _TitleAndCopyCallback = void Function(String, String);
+
+class _PasswordResultRow extends StatelessWidget {
+  const _PasswordResultRow({
+    Key key,
+    @required this.onCopy,
+  }) : super(key: key);
+
+  final _TitleAndCopyCallback onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    log.fine("_PasswordResultRow.build");
+    return Selector<GenPassData, ValueNotifier<String>>(
+      selector: (BuildContext context, GenPassData value) {
+        log.fine("_PasswordResultRow.Selector.selector");
+        return value.passNotifier;
+      },
+      builder: (BuildContext context, ValueNotifier<String> value, Widget child) {
+        log.fine("_PasswordResultRow.Selector.builder");
+        return ValueListenableProvider<String>.value(
+          value: value,
+          child: child,
+        );
+      },
+      child: _ResultRow(
+        title: kTitlePassword,
+        icon: kIconPassword,
+        onCopy: onCopy,
+      ),
+    );
   }
 }
 
-typedef _CopyCallback = void Function(String);
+class _PinResultRow extends StatelessWidget {
+  const _PinResultRow({
+    Key key,
+    @required this.onCopy,
+  }) : super(key: key);
+
+  final _TitleAndCopyCallback onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    log.fine("_PinResultRow.Selector.build");
+    return Selector<GenPassData, ValueNotifier<String>>(
+      selector: (BuildContext context, GenPassData value) {
+        log.fine("_PinResultRow.Selector.selector");
+        return value.pinNotifier;
+      },
+      builder: (BuildContext context, ValueNotifier<String> value, Widget child) {
+        log.fine("_PinResultRow.Selector.builder");
+        return ValueListenableProvider<String>.value(
+          value: value,
+          child: child,
+        );
+      },
+      child: _ResultRow(
+        title: kTitlePin,
+        icon: kIconPin,
+        onCopy: onCopy,
+      ),
+    );
+  }
+}
 
 class _ResultRow extends StatelessWidget {
   _ResultRow({
@@ -424,12 +499,16 @@ class _ResultRow extends StatelessWidget {
 
   final IconData icon;
 
-  final _CopyCallback onCopy;
+  final _TitleAndCopyCallback onCopy;
 
   @override
   Widget build(BuildContext context) {
+    log.fine("_ResultRow(${title}).build");
     return ChangeNotifierProvider<ValueNotifier<bool>>(
-      builder: (BuildContext context) => ValueNotifier<bool>(false),
+      create: (BuildContext context) {
+        log.fine("_ResultRow(${title}).ChangeNotifierProvider.create");
+        return ValueNotifier<bool>(false);
+      },
       child: Consumer2<String, ValueNotifier<bool>>(
         builder: (
           BuildContext context,
@@ -437,6 +516,7 @@ class _ResultRow extends StatelessWidget {
           ValueNotifier<bool> showNotifier,
           Widget child,
         ) {
+          log.fine("_ResultRow(${title}).Consumer2.builder");
           return _buildRow(
             context,
             showNotifier: showNotifier,
@@ -489,7 +569,7 @@ class _ResultRow extends StatelessWidget {
                 showText ?? "",
                 style: TextStyle(
                   fontSize: kFontSize,
-                  color: textTheme.body1.color,
+                  color: textTheme.bodyText2.color,
                 ),
               ),
             ],
@@ -515,7 +595,7 @@ class _ResultRow extends StatelessWidget {
           ),
           onPressed: valid
               ? () {
-                  onCopy(text);
+                  onCopy(title, text);
                 }
               : null,
         ),
@@ -531,8 +611,8 @@ Future<void> copyTextToClipboard(BuildContext context, String title, String text
         content: Text("${title} copied to clipboard"),
       ),
     );
-  }).catchError((Object ex) {
-    debugPrint(ex.toString());
+  }).catchError((Object error, StackTrace stackTrace) {
+    log.warning("clipboard: failed to copy", error, stackTrace);
   });
 }
 

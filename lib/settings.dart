@@ -32,13 +32,13 @@ class SettingsPage extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<_PasswordLengthNotifier>(
-          builder: (BuildContext context) => _PasswordLengthNotifier(settings.passwordLength),
+          create: (BuildContext context) => _PasswordLengthNotifier(settings.passwordLength),
         ),
         ChangeNotifierProvider<_PinLengthNotifier>(
-          builder: (BuildContext context) => _PinLengthNotifier(settings.pinLength),
+          create: (BuildContext context) => _PinLengthNotifier(settings.pinLength),
         ),
         ChangeNotifierProvider<_HashAlgorithmNotifier>(
-          builder: (BuildContext context) => _HashAlgorithmNotifier(settings.hashAlgorithm),
+          create: (BuildContext context) => _HashAlgorithmNotifier(settings.hashAlgorithm),
         ),
       ],
       child: Builder(
@@ -205,7 +205,7 @@ class _Algorithms extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ValueNotifier<bool>>(
-      builder: (BuildContext context) => ValueNotifier<bool>(false),
+      create: (BuildContext context) => ValueNotifier<bool>(false),
       child: _build(context),
     );
   }
