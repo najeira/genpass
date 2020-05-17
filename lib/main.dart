@@ -5,17 +5,13 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import 'widgets/result_row.dart';
+
+import 'gloabls.dart';
 import 'history.dart';
 import 'model.dart';
 import 'service.dart';
 import 'settings.dart';
-
-const String kAppName = "Gen Pass";
-const double kFontSize = 18.0;
-const double kInputIconSize = 24.0;
-const double kActionIconSize = 28.0;
-
-final Logger log = Logger(kAppName);
 
 void main() {
   _initLogging();
@@ -112,8 +108,13 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   }
 
   Widget _buildBody(BuildContext context) {
-    return SingleChildScrollView(
-      child: _buildColumn(context),
+    return IconTheme(
+      data: IconThemeData(
+        size: kActionIconSize,
+      ),
+      child: SingleChildScrollView(
+        child: _buildColumn(context),
+      ),
     );
   }
 
@@ -135,26 +136,16 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
         ),
         const Divider(),
         const _SectionTitle(title: "Generator"),
-        Padding(
+        const Padding(
           padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
-          child: _PasswordResultRow(
-            onCopy: _onCopy,
-          ),
+          child: const _PasswordResultRow(),
         ),
-        Padding(
+        const Padding(
           padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
-          child: _PinResultRow(
-            onCopy: _onCopy,
-          ),
+          child: const _PinResultRow(),
         ),
       ],
     );
-  }
-
-  void _onCopy(String title, String text) {
-    copyTextToClipboard(context, title, text).then<void>((_) {
-      _addHistory();
-    });
   }
 
   void _onHistoryPressed() {
@@ -426,10 +417,7 @@ typedef _TitleAndCopyCallback = void Function(String, String);
 class _PasswordResultRow extends StatelessWidget {
   const _PasswordResultRow({
     Key key,
-    @required this.onCopy,
   }) : super(key: key);
-
-  final _TitleAndCopyCallback onCopy;
 
   @override
   Widget build(BuildContext context) {
@@ -446,10 +434,11 @@ class _PasswordResultRow extends StatelessWidget {
           child: child,
         );
       },
-      child: _ResultRow(
-        title: kTitlePassword,
-        icon: kIconPassword,
-        onCopy: onCopy,
+      child: ResultRowController.provider(
+        child: ResultRow(
+          title: kTitlePassword,
+          icon: kIconPassword,
+        ),
       ),
     );
   }
@@ -458,10 +447,7 @@ class _PasswordResultRow extends StatelessWidget {
 class _PinResultRow extends StatelessWidget {
   const _PinResultRow({
     Key key,
-    @required this.onCopy,
   }) : super(key: key);
-
-  final _TitleAndCopyCallback onCopy;
 
   @override
   Widget build(BuildContext context) {
@@ -478,143 +464,14 @@ class _PinResultRow extends StatelessWidget {
           child: child,
         );
       },
-      child: _ResultRow(
-        title: kTitlePin,
-        icon: kIconPin,
-        onCopy: onCopy,
+      child: ResultRowController.provider(
+        child: ResultRow(
+          title: kTitlePin,
+          icon: kIconPin,
+        ),
       ),
     );
   }
-}
-
-class _ResultRow extends StatelessWidget {
-  _ResultRow({
-    Key key,
-    @required this.title,
-    @required this.icon,
-    @required this.onCopy,
-  }) : super(key: key);
-
-  final String title;
-
-  final IconData icon;
-
-  final _TitleAndCopyCallback onCopy;
-
-  @override
-  Widget build(BuildContext context) {
-    log.fine("_ResultRow(${title}).build");
-    return ChangeNotifierProvider<ValueNotifier<bool>>(
-      create: (BuildContext context) {
-        log.fine("_ResultRow(${title}).ChangeNotifierProvider.create");
-        return ValueNotifier<bool>(false);
-      },
-      child: Consumer2<String, ValueNotifier<bool>>(
-        builder: (
-          BuildContext context,
-          String text,
-          ValueNotifier<bool> showNotifier,
-          Widget child,
-        ) {
-          log.fine("_ResultRow(${title}).Consumer2.builder");
-          return _buildRow(
-            context,
-            showNotifier: showNotifier,
-            text: text,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildRow(
-    BuildContext context, {
-    ValueNotifier<bool> showNotifier,
-    String text,
-  }) {
-    final ThemeData themeData = Theme.of(context);
-    final TextTheme textTheme = themeData.textTheme;
-    final bool valid = (text != null && text.isNotEmpty);
-    final Color buttonColor = valid ? themeData.primaryColor : themeData.disabledColor;
-    final Color iconColor = valid ? textTheme.caption.color : themeData.disabledColor;
-    final bool show = showNotifier.value ?? false;
-
-    String showText = text;
-    if (valid) {
-      if (!show) {
-        showText = "*".padRight(text.length, "*");
-      }
-    } else {
-      showText = "-";
-    }
-
-    return Row(
-      children: <Widget>[
-        Icon(
-          icon,
-          size: kInputIconSize,
-          color: iconColor,
-        ),
-        const SizedBox(width: 16.0),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                title,
-                style: textTheme.caption,
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                showText ?? "",
-                style: TextStyle(
-                  fontSize: kFontSize,
-                  color: textTheme.bodyText2.color,
-                ),
-              ),
-            ],
-          ),
-        ),
-        IconButton(
-          icon: Icon(
-            show ? Icons.visibility : Icons.visibility_off,
-            size: kActionIconSize,
-            color: buttonColor,
-          ),
-          onPressed: valid
-              ? () {
-                  showNotifier.value = !show;
-                }
-              : null,
-        ),
-        IconButton(
-          icon: Icon(
-            Icons.content_copy,
-            size: kActionIconSize,
-            color: buttonColor,
-          ),
-          onPressed: valid
-              ? () {
-                  onCopy(title, text);
-                }
-              : null,
-        ),
-      ],
-    );
-  }
-}
-
-Future<void> copyTextToClipboard(BuildContext context, String title, String text) {
-  return Clipboard.setData(ClipboardData(text: text)).then((_) {
-    log.config("clipboard: succeeded to copy");
-    Scaffold.of(context, nullOk: true)?.showSnackBar(
-      SnackBar(
-        content: Text("${title} copied to clipboard"),
-      ),
-    );
-  }).catchError((Object error, StackTrace stackTrace) {
-    log.warning("clipboard: failed to copy", error, stackTrace);
-  });
 }
 
 class _SectionTitle extends StatelessWidget {

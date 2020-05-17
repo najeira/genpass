@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import 'main.dart';
 import 'model.dart';
 import 'service.dart';
 
@@ -302,19 +301,22 @@ class _Caption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme textTheme = themeData.textTheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         children: <Widget>[
           Icon(
             icon,
-            size: kFontSize,
+            size: textTheme.bodyText2.fontSize,
           ),
           const SizedBox(width: 8.0),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: kFontSize,
+            style: TextStyle(
+              fontSize: textTheme.bodyText2.fontSize,
               fontWeight: FontWeight.w500,
             ),
           ),

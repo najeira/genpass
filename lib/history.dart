@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import 'main.dart';
 import 'service.dart';
 
 class HistoryPage extends StatelessWidget {
@@ -69,12 +68,6 @@ class HistoryPage extends StatelessWidget {
             focusNode: focusNode,
             decoration: const InputDecoration(
               hintText: "example.com",
-              hintStyle: TextStyle(
-                fontSize: kFontSize,
-              ),
-            ),
-            style: const TextStyle(
-              fontSize: kFontSize,
             ),
             keyboardType: TextInputType.url,
             onChanged: (String value) => _onTextChanged(context, value),
@@ -159,6 +152,9 @@ class _HistoryListViewState extends State<_HistoryListView> {
   }
 
   Widget _buildListTile(BuildContext context, String value) {
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme textTheme = themeData.textTheme;
+
     return InkWell(
       key: ValueKey<String>(value),
       onTap: () {
@@ -173,9 +169,7 @@ class _HistoryListViewState extends State<_HistoryListView> {
         ),
         child: Text(
           value,
-          style: const TextStyle(
-            fontSize: kFontSize,
-          ),
+          style: textTheme.bodyText2,
         ),
       ),
     );
