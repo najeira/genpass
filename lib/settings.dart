@@ -85,70 +85,24 @@ class SettingsPage extends StatelessWidget {
             child: _Algorithms(),
           ),
           const Divider(),
-          _buildItem(
-            context,
-            title: "About",
-            icon: Icons.info_outline,
-            value: "about",
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+            child: _ThemeModeRow(),
           ),
+          const Divider(),
+          const _AboutRow(),
           const Divider(),
         ],
       ),
     );
   }
 
-  Widget _buildItem(
-    BuildContext context, {
-    String title,
-    IconData icon,
-    String value,
-  }) {
-    return InkWell(
-      onTap: () {
-        _onItemPressed(context, value);
-      },
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 4.0),
-        child: _Caption(
-          icon: icon,
-          title: title,
-        ),
-      ),
-    );
-  }
-
-  void _onItemPressed(BuildContext context, String value) {
-    switch (value) {
-      case "about":
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return SimpleDialog(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const <Widget>[
-                      Text("GenPass app is made by najeira."),
-                      Text("Icon made by Freepik from www.flaticon.com"),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-        break;
-    }
-  }
-
   void _onBackPressed(BuildContext context) {
     Navigator.of(context).maybePop(
       Settings(
-        passwordLength: Provider.of<_PasswordLengthNotifier>(context, listen: false).value,
-        pinLength: Provider.of<_PinLengthNotifier>(context, listen: false).value,
-        hashAlgorithm: Provider.of<_HashAlgorithmNotifier>(context, listen: false).value,
+        passwordLength: context.read<_PasswordLengthNotifier>().value,
+        pinLength: context.read<_PinLengthNotifier>().value,
+        hashAlgorithm: context.read<_HashAlgorithmNotifier>().value,
       ),
     );
   }
@@ -156,11 +110,12 @@ class SettingsPage extends StatelessWidget {
 
 class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
   const _Slider({
+    Key key,
     @required this.icon,
     @required this.title,
     @required this.min,
     @required this.max,
-  });
+  }) : super(key: key);
 
   final IconData icon;
   final String title;
@@ -254,7 +209,7 @@ class _Algorithms extends StatelessWidget {
     _HashAlgorithmNotifier valueNotifier,
     HashAlgorithm value,
   ) {
-    final ValueNotifier<bool> confirmation = Provider.of<ValueNotifier<bool>>(context, listen: false);
+    final ValueNotifier<bool> confirmation = context.read<ValueNotifier<bool>>();
     if (confirmation.value == true) {
       valueNotifier.value = value;
       return;
@@ -292,9 +247,10 @@ class _Algorithms extends StatelessWidget {
 
 class _Caption extends StatelessWidget {
   const _Caption({
+    Key key,
     @required this.icon,
     @required this.title,
-  });
+  }) : super(key: key);
 
   final IconData icon;
   final String title;
@@ -310,18 +266,95 @@ class _Caption extends StatelessWidget {
         children: <Widget>[
           Icon(
             icon,
-            size: textTheme.bodyText2.fontSize,
+            size: textTheme.subtitle1.fontSize,
           ),
           const SizedBox(width: 8.0),
           Text(
             title,
             style: TextStyle(
-              fontSize: textTheme.bodyText2.fontSize,
+              fontSize: textTheme.subtitle1.fontSize,
               fontWeight: FontWeight.w500,
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AboutRow extends StatelessWidget {
+  const _AboutRow({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => _onPressed(context),
+      child: const Padding(
+        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+        child: _Caption(
+          icon: Icons.info_outline,
+          title: "About",
+        ),
+      ),
+    );
+  }
+
+  void _onPressed(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          children: <Widget>[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const <Widget>[
+                ListTile(title: Text("GenPass app is made by najeira")),
+                ListTile(title: Text("App icon is made by Freepik from www.flaticon.com")),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ThemeModeRow extends StatelessWidget {
+  const _ThemeModeRow({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    ValueNotifier<ThemeMode> notifier = context.watch<ValueNotifier<ThemeMode>>();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const _Caption(
+          title: "Theme Mode",
+          icon: Icons.palette,
+        ),
+        RadioListTile<ThemeMode>(
+          title: const Text("System"),
+          value: ThemeMode.system,
+          groupValue: notifier.value,
+          onChanged: (ThemeMode value) => notifier.value = value,
+        ),
+        RadioListTile<ThemeMode>(
+          title: const Text("Light"),
+          value: ThemeMode.light,
+          groupValue: notifier.value,
+          onChanged: (ThemeMode value) => notifier.value = value,
+        ),
+        RadioListTile<ThemeMode>(
+          title: const Text("Dark"),
+          value: ThemeMode.dark,
+          groupValue: notifier.value,
+          onChanged: (ThemeMode value) => notifier.value = value,
+        ),
+      ],
     );
   }
 }

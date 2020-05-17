@@ -36,6 +36,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = _textTheme(context);
+
+    final ThemeData lightTheme = ThemeData.from(
+      colorScheme: ColorScheme.light(),
+      textTheme: textTheme,
+    );
+
+    final ThemeData darkTheme = ThemeData.from(
+      colorScheme: ColorScheme.dark(),
+      textTheme: textTheme,
+    );
+
     return ChangeNotifierProvider<ValueNotifier<ThemeMode>>(
       create: (BuildContext context) {
         return ValueNotifier<ThemeMode>(ThemeMode.system);
@@ -49,20 +61,25 @@ class MyApp extends StatelessWidget {
             },
             child: MaterialApp(
               title: kAppName,
-              theme: ThemeData(
-                brightness: Brightness.light,
-                primarySwatch: Colors.blue,
-              ),
-              darkTheme: ThemeData(
-                brightness: Brightness.dark,
-                primarySwatch: Colors.blue,
-              ),
+              theme: lightTheme,
+              darkTheme: darkTheme,
               themeMode: value.value,
               home: child,
             ),
           );
         },
         child: const AppRoot(),
+      ),
+    );
+  }
+
+  TextTheme _textTheme(BuildContext context) {
+    return TextTheme(
+      bodyText2: TextStyle(
+        fontSize: 18.0,
+      ),
+      subtitle1: TextStyle(
+        fontSize: 18.0,
       ),
     );
   }
@@ -94,28 +111,6 @@ class AppRoot extends StatelessWidget {
   }
 
   Widget _build(BuildContext context, AppModel appModel) {
-    final ThemeData themeData = Theme.of(context);
-    final TextTheme textTheme = themeData.textTheme;
-    final IconThemeData iconThemeData = themeData.iconTheme;
-    
-    const double kFontSize = 18.0;
-
-    return Theme(
-      data: themeData.copyWith(
-        textTheme: textTheme.copyWith(
-          bodyText2: textTheme.bodyText2.copyWith(
-            fontSize: kFontSize,
-          ),
-          subtitle1: textTheme.subtitle1.copyWith(
-            fontSize: kFontSize,
-          ),
-        ),
-      ),
-      child: _buildGenPassPage(context, appModel),
-    );
-  }
-
-  Widget _buildGenPassPage(BuildContext context, AppModel appModel) {
     return MultiProvider(
       providers: [
         Provider<History>.value(

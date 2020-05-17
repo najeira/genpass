@@ -4,7 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import 'widgets/history_button.dart';
+import 'widgets/input_row.dart';
+import 'widgets/master_visibility_button.dart';
 import 'widgets/result_row.dart';
+import 'widgets/visibility_button.dart';
 
 import 'gloabls.dart';
 import 'history.dart';
@@ -13,7 +17,9 @@ import 'service.dart';
 import 'settings.dart';
 
 class GenPassPage extends StatefulWidget {
-  const GenPassPage();
+  const GenPassPage({
+    Key key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -70,61 +76,29 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       children: <Widget>[
         const _SectionTitle(title: "Form"),
         const Padding(
-          padding: const EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
-          child: const _MasterInputRow(),
+          padding: EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
+          child: _MasterInputRow(),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 24.0),
-          child: _DomainInputRow(
-            onActionPressed: _onHistoryPressed,
-          ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 24.0),
+          child: _DomainInputRow(),
         ),
         const Divider(),
         const _SectionTitle(title: "Generator"),
         const Padding(
-          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
-          child: const _PasswordResultRow(),
+          padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
+          child: _PasswordResultRow(),
         ),
         const Padding(
-          padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
-          child: const _PinResultRow(),
+          padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
+          child: _PinResultRow(),
         ),
       ],
     );
   }
 
-  void _onHistoryPressed() {
-    final History history = Provider.of<History>(context, listen: false);
-    if (history == null) {
-      log.warning("History is not provided");
-      return;
-    }
-
-    final GenPassData data = Provider.of<GenPassData>(context, listen: false);
-    if (data == null) {
-      log.warning("GenPassData is not provided");
-      return;
-    }
-
-    Navigator.of(context)?.push(
-      MaterialPageRoute<String>(
-        builder: (BuildContext context) {
-          return HistoryPage(
-            text: data.domainNotifier.text,
-            history: history,
-          );
-        },
-      ),
-    )?.then((String domainText) {
-      if (domainText != null && domainText.isNotEmpty) {
-        data.domainNotifier.text = domainText;
-        log.config("domain is ${domainText}");
-      }
-    });
-  }
-
   void _onSettingsPressed() {
-    final GenPassData data = Provider.of<GenPassData>(context, listen: false);
+    final GenPassData data = context.read<GenPassData>();
     if (data == null) {
       log.warning("GenPassData is not provided");
       return;
@@ -142,21 +116,21 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
       }
       data.settingsNotifier.value = settings;
       Settings.save(settings).then((_) {
-        log.config("settings succeeded to save");
+        log.config("settings: succeeded to save");
       }).catchError((Object error, StackTrace stackTrace) {
-        log.warning("settings failed to save", error, stackTrace);
+        log.warning("settings: failed to save", error, stackTrace);
       });
     });
   }
 
   Future<bool> _addHistory() async {
-    final History history = Provider.of<History>(context, listen: false);
+    final History history = context.read<History>();
     if (history == null) {
       log.warning("History is not provided");
       return false;
     }
 
-    final GenPassData data = Provider.of<GenPassData>(context, listen: false);
+    final GenPassData data = context.read<GenPassData>();
     if (data == null) {
       log.warning("GenPassData is not provided");
       return false;
@@ -209,28 +183,46 @@ class _MasterInputRow extends StatelessWidget {
           child: child,
         );
       },
-      child: _build(context),
+      child: const _MasterInputRowInner(),
+    );
+  }
+}
+
+class _MasterInputRowInner extends StatelessWidget {
+  const _MasterInputRowInner({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    log.fine("_MasterInputRowInner.build");
+    return _buildNotificationListener(context);
+  }
+
+  Widget _buildNotificationListener(BuildContext context) {
+    return NotificationListener<VisibilityNotification>(
+      onNotification: (VisibilityNotification notification) {
+        final ValueNotifier<bool> notifier = context.read<ValueNotifier<bool>>();
+        notifier.value = notification.visible;
+        return true;
+      },
+      child: _buildInputRow(context),
     );
   }
 
-  Widget _build(BuildContext context) {
-    log.fine("_MasterInputRow.Consumer");
-    return Consumer<ValueNotifier<bool>>(
-      builder: (BuildContext context, ValueNotifier<bool> showNotifier, Widget child) {
-        log.fine("_MasterInputRow.Consumer.builder");
-        final bool show = showNotifier.value ?? false;
-        return _InputRow(
-          textInputType: TextInputType.visiblePassword,
-          inputIcon: Icons.bubble_chart,
-          labelText: "master password",
-          hintText: "your master password",
-          obscureText: !show,
-          actionIcon: show ? Icons.visibility : Icons.visibility_off,
-          onActionPressed: () {
-            showNotifier.value = !show;
-          },
-        );
-      },
+  Widget _buildInputRow(BuildContext context) {
+    final ValueNotifier<bool> notifier = context.watch<ValueNotifier<bool>>();
+    final bool visible = notifier.value ?? false;
+    return InputRow(
+      textInputType: TextInputType.visiblePassword,
+      inputIcon: Icons.bubble_chart,
+      labelText: "master password",
+      hintText: "your master password",
+      obscureText: !visible,
+      actionButton: Provider<bool>.value(
+        value: visible,
+        child: const MasterVisibilityButton(),
+      ),
     );
   }
 }
@@ -238,11 +230,7 @@ class _MasterInputRow extends StatelessWidget {
 class _DomainInputRow extends StatelessWidget {
   const _DomainInputRow({
     Key key,
-    @required this.onActionPressed,
-  })  : assert(onActionPressed != null),
-        super(key: key);
-
-  final VoidCallback onActionPressed;
+  })  : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -270,87 +258,70 @@ class _DomainInputRow extends StatelessWidget {
           child: child,
         );
       },
-      child: _build(context),
-    );
-  }
-
-  Widget _build(BuildContext context) {
-    log.fine("_DomainInputRow._InputRow");
-    return _InputRow(
-      textInputType: TextInputType.url,
-      inputIcon: Icons.business,
-      labelText: "domain / site",
-      hintText: "example.com",
-      actionIcon: Icons.assignment,
-      onActionPressed: onActionPressed,
+      child: const _DomainInputRowInner(),
     );
   }
 }
 
-class _InputRow extends StatelessWidget {
-  const _InputRow({
+class _DomainInputRowInner extends StatelessWidget {
+  const _DomainInputRowInner({
     Key key,
-    @required this.inputIcon,
-    @required this.textInputType,
-    @required this.labelText,
-    @required this.hintText,
-    this.obscureText = false,
-    @required this.actionIcon,
-    @required this.onActionPressed,
   }) : super(key: key);
-
-  final IconData inputIcon;
-  final TextInputType textInputType;
-  final String labelText;
-  final String hintText;
-  final bool obscureText;
-  final IconData actionIcon;
-  final VoidCallback onActionPressed;
 
   @override
   Widget build(BuildContext context) {
-    log.fine("_InputRow(${labelText}).build");
-    final ThemeData themeData = Theme.of(context);
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: _buildTextField(context),
-        ),
-        IconButton(
-          icon: Icon(
-            actionIcon,
-            size: kActionIconSize,
-            color: themeData.primaryColor,
-          ),
-          onPressed: onActionPressed,
-        ),
-      ],
+    log.fine("_DomainInputRowInner.build");
+    return _buildNotificationListener(context);
+  }
+
+  Widget _buildNotificationListener(BuildContext context) {
+    return NotificationListener<HistoryNotification>(
+      onNotification: (HistoryNotification notification) {
+        _showHistoryPage(context);
+        return true;
+      },
+      child: _buildInputRow(context),
     );
   }
 
-  Widget _buildTextField(BuildContext context) {
-    log.fine("_InputRow(${labelText}).Consumer2");
-    final TextEditingController controller = Provider.of<TextEditingController>(context, listen: false);
-    return Consumer<ErrorMessage>(
-      builder: (
-        BuildContext context,
-        ErrorMessage errorMessage,
-        Widget child,
-      ) {
-        log.fine("_InputRow(${labelText}).Consumer2.builder");
-        return TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            icon: Icon(inputIcon, size: kInputIconSize),
-            labelText: labelText,
-            hintText: hintText,
-            errorText: errorMessage?.value,
-          ),
-          keyboardType: textInputType,
-          obscureText: obscureText ?? false,
-        );
-      },
+  Widget _buildInputRow(BuildContext context) {
+    return InputRow(
+      textInputType: TextInputType.url,
+      inputIcon: Icons.business,
+      labelText: "domain / site",
+      hintText: "example.com",
+      actionButton: const HistoryButton(),
     );
+  }
+
+  void _showHistoryPage(BuildContext context) {
+    final History history = context.read<History>();
+    if (history == null) {
+      log.warning("History is not provided");
+      return;
+    }
+
+    final TextEditingController controller = context.read<TextEditingController>();
+    if (controller == null) {
+      log.warning("TextEditingController is not provided");
+      return;
+    }
+
+    Navigator.of(context)?.push(
+      MaterialPageRoute<String>(
+        builder: (BuildContext context) {
+          return HistoryPage(
+            text: controller.text,
+            history: history,
+          );
+        },
+      ),
+    )?.then((String domainText) {
+      if (domainText != null && domainText.isNotEmpty) {
+        controller.text = domainText;
+        log.config("domain is ${domainText}");
+      }
+    });
   }
 }
 
@@ -416,19 +387,22 @@ class _PinResultRow extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({
+    Key key,
     this.title,
-  });
+  }) : super(key: key);
 
   final String title;
 
   @override
   Widget build(BuildContext context) {
+    log.fine("_SectionTitle.build");
+    final ThemeData themeData = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 16.0, 8.0, 8.0),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 18.0,
+        style: TextStyle(
+          fontSize: themeData.textTheme.bodyText2.fontSize,
           fontWeight: FontWeight.w500,
         ),
       ),

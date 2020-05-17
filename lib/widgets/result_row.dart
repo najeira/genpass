@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
-import 'package:genpass/gloabls.dart';
+import '../gloabls.dart';
 
 import 'copy_button.dart';
 import 'visibility_button.dart';
@@ -120,7 +120,7 @@ class ResultRow extends StatelessWidget {
     );
 
     final IconThemeData buttonIconThemeData = IconThemeData(
-      color: themeData.primaryColor,
+      color: themeData.colorScheme.primary,
       size: kActionIconSize,
     );
 
@@ -147,17 +147,12 @@ class ResultRow extends StatelessWidget {
   }
 
   Widget _buildText(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
-    final TextTheme textTheme = themeData.textTheme;
     return ProxyProvider<ResultRowController, String>(
       update: (BuildContext context, ResultRowController value, String previous) {
         return value.showText;
       },
-      child: DefaultTextStyle(
-        style: textTheme.bodyText2,
-        child: ResultText(
-          title: title,
-        ),
+      child: ResultText(
+        title: title,
       ),
     );
   }
