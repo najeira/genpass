@@ -154,10 +154,7 @@ class ResultRow extends StatelessWidget {
         return value.showText;
       },
       child: DefaultTextStyle(
-        style: TextStyle(
-          fontSize: kFontSize,
-          color: textTheme.bodyText2.color,
-        ),
+        style: textTheme.bodyText2,
         child: ResultText(
           title: title,
         ),

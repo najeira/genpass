@@ -30,10 +30,7 @@ class ResultText extends StatelessWidget {
         const SizedBox(height: 4.0),
         Text(
           text ?? "",
-          style: TextStyle(
-            fontSize: kFontSize,
-            color: textTheme.bodyText2.color,
-          ),
+          style: textTheme.bodyText2,
         ),
       ],
     );

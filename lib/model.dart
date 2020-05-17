@@ -10,6 +10,8 @@ const IconData kIconPin = Icons.casino;
 const IconData kIconAlgorithm = Icons.card_travel;
 
 class GenPassData {
+  final ValueNotifier<bool> darkThemeNotifier = ValueNotifier<bool>(false);
+
   final ValueNotifier<Settings> settingsNotifier = ValueNotifier<Settings>(Settings());
 
   final TextEditingController masterNotifier = TextEditingController();
@@ -28,6 +30,7 @@ class GenPassData {
   }
 
   void dispose() {
+    darkThemeNotifier?.dispose();
     settingsNotifier?.dispose();
     masterNotifier?.dispose();
     domainNotifier?.dispose();
