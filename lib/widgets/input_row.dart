@@ -42,25 +42,17 @@ class InputRow extends StatelessWidget {
   Widget _buildTextField(BuildContext context) {
     log.fine("InputRow(${labelText})._buildTextField");
     final TextEditingController controller = Provider.of<TextEditingController>(context, listen: false);
-    return Consumer<ErrorMessage>(
-      builder: (
-        BuildContext context,
-        ErrorMessage errorMessage,
-        Widget child,
-      ) {
-        log.fine("InputRow(${labelText}).Consumer2.builder");
-        return TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            icon: Icon(inputIcon, size: kInputIconSize),
-            labelText: labelText,
-            hintText: hintText,
-            errorText: errorMessage?.value,
-          ),
-          keyboardType: textInputType,
-          obscureText: obscureText ?? false,
-        );
-      },
+    final ErrorMessage errorMessage = context.watch<ErrorMessage>();
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        icon: Icon(inputIcon, size: kInputIconSize),
+        labelText: labelText,
+        hintText: hintText,
+        errorText: errorMessage?.value,
+      ),
+      keyboardType: textInputType,
+      obscureText: obscureText ?? false,
     );
   }
 }
