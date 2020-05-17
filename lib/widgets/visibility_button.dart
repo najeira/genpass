@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../gloabls.dart';
+import '../gloabls.dart' show log;
 
 import 'result_row.dart';
 
@@ -27,6 +27,7 @@ class VisibilityButton extends StatelessWidget {
       },
       builder: (BuildContext context, Tuple2<bool, bool> tuple, Widget child) {
         log.fine("VisibilityButton.Selector.builder");
+        final ThemeData themeData = Theme.of(context);
         final bool visible = tuple.item1;
         final bool enable = tuple.item2;
         final IconData icon = visible ? Icons.visibility : Icons.visibility_off;
@@ -37,6 +38,7 @@ class VisibilityButton extends StatelessWidget {
             : null;
         return IconButton(
           icon: Icon(icon),
+          color: themeData.colorScheme.primary,
           onPressed: onPressed,
         );
       },

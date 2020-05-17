@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../gloabls.dart';
+import '../gloabls.dart' show log;
 
 import 'result_row.dart';
 
@@ -27,6 +27,7 @@ class CopyButton extends StatelessWidget {
       },
       builder: (BuildContext context, Tuple2<String, bool> tuple, Widget child) {
         log.fine("CopyButton.Selector.builder");
+        final ThemeData themeData = Theme.of(context);
         final String text = tuple.item1;
         final bool enable = tuple.item2;
         final VoidCallback onPressed = enable
@@ -36,6 +37,7 @@ class CopyButton extends StatelessWidget {
             : null;
         return IconButton(
           icon: Icon(Icons.content_copy),
+          color: themeData.colorScheme.primary,
           onPressed: onPressed,
         );
       },

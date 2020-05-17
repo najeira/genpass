@@ -52,8 +52,10 @@ class ResultRowController extends ChangeNotifier {
   }
 
   void update(String newText) {
-    _text = newText;
-    notifyListeners();
+    if (_text != newText) {
+      _text = newText;
+      notifyListeners();
+    }
   }
 }
 
@@ -113,35 +115,18 @@ class ResultRow extends StatelessWidget {
   Widget _buildRow(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
-
-    final IconThemeData captionIconThemeData = IconThemeData(
-      color: textTheme.caption.color,
-      size: kInputIconSize,
-    );
-
-    final IconThemeData buttonIconThemeData = IconThemeData(
-      color: themeData.colorScheme.primary,
-      size: kActionIconSize,
-    );
-
     return Row(
       children: <Widget>[
-        IconTheme(
-          data: captionIconThemeData,
-          child: Icon(icon),
+        Icon(
+          icon,
+          color: textTheme.caption.color,
         ),
         const SizedBox(width: 16.0),
         Expanded(
           child: _buildText(context),
         ),
-        IconTheme(
-          data: buttonIconThemeData,
-          child: const VisibilityButton(),
-        ),
-        IconTheme(
-          data: buttonIconThemeData,
-          child: const CopyButton(),
-        ),
+        const VisibilityButton(),
+        const CopyButton(),
       ],
     );
   }

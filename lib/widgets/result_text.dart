@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../gloabls.dart';
+import '../gloabls.dart' show log;
 
 class ResultText extends StatelessWidget {
   const ResultText({
