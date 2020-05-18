@@ -25,7 +25,7 @@ class HistoryPage extends StatelessWidget {
           dispose: (BuildContext context, FocusNode value) => value.dispose(),
         ),
         ListenableProvider<TextEditingController>(
-          create: (BuildContext context) => TextEditingController(),
+          create: (BuildContext context) => TextEditingController(text: text),
           dispose: (BuildContext context, TextEditingController value) => value.dispose(),
         ),
       ],
@@ -63,16 +63,10 @@ class HistoryPage extends StatelessWidget {
         hintText: "example.com",
       ),
       keyboardType: TextInputType.url,
-      onChanged: (String value) => _onTextChanged(context, value),
-      onSubmitted: (String value) => _onTextChanged(context, value),
       autofocus: false,
       autocorrect: false,
       cursorColor: Colors.white,
     );
-  }
-
-  void _onTextChanged(BuildContext context, String value) {
-    context.read<TextEditingController>().text = value;
   }
 }
 
