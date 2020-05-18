@@ -10,7 +10,7 @@ import '../../widgets/master_visibility_button.dart';
 import '../../widgets/result_row.dart';
 import '../../widgets/visibility_button.dart';
 
-import '../../gloabls.dart';
+import '../gloabls.dart';
 import '../../history.dart';
 import '../../domain/model.dart';
 import '../../domain/service.dart';

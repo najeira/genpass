@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../service/crypto.dart';
-import 'service.dart';
 
-const String kTitlePassword = "Password";
-const String kTitlePin = "PIN";
-const IconData kIconPassword = Icons.vpn_key;
-const IconData kIconPin = Icons.casino;
-const IconData kIconAlgorithm = Icons.card_travel;
+import 'service.dart';
 
 class GenPassData {
   final ValueNotifier<bool> darkThemeNotifier = ValueNotifier<bool>(false);
