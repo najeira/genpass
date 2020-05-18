@@ -22,9 +22,11 @@ class HistoryPage extends StatelessWidget {
       providers: [
         ListenableProvider<FocusNode>(
           create: (BuildContext context) => FocusNode(),
+          dispose: (BuildContext context, FocusNode value) => value.dispose(),
         ),
-        ChangeNotifierProvider<ValueNotifier<String>>(
-          create: (BuildContext context) => ValueNotifier<String>(null),
+        ListenableProvider<TextEditingController>(
+          create: (BuildContext context) => TextEditingController(),
+          dispose: (BuildContext context, TextEditingController value) => value.dispose(),
         ),
       ],
       child: Builder(
@@ -52,38 +54,25 @@ class HistoryPage extends StatelessWidget {
   }
 
   Widget _buildTextField(BuildContext context) {
-    return ListenableProvider<TextEditingController>(
-      create: (BuildContext context) {
-        final String value = Provider.of<ValueNotifier<String>>(context, listen: false).value;
-        return TextEditingController(text: value);
-      },
-      child: Consumer2<TextEditingController, FocusNode>(
-        builder: (
-          BuildContext context,
-          TextEditingController controller,
-          FocusNode focusNode,
-          Widget child,
-        ) {
-          return TextField(
-            controller: controller,
-            focusNode: focusNode,
-            decoration: const InputDecoration(
-              hintText: "example.com",
-            ),
-            keyboardType: TextInputType.url,
-            onChanged: (String value) => _onTextChanged(context, value),
-            onSubmitted: (String value) => _onTextChanged(context, value),
-            autofocus: false,
-            autocorrect: false,
-            cursorColor: Colors.white,
-          );
-        },
+    final TextEditingController controller = Provider.of<TextEditingController>(context, listen: false);
+    final FocusNode focusNode = Provider.of<FocusNode>(context, listen: false);
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      decoration: const InputDecoration(
+        hintText: "example.com",
       ),
+      keyboardType: TextInputType.url,
+      onChanged: (String value) => _onTextChanged(context, value),
+      onSubmitted: (String value) => _onTextChanged(context, value),
+      autofocus: false,
+      autocorrect: false,
+      cursorColor: Colors.white,
     );
   }
 
   void _onTextChanged(BuildContext context, String value) {
-    Provider.of<ValueNotifier<String>>(context, listen: false)?.value = value;
+    context.read<TextEditingController>().text = value;
   }
 }
 
@@ -123,8 +112,8 @@ class _HistoryListViewState extends State<_HistoryListView> {
 
   @override
   Widget build(BuildContext context) {
-    final ValueNotifier<String> textNotifier = context.watch<ValueNotifier<String>>();
-    final String text = textNotifier.value;
+    final TextEditingController controller = context.watch<TextEditingController>();
+    final String text = controller.text;
 
     Iterable<String> targets;
     if (text == null || text.isEmpty) {
