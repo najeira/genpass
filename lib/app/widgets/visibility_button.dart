@@ -16,13 +16,13 @@ class VisibilityButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     log.fine("VisibilityButton.build");
+    final ThemeData themeData = Theme.of(context);
     return Selector<ResultRowController, Tuple2<bool, bool>>(
       selector: (BuildContext context, ResultRowController value) {
         return Tuple2(value.visible, value.enable);
       },
       builder: (BuildContext context, Tuple2<bool, bool> tuple, Widget child) {
         log.fine("VisibilityButton.Selector.builder");
-        final ThemeData themeData = Theme.of(context);
         final bool visible = tuple.item1;
         final bool enable = tuple.item2;
         final IconData icon = visible ? Icons.visibility : Icons.visibility_off;

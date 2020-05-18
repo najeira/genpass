@@ -16,13 +16,13 @@ class CopyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     log.fine("CopyButton.build");
+    final ThemeData themeData = Theme.of(context);
     return Selector<ResultRowController, Tuple2<String, bool>>(
       selector: (BuildContext context, ResultRowController value) {
         return Tuple2(value.text, value.enable);
       },
       builder: (BuildContext context, Tuple2<String, bool> tuple, Widget child) {
         log.fine("CopyButton.Selector.builder");
-        final ThemeData themeData = Theme.of(context);
         final String text = tuple.item1;
         final bool enable = tuple.item2;
         final VoidCallback onPressed = enable
