@@ -3,15 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../gloabls.dart' show log;
+import 'package:genpass/app/gloabls.dart' show log;
+import 'package:genpass/app/notifications/copy.dart';
 
 import 'result_row.dart';
-
-class CopyNotification extends Notification {
-  const CopyNotification(this.text);
-
-  final String text;
-}
 
 class CopyButton extends StatelessWidget {
   const CopyButton({

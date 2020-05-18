@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../service/crypto.dart';
 
 import 'error_message.dart';
-import 'service.dart';
+import 'settings.dart';
 
 class GenPassData {
   final ValueNotifier<bool> darkThemeNotifier = ValueNotifier<bool>(false);

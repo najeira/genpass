@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 
 import 'package:provider/provider.dart';
 
-import '../gloabls.dart';
-import '../model.dart';
+import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/domain/error_message.dart';
 
 class InputRow extends StatelessWidget {
   const InputRow({

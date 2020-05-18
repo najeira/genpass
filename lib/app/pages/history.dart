@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import 'service.dart';
+import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/domain/history.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({

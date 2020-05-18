@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
+import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/domain/gen_pass_data.dart';
+import 'package:genpass/domain/history.dart';
+import 'package:genpass/domain/settings.dart';
+
 import 'generator.dart';
-import '../gloabls.dart';
-import '../../domain/model.dart';
-import '../../domain/service.dart';
 
 class AppModel {
   AppModel(this.settings, this.history);

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../gloabls.dart';
-
-import 'visibility_button.dart';
+import 'package:genpass/app/gloabls.dart' show log;
+import 'package:genpass/app/notifications/visibility.dart';
 
 class MasterVisibilityButton extends StatelessWidget {
   const MasterVisibilityButton({

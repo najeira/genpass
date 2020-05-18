@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../gloabls.dart';
-
-class HistoryNotification extends Notification {
-  const HistoryNotification();
-}
+import 'package:genpass/app/gloabls.dart' show log;
+import 'package:genpass/app/notifications/history.dart';
 
 class HistoryButton extends StatelessWidget {
   const HistoryButton({

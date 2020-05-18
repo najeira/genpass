@@ -4,16 +4,19 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../widgets/history_button.dart';
-import '../../widgets/input_row.dart';
-import '../../widgets/master_visibility_button.dart';
-import '../../widgets/result_row.dart';
-import '../../widgets/visibility_button.dart';
+import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/app/notifications/history.dart';
+import 'package:genpass/app/notifications/visibility.dart';
+import 'package:genpass/app/widgets/history_button.dart';
+import 'package:genpass/app/widgets/input_row.dart';
+import 'package:genpass/app/widgets/master_visibility_button.dart';
+import 'package:genpass/app/widgets/result_row.dart';
+import 'package:genpass/domain/error_message.dart';
+import 'package:genpass/domain/gen_pass_data.dart';
+import 'package:genpass/domain/history.dart';
+import 'package:genpass/domain/settings.dart';
 
-import '../gloabls.dart';
-import '../../history.dart';
-import '../../domain/model.dart';
-import '../../domain/service.dart';
+import 'history.dart';
 import 'settings.dart';
 
 class GenPassPage extends StatefulWidget {

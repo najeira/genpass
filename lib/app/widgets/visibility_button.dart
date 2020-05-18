@@ -3,15 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../gloabls.dart' show log;
+import 'package:genpass/app/gloabls.dart' show log;
+import 'package:genpass/app/notifications/visibility.dart';
 
 import 'result_row.dart';
-
-class VisibilityNotification extends Notification {
-  const VisibilityNotification(this.visible);
-
-  final bool visible;
-}
 
 class VisibilityButton extends StatelessWidget {
   const VisibilityButton({

@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import '../../domain/model.dart';
-import '../../domain/service.dart';
+import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/domain/hash_algorithm.dart';
+import 'package:genpass/domain/settings.dart';
 
 class _PasswordLengthNotifier extends ValueNotifier<int> {
   _PasswordLengthNotifier(int value) : super(value);
