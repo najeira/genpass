@@ -123,31 +123,24 @@ class _HistoryListViewState extends State<_HistoryListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ValueNotifier<String>>(
-      builder: (
-        BuildContext context,
-        ValueNotifier<String> textNotifier,
-        Widget child,
-      ) {
-        final String text = textNotifier.value;
+    final ValueNotifier<String> textNotifier = context.watch<ValueNotifier<String>>();
+    final String text = textNotifier.value;
 
-        Iterable<String> targets;
-        if (text == null || text.isEmpty) {
-          targets = widget.entries;
-        } else {
-          targets = widget.entries.where((String entry) {
-            return entry.contains(text);
-          });
-        }
+    Iterable<String> targets;
+    if (text == null || text.isEmpty) {
+      targets = widget.entries;
+    } else {
+      targets = widget.entries.where((String entry) {
+        return entry.contains(text);
+      });
+    }
 
-        return ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          controller: _scrollController,
-          itemCount: targets.length,
-          itemBuilder: (BuildContext context, int index) {
-            return _buildListTile(context, targets.elementAt(index));
-          },
-        );
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      controller: _scrollController,
+      itemCount: targets.length,
+      itemBuilder: (BuildContext context, int index) {
+        return _buildListTile(context, targets.elementAt(index));
       },
     );
   }
