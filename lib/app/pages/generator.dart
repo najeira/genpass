@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/app/notifications/copy.dart';
 import 'package:genpass/app/notifications/history.dart';
 import 'package:genpass/app/notifications/visibility.dart';
 import 'package:genpass/app/widgets/history_button.dart';
@@ -68,7 +69,20 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
 
   Widget _buildBody(BuildContext context) {
     return SingleChildScrollView(
-      child: _buildColumn(context),
+      child: _wrapNotificationListener(
+        context,
+        _buildColumn(context),
+      ),
+    );
+  }
+
+  Widget _wrapNotificationListener(BuildContext context, Widget child) {
+    return NotificationListener<CopyNotification>(
+      onNotification: (CopyNotification notification) {
+        _addHistory();
+        return true;
+      },
+      child: child,
     );
   }
 

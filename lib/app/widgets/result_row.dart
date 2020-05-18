@@ -108,7 +108,7 @@ class ResultRow extends StatelessWidget {
         if (notification.text != null && notification.text.isNotEmpty) {
           _copyTextToClipboard(context, title, notification.text);
         }
-        return true;
+        return false; // dispatch to page
       },
       child: child,
     );
