@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'app.dart';
-import 'log.dart';
+import 'app/pages/app.dart';
+import 'service/log.dart';
 
 void main() {
   initLogging();

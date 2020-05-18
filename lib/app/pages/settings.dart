@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import 'model.dart';
-import 'service.dart';
+import '../../domain/model.dart';
+import '../../domain/service.dart';
 
 class _PasswordLengthNotifier extends ValueNotifier<int> {
   _PasswordLengthNotifier(int value) : super(value);

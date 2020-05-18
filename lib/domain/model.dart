@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'crypto.dart';
+import '../service/crypto.dart';
 import 'service.dart';
 
 const String kTitlePassword = "Password";

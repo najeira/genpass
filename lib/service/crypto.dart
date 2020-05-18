@@ -2,7 +2,7 @@ import 'dart:convert' show base64;
 
 import 'package:crypto/crypto.dart' as crypto;
 
-import 'service.dart';
+import '../domain/service.dart';
 
 class Crypto {
   factory Crypto._() {

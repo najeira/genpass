@@ -4,16 +4,16 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import 'widgets/history_button.dart';
-import 'widgets/input_row.dart';
-import 'widgets/master_visibility_button.dart';
-import 'widgets/result_row.dart';
-import 'widgets/visibility_button.dart';
+import '../../widgets/history_button.dart';
+import '../../widgets/input_row.dart';
+import '../../widgets/master_visibility_button.dart';
+import '../../widgets/result_row.dart';
+import '../../widgets/visibility_button.dart';
 
-import 'gloabls.dart';
-import 'history.dart';
-import 'model.dart';
-import 'service.dart';
+import '../../gloabls.dart';
+import '../../history.dart';
+import '../../domain/model.dart';
+import '../../domain/service.dart';
 import 'settings.dart';
 
 class GenPassPage extends StatefulWidget {
