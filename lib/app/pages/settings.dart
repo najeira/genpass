@@ -125,6 +125,8 @@ class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final T valueNotifier = context.watch<T>();
+    final int value = valueNotifier.value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -132,19 +134,14 @@ class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
           title: title,
           icon: icon,
         ),
-        Consumer<T>(
-          builder: (BuildContext context, T valueNotifier, Widget child) {
-            final int value = valueNotifier.value;
-            return Slider(
-              label: value.toString(),
-              value: value.toDouble(),
-              min: min.toDouble(),
-              max: max.toDouble(),
-              divisions: (max - min),
-              onChanged: (double value) {
-                valueNotifier.value = value.toInt();
-              },
-            );
+        Slider(
+          label: value.toString(),
+          value: value.toDouble(),
+          min: min.toDouble(),
+          max: max.toDouble(),
+          divisions: (max - min),
+          onChanged: (double value) {
+            valueNotifier.value = value.toInt();
           },
         ),
       ],
