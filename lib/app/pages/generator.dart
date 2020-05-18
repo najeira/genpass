@@ -214,18 +214,21 @@ class _MasterInputRowInner extends StatelessWidget {
   }
 
   Widget _buildInputRow(BuildContext context) {
-    final ValueNotifier<bool> notifier = context.watch<ValueNotifier<bool>>();
-    final bool visible = notifier.value ?? false;
-    return InputRow(
-      textInputType: TextInputType.visiblePassword,
-      inputIcon: Icons.bubble_chart,
-      labelText: "master password",
-      hintText: "your master password",
-      obscureText: !visible,
-      actionButton: Provider<bool>.value(
-        value: visible,
-        child: const MasterVisibilityButton(),
-      ),
+    return Consumer<ValueNotifier<bool>>(
+      builder: (BuildContext context, ValueNotifier<bool> value, Widget child) {
+        final bool visible = value.value ?? false;
+        return InputRow(
+          textInputType: TextInputType.visiblePassword,
+          inputIcon: Icons.bubble_chart,
+          labelText: "master password",
+          hintText: "your master password",
+          obscureText: !visible,
+          actionButton: Provider<bool>.value(
+            value: visible,
+            child: const MasterVisibilityButton(),
+          ),
+        );
+      },
     );
   }
 }
@@ -233,7 +236,7 @@ class _MasterInputRowInner extends StatelessWidget {
 class _DomainInputRow extends StatelessWidget {
   const _DomainInputRow({
     Key key,
-  })  : super(key: key);
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
