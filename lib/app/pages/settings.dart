@@ -308,8 +308,9 @@ class _AboutRow extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const <Widget>[
-                ListTile(title: Text("GenPass app is made by najeira")),
-                ListTile(title: Text("App icon is made by Freepik from www.flaticon.com")),
+                ListTile(title: Text("GenPass app made by najeira")),
+                // <div>Icons made by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+                ListTile(title: Text("App icon made by Becris from www.flaticon.com")),
               ],
             ),
           ],
