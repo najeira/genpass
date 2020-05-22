@@ -27,10 +27,12 @@ class Crypto {
   }
 
   static String _hashRound(String input, int length, crypto.Hash hash, int round) {
-    if (round > 0 || !_validatePassword(input)) {
-      return _hashRound(_hashPassword(input, hash), length, hash, round - 1);
+    String generated = input;
+    while (round > 0 || !_validatePassword(generated, length)) {
+      round--;
+      generated = _hashPassword(generated, hash);
     }
-    return input.substring(0, length);
+    return generated.substring(0, length);
   }
 
   static String _hashPassword(String input, crypto.Hash hash) {
@@ -43,8 +45,16 @@ class Crypto {
     return output;
   }
 
-  static bool _validatePassword(String value) {
-    return value.startsWith(RegExp(r"[a-z]")) && value.contains(RegExp(r"[A-Z]")) && value.contains(RegExp(r"[0-9]"));
+  static bool _validatePassword(String value, int length) {
+    final String substr = value.substring(0, length);
+    if (!substr.startsWith(RegExp(r"[a-z]"))) {
+      return false;
+    } else if (!substr.contains(RegExp(r"[A-Z]"))) {
+      return false;
+    } else if (!substr.contains(RegExp(r"[0-9]"))) {
+      return false;
+    }
+    return true;
   }
 
   static String generatePin(String domain, String password, int length) {
