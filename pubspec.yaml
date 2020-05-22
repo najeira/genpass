@@ -1,4 +1,4 @@
-name: genpass
+name: GenPass
 description: A password generator app written by Flutter/Dart.
 
 version: 1.2.0+102000
