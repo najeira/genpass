@@ -17,7 +17,10 @@ class AppModel {
 }
 
 Future<AppModel> _loadAppModel() async {
-  await Future.delayed(const Duration(seconds: 3));
+  assert(await () async {
+    Future.delayed(const Duration(seconds: 3));
+    return true;
+  }());
 
   Future<History> history = History.load();
   Future<Settings> settings = Settings.load();
