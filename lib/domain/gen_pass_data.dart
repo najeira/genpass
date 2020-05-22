@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 
-import 'crypto.dart';
-import 'service.dart';
+import '../service/crypto.dart';
 
-const String kTitlePassword = "Password";
-const String kTitlePin = "PIN";
-const IconData kIconPassword = Icons.vpn_key;
-const IconData kIconPin = Icons.casino;
-const IconData kIconAlgorithm = Icons.card_travel;
+import 'error_message.dart';
+import 'settings.dart';
 
 class GenPassData {
+  final ValueNotifier<bool> darkThemeNotifier = ValueNotifier<bool>(false);
+
   final ValueNotifier<Settings> settingsNotifier = ValueNotifier<Settings>(Settings());
-  final ValueNotifier<String> masterNotifier = ValueNotifier<String>("");
-  final ValueNotifier<String> domainNotifier = ValueNotifier<String>("");
+
+  final TextEditingController masterNotifier = TextEditingController();
+  final ErrorMessageNotifier masterErrorNotifier = ErrorMessageNotifier();
+
+  final TextEditingController domainNotifier = TextEditingController();
+  final ErrorMessageNotifier domainErrorNotifier = ErrorMessageNotifier();
+
   final ValueNotifier<String> passNotifier = ValueNotifier<String>("");
   final ValueNotifier<String> pinNotifier = ValueNotifier<String>("");
-  final ValueNotifier<String> masterErrorNotifier = ValueNotifier<String>("");
-  final ValueNotifier<String> domainErrorNotifier = ValueNotifier<String>("");
 
   GenPassData() {
     settingsNotifier.addListener(_onUpdated);
@@ -25,6 +26,7 @@ class GenPassData {
   }
 
   void dispose() {
+    darkThemeNotifier?.dispose();
     settingsNotifier?.dispose();
     masterNotifier?.dispose();
     domainNotifier?.dispose();
@@ -35,8 +37,8 @@ class GenPassData {
   }
 
   void _onUpdated() {
-    final String master = masterNotifier.value;
-    final String domain = domainNotifier.value;
+    final String master = masterNotifier.value.text ?? "";
+    final String domain = domainNotifier.value.text ?? "";
 
     masterErrorNotifier.value = _Validator.validateMaster(master);
     domainErrorNotifier.value = _Validator.validateDomain(domain);
@@ -64,16 +66,16 @@ class GenPassData {
 class _Validator {
   _Validator._();
 
-  static String validateMaster(String value) {
+  static ErrorMessage validateMaster(String value) {
     if (value == null || value.isEmpty || value.length < 8) {
-      return "enter 8 or more characters";
+      return ErrorMessage("enter 8 or more characters");
     }
     return null;
   }
 
-  static String validateDomain(String value) {
+  static ErrorMessage validateDomain(String value) {
     if (value == null || value.isEmpty) {
-      return "enter";
+      return ErrorMessage("enter");
     }
     return null;
   }

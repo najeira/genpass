@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import 'main.dart';
-import 'service.dart';
+import 'package:genpass/domain/history.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({
@@ -21,10 +20,12 @@ class HistoryPage extends StatelessWidget {
     return MultiProvider(
       providers: [
         ListenableProvider<FocusNode>(
-          builder: (BuildContext context) => FocusNode(),
+          create: (BuildContext context) => FocusNode(),
+          dispose: (BuildContext context, FocusNode value) => value.dispose(),
         ),
-        ChangeNotifierProvider<ValueNotifier<String>>(
-          builder: (BuildContext context) => ValueNotifier<String>(null),
+        ListenableProvider<TextEditingController>(
+          create: (BuildContext context) => TextEditingController(text: text),
+          dispose: (BuildContext context, TextEditingController value) => value.dispose(),
         ),
       ],
       child: Builder(
@@ -52,44 +53,19 @@ class HistoryPage extends StatelessWidget {
   }
 
   Widget _buildTextField(BuildContext context) {
-    return ListenableProvider<TextEditingController>(
-      builder: (BuildContext context) {
-        final String value = Provider.of<ValueNotifier<String>>(context, listen: false).value;
-        return TextEditingController(text: value);
-      },
-      child: Consumer2<TextEditingController, FocusNode>(
-        builder: (
-          BuildContext context,
-          TextEditingController controller,
-          FocusNode focusNode,
-          Widget child,
-        ) {
-          return TextField(
-            controller: controller,
-            focusNode: focusNode,
-            decoration: const InputDecoration(
-              hintText: "example.com",
-              hintStyle: TextStyle(
-                fontSize: kFontSize,
-              ),
-            ),
-            style: const TextStyle(
-              fontSize: kFontSize,
-            ),
-            keyboardType: TextInputType.url,
-            onChanged: (String value) => _onTextChanged(context, value),
-            onSubmitted: (String value) => _onTextChanged(context, value),
-            autofocus: false,
-            autocorrect: false,
-            cursorColor: Colors.white,
-          );
-        },
+    final TextEditingController controller = Provider.of<TextEditingController>(context, listen: false);
+    final FocusNode focusNode = Provider.of<FocusNode>(context, listen: false);
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      decoration: const InputDecoration(
+        hintText: "example.com",
       ),
+      keyboardType: TextInputType.url,
+      autofocus: false,
+      autocorrect: false,
+      cursorColor: Colors.white,
     );
-  }
-
-  void _onTextChanged(BuildContext context, String value) {
-    Provider.of<ValueNotifier<String>>(context, listen: false)?.value = value;
   }
 }
 
@@ -129,36 +105,32 @@ class _HistoryListViewState extends State<_HistoryListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ValueNotifier<String>>(
-      builder: (
-        BuildContext context,
-        ValueNotifier<String> textNotifier,
-        Widget child,
-      ) {
-        final String text = textNotifier.value;
+    final TextEditingController controller = context.watch<TextEditingController>();
+    final String text = controller.text;
 
-        Iterable<String> targets;
-        if (text == null || text.isEmpty) {
-          targets = widget.entries;
-        } else {
-          targets = widget.entries.where((String entry) {
-            return entry.contains(text);
-          });
-        }
+    Iterable<String> targets;
+    if (text == null || text.isEmpty) {
+      targets = widget.entries;
+    } else {
+      targets = widget.entries.where((String entry) {
+        return entry.contains(text);
+      });
+    }
 
-        return ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          controller: _scrollController,
-          itemCount: targets.length,
-          itemBuilder: (BuildContext context, int index) {
-            return _buildListTile(context, targets.elementAt(index));
-          },
-        );
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      controller: _scrollController,
+      itemCount: targets.length,
+      itemBuilder: (BuildContext context, int index) {
+        return _buildListTile(context, targets.elementAt(index));
       },
     );
   }
 
   Widget _buildListTile(BuildContext context, String value) {
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme textTheme = themeData.textTheme;
+
     return InkWell(
       key: ValueKey<String>(value),
       onTap: () {
@@ -173,9 +145,7 @@ class _HistoryListViewState extends State<_HistoryListView> {
         ),
         child: Text(
           value,
-          style: const TextStyle(
-            fontSize: kFontSize,
-          ),
+          style: textTheme.bodyText2,
         ),
       ),
     );
