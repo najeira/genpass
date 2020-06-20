@@ -92,24 +92,45 @@ class _GeneratorTitle extends StatelessWidget {
     log.fine("_GeneratorTitle.build");
     final int number = context.watch<int>() ?? 0;
     final ThemeData themeData = Theme.of(context);
+    final double fontSize = themeData.textTheme.bodyText2.fontSize;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 16.0, 8.0, 0.0),
+      padding: const EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
       child: Row(
         children: [
           Text(
             "Generator ${number + 1}",
             style: TextStyle(
-              fontSize: themeData.textTheme.bodyText2.fontSize,
+              fontSize: fontSize,
               fontWeight: FontWeight.w500,
             ),
           ),
+          const SizedBox(width: 8.0),
           IconButton(
             icon: Icon(Icons.settings),
-            iconSize: 20.0,
+            iconSize: fontSize,
             color: themeData.colorScheme.secondaryVariant,
             padding: const EdgeInsets.all(0.0),
+            constraints: const BoxConstraints(
+              minWidth: 32.0,
+              minHeight: 24.0,
+            ),
             onPressed: () => _onSettingsPressed(context),
           ),
+          if (number > 0)
+            IconButton(
+              icon: Icon(Icons.delete),
+              iconSize: fontSize,
+              color: themeData.colorScheme.secondaryVariant,
+              padding: const EdgeInsets.all(0.0),
+              constraints: const BoxConstraints(
+                minWidth: 32.0,
+                minHeight: 24.0,
+              ),
+              onPressed: () {
+                final GenPassData data = context.read();
+                data.removeSettingAt(number);
+              },
+            ),
         ],
       ),
     );

@@ -371,6 +371,7 @@ class _GeneratorList extends StatelessWidget {
       child: Consumer<Generators>(
         builder: (BuildContext context, Generators value, Widget child) {
           log.fine("_GeneratorList.Consumer.builder");
+          final ThemeData themeData = Theme.of(context);
           final int length = value?.items?.length ?? 0;
           return Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -384,6 +385,18 @@ class _GeneratorList extends StatelessWidget {
                     child: const GeneratorSection(),
                   ),
                 ),
+              Center(
+                child: RaisedButton.icon(
+                  onPressed: () {
+                    final GenPassData data = context.read();
+                    data.addSetting(const Setting());
+                  },
+                  icon: Icon(Icons.add_circle),
+                  label: Text("Add Generator"),
+                  color: themeData.colorScheme.secondaryVariant,
+                  textColor: themeData.colorScheme.onPrimary,
+                ),
+              ),
             ],
           );
         },

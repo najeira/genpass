@@ -35,11 +35,24 @@ class GenPassData {
     settings.items.clear();
     settings.items.addAll(newSettings.items);
     generators.setSettings(newSettings);
+
+    settings.save();
   }
 
   void addSetting(Setting setting) {
     settings.items.add(setting);
     generators.addSetting(setting);
+    _onInputUpdated();
+
+    settings.save();
+  }
+
+  void removeSettingAt(int index) {
+    settings.items.removeAt(index);
+    generators.removeSettingAt(index);
+    _onInputUpdated();
+
+    settings.save();
   }
 
   Future<void> saveSettings() {
