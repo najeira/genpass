@@ -22,23 +22,23 @@ class _HashAlgorithmNotifier extends ValueNotifier<HashAlgorithm> {
 class SettingPage extends StatelessWidget {
   const SettingPage({
     Key key,
-    this.settings,
+    this.setting,
   }) : super(key: key);
 
-  final Setting settings;
+  final Setting setting;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<_PasswordLengthNotifier>(
-          create: (BuildContext context) => _PasswordLengthNotifier(settings.passwordLength),
+          create: (BuildContext context) => _PasswordLengthNotifier(setting.passwordLength),
         ),
         ChangeNotifierProvider<_PinLengthNotifier>(
-          create: (BuildContext context) => _PinLengthNotifier(settings.pinLength),
+          create: (BuildContext context) => _PinLengthNotifier(setting.pinLength),
         ),
         ChangeNotifierProvider<_HashAlgorithmNotifier>(
-          create: (BuildContext context) => _HashAlgorithmNotifier(settings.hashAlgorithm),
+          create: (BuildContext context) => _HashAlgorithmNotifier(setting.hashAlgorithm),
         ),
       ],
       child: Builder(

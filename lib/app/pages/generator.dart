@@ -12,7 +12,6 @@ import 'package:genpass/app/widgets/generator.dart';
 import 'package:genpass/app/widgets/history_button.dart';
 import 'package:genpass/app/widgets/input_row.dart';
 import 'package:genpass/app/widgets/master_visibility_button.dart';
-import 'package:genpass/app/widgets/result_row.dart';
 import 'package:genpass/domain/error_message.dart';
 import 'package:genpass/domain/gen_pass_data.dart';
 import 'package:genpass/domain/generator.dart';
@@ -21,7 +20,6 @@ import 'package:genpass/domain/settings.dart';
 
 import 'help.dart';
 import 'history.dart';
-import 'setting.dart';
 
 class GenPassPage extends StatefulWidget {
   const GenPassPage({
@@ -118,35 +116,6 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
         },
       ),
     );
-  }
-
-  void _onSettingsPressed() {
-    final GenPassData data = context.read<GenPassData>();
-    if (data == null) {
-      log.warning("GenPassData is not provided");
-      return;
-    }
-
-    Navigator.of(context)?.push(
-      MaterialPageRoute<Setting>(
-        builder: (BuildContext context) {
-          // FIXME:
-          //return SettingsPage(settings: data.settingsNotifier.value.first);
-          return SizedBox();
-        },
-      ),
-    )?.then((Setting settings) {
-      if (settings == null) {
-        return;
-      }
-      // FIXME:
-      //data.settingsNotifier.value = settings;
-      //Setting.save(settings).then((_) {
-      //  log.config("settings: succeeded to save");
-      //}).catchError((Object error, StackTrace stackTrace) {
-      //  log.warning("settings: failed to save", error, stackTrace);
-      //});
-    });
   }
 
   Future<bool> _addHistory() async {
@@ -386,26 +355,34 @@ class _GeneratorList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<GenPassData, ValueNotifier<List<Generator>>>(
+    log.fine("_GeneratorList.build");
+    return Selector<GenPassData, Generators>(
       selector: (BuildContext context, GenPassData value) {
+        log.fine("_GeneratorList.selector");
         return value.generators;
       },
-      builder: (BuildContext context, ValueNotifier<List<Generator>> value, Widget child) {
-        return ValueListenableProvider<List<Generator>>.value(
+      builder: (BuildContext context, Generators value, Widget child) {
+        log.fine("_GeneratorList.builder");
+        return ChangeNotifierProvider.value(
           value: value,
           child: child,
         );
       },
-      child: Consumer<List<Generator>>(
-        builder: (BuildContext context, List<Generator> value, Widget child) {
+      child: Consumer<Generators>(
+        builder: (BuildContext context, Generators value, Widget child) {
+          log.fine("_GeneratorList.Consumer.builder");
+          final int length = value?.items?.length ?? 0;
           return Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              for (final Generator generator in value)
-                ChangeNotifierProvider.value(
-                  value: generator,
-                  child: const GeneratorSection(),
+              for (int i = 0; i < length; i++)
+                ChangeNotifierProvider<Generator>.value(
+                  value: value?.items[i],
+                  child: Provider<int>.value(
+                    value: i,
+                    child: const GeneratorSection(),
+                  ),
                 ),
             ],
           );

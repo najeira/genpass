@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../service/crypto.dart';
-
 import 'error_message.dart';
 import 'generator.dart';
 import 'settings.dart';
@@ -9,54 +7,46 @@ import 'settings.dart';
 class GenPassData {
   final ValueNotifier<bool> darkThemeNotifier = ValueNotifier<bool>(false);
 
-  final ValueNotifier<Settings> settingsNotifier = ValueNotifier<Settings>(Settings());
-
   final TextEditingController masterNotifier = TextEditingController();
   final ErrorMessageNotifier masterErrorNotifier = ErrorMessageNotifier();
 
   final TextEditingController domainNotifier = TextEditingController();
   final ErrorMessageNotifier domainErrorNotifier = ErrorMessageNotifier();
 
-  final ValueNotifier<List<Generator>> generators = ValueNotifier<List<Generator>>(null);
+  final Settings settings = Settings.single();
+  final Generators generators = Generators();
 
-  GenPassData() {
-    generators.value = _createGenerators();
-
-    settingsNotifier.addListener(_onSettingsUpdated);
+  GenPassData(){
+    generators.setSettings(settings);
     masterNotifier.addListener(_onInputUpdated);
     domainNotifier.addListener(_onInputUpdated);
   }
 
   void dispose() {
     darkThemeNotifier?.dispose();
-    settingsNotifier?.dispose();
     masterNotifier?.dispose();
-    domainNotifier?.dispose();
-    for (final Generator generator in generators?.value) {
-      generator.dispose();
-    }
-    generators?.dispose();
     masterErrorNotifier?.dispose();
+    domainNotifier?.dispose();
     domainErrorNotifier?.dispose();
+    generators?.dispose();
   }
 
-  List<Generator> _createGenerators() {
-    return settingsNotifier.value.settings.map((Setting setting) {
-      return Generator(setting);
-    }).toList();
+  void setSettings(Settings newSettings) {
+    settings.items.clear();
+    settings.items.addAll(newSettings.items);
+    generators.setSettings(newSettings);
   }
 
-  void _onSettingsUpdated() {
-    final List<Generator> generators = _createGenerators();
-    _updateGenerators(generators);
-    this.generators.value = generators;
+  void addSetting(Setting setting) {
+    settings.items.add(setting);
+    generators.addSetting(setting);
+  }
+
+  Future<void> saveSettings() {
+    return settings.save();
   }
 
   void _onInputUpdated() {
-    _updateGenerators(generators.value);
-  }
-
-  void _updateGenerators(List<Generator> generators) {
     final String master = masterNotifier.value.text ?? "";
     final String domain = domainNotifier.value.text ?? "";
 
@@ -65,7 +55,7 @@ class GenPassData {
 
     final bool hasValue = masterErrorNotifier.value == null && domainErrorNotifier.value == null;
 
-    for (final Generator generator in generators) {
+    for (final Generator generator in generators.items) {
       if (hasValue) {
         generator.update(master, domain);
       } else {

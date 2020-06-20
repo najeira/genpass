@@ -25,17 +25,17 @@ void testSettingsEncode() {
 void testSettingsDecode() {
   test("Settings decode one", () {
     final Settings ss = Settings.decode('[{"passwordLength":10,"pinLength":4,"hashAlgorithm":"md5"}]');
-    expect(ss?.settings?.length, 1);
-    expect(ss?.settings?.first?.passwordLength, 10);
-    expect(ss?.settings?.first?.pinLength, 4);
-    expect(ss?.settings?.first?.hashAlgorithm, HashAlgorithm.md5);
+    expect(ss?.items?.length, 1);
+    expect(ss?.items?.first?.passwordLength, 10);
+    expect(ss?.items?.first?.pinLength, 4);
+    expect(ss?.items?.first?.hashAlgorithm, HashAlgorithm.md5);
   });
   test("Settings decode null", () {
     final Settings ss = Settings.decode(null);
-    expect(ss?.settings?.length, 1);
+    expect(ss?.items?.length, 1);
   });
   test("Settings decode empty string", () {
     final Settings ss = Settings.decode("");
-    expect(ss?.settings?.length, 1);
+    expect(ss?.items?.length, 1);
   });
 }

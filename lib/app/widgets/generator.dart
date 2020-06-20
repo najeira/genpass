@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/app/pages/setting.dart';
 import 'package:genpass/app/widgets/result_row.dart';
 import 'package:genpass/domain/gen_pass_data.dart';
 import 'package:genpass/domain/generator.dart';
+import 'package:genpass/domain/settings.dart';
 
 class GeneratorSection extends StatelessWidget {
   const GeneratorSection({
@@ -14,10 +16,12 @@ class GeneratorSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log.fine("GeneratorSection.build");
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        const _GeneratorTitle(),
         const Padding(
           padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
           child: _PasswordResultRow(),
@@ -29,6 +33,31 @@ class GeneratorSection extends StatelessWidget {
         const Divider(),
       ],
     );
+  }
+
+  void _onSettingsPressed(BuildContext context) {
+    final Generator generator = context.read<Generator>();
+    assert(generator != null);
+
+    Navigator.of(context)?.push<Setting>(
+      MaterialPageRoute<Setting>(
+        builder: (BuildContext context) {
+          return SettingPage(setting: generator.setting);
+        },
+      ),
+    )?.then((Setting setting) {
+      if (setting == null) {
+        return;
+      }
+      generator.setting = setting;
+
+      //data.settingsNotifier.value = settings;
+      //Setting.save(settings).then((_) {
+      //  log.config("settings: succeeded to save");
+      //}).catchError((Object error, StackTrace stackTrace) {
+      //  log.warning("settings: failed to save", error, stackTrace);
+      //});
+    });
   }
 }
 
@@ -66,13 +95,42 @@ class _PinResultRow extends StatelessWidget {
     return ProxyProvider<Generator, String>(
       update: (BuildContext context, Generator value, String previous) {
         log.fine("_PinResultRow.update");
-        return value.password;
+        return value.pin;
       },
       child: ResultRowController.provider(
         child: ResultRow(
           title: kTitlePin,
           icon: kIconPin,
         ),
+      ),
+    );
+  }
+}
+
+class _GeneratorTitle extends StatelessWidget {
+  const _GeneratorTitle({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    log.fine("_GeneratorTitle.build");
+    final int number = context.watch<int>() ?? 0;
+    final ThemeData themeData = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 16.0, 8.0, 8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              "Generator ${number + 1}",
+              style: TextStyle(
+                fontSize: themeData.textTheme.bodyText2.fontSize,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

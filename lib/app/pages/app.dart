@@ -18,7 +18,7 @@ class AppModel {
 
 Future<AppModel> _loadAppModel() async {
   assert(await () async {
-    Future.delayed(const Duration(seconds: 3));
+    Future.delayed(const Duration(seconds: 1));
     return true;
   }());
 
@@ -105,11 +105,15 @@ class AppRoot extends StatelessWidget {
             future: value,
             builder: (BuildContext context, AsyncSnapshot<AppModel> snapshot) {
               if (snapshot.hasError) {
-                log.fine("AppRoot.hasError ${snapshot.error}");
+                log.fine("AppRoot error ${snapshot.error}");
                 return const LaunchPage();
               } else if (!snapshot.hasData) {
+                log.fine("AppRoot loading");
                 return const LaunchPage();
               }
+
+              assert(snapshot.data?.history != null);
+              assert(snapshot.data?.settings != null);
               return _build(context, snapshot.data);
             },
           );
@@ -127,7 +131,7 @@ class AppRoot extends StatelessWidget {
         Provider<GenPassData>(
           create: (BuildContext context) {
             final GenPassData data = GenPassData();
-            data.settingsNotifier.value = appModel.settings;
+            data.setSettings(appModel.settings);
             return data;
           },
         ),

@@ -27,9 +27,11 @@ class Setting {
 }
 
 class Settings {
-  const Settings([this.settings = const <Setting>[Setting()]]);
+  Settings(this.items);
 
-  final List<Setting> settings;
+  Settings.single() : this(<Setting>[const Setting()]);
+
+  final List<Setting> items;
 
   static Future<Settings> load() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -45,7 +47,7 @@ class Settings {
 
   static Settings decode(String str) {
     if (str == null || str.isEmpty) {
-      return const Settings(<Setting>[Setting()]);
+      return Settings.single();
     }
 
     final List<dynamic> list = jsonDecode(str);
@@ -61,7 +63,7 @@ class Settings {
   }
 
   static String encode(Settings settings) {
-    return jsonEncode(settings.settings.map<Map<String, Object>>((Setting setting) {
+    return jsonEncode(settings.items.map<Map<String, Object>>((Setting setting) {
       return <String, Object>{
         _keyPasswordLength: setting.passwordLength,
         _keyPinLength: setting.pinLength,
