@@ -122,17 +122,17 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
     }
 
     Navigator.of(context)?.push(
-      MaterialPageRoute<Settings>(
+      MaterialPageRoute<Setting>(
         builder: (BuildContext context) {
           return SettingsPage(settings: data.settingsNotifier.value);
         },
       ),
-    )?.then((Settings settings) {
+    )?.then((Setting settings) {
       if (settings == null) {
         return;
       }
       data.settingsNotifier.value = settings;
-      Settings.save(settings).then((_) {
+      Setting.save(settings).then((_) {
         log.config("settings: succeeded to save");
       }).catchError((Object error, StackTrace stackTrace) {
         log.warning("settings: failed to save", error, stackTrace);

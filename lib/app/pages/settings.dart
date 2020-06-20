@@ -25,7 +25,7 @@ class SettingsPage extends StatelessWidget {
     this.settings,
   }) : super(key: key);
 
-  final Settings settings;
+  final Setting settings;
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +100,7 @@ class SettingsPage extends StatelessWidget {
 
   void _onBackPressed(BuildContext context) {
     Navigator.of(context).maybePop(
-      Settings(
+      Setting(
         passwordLength: context.read<_PasswordLengthNotifier>().value,
         pinLength: context.read<_PinLengthNotifier>().value,
         hashAlgorithm: context.read<_HashAlgorithmNotifier>().value,

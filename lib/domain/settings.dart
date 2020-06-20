@@ -32,8 +32,8 @@ String _getHashAlgorithmName(HashAlgorithm algo) {
   return null;
 }
 
-class Settings {
-  Settings({
+class Setting {
+  Setting({
     this.passwordLength: _defaultPasswordLength,
     this.pinLength: _defaultPinLength,
     this.hashAlgorithm: _defaultHashAlgorithm,
@@ -43,20 +43,20 @@ class Settings {
   final int pinLength;
   final HashAlgorithm hashAlgorithm;
 
-  static Future<Settings> load() async {
+  static Future<Setting> load() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final int pass = prefs.getInt(_keyPasswordLength) ?? _defaultPasswordLength;
     final int pin = prefs.getInt(_keyPinLength) ?? _defaultPinLength;
     final String algo = prefs.getString(_keyHashAlgorithm);
     final HashAlgorithm hash = _getHashAlgorithm(algo) ?? _defaultHashAlgorithm;
-    return Settings(
+    return Setting(
       passwordLength: pass,
       pinLength: pin,
       hashAlgorithm: hash,
     );
   }
 
-  static Future<void> save(Settings settings) async {
+  static Future<void> save(Setting settings) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_keyPasswordLength, settings.passwordLength);
     await prefs.setInt(_keyPinLength, settings.pinLength);

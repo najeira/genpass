@@ -8,7 +8,7 @@ import 'settings.dart';
 class GenPassData {
   final ValueNotifier<bool> darkThemeNotifier = ValueNotifier<bool>(false);
 
-  final ValueNotifier<Settings> settingsNotifier = ValueNotifier<Settings>(Settings());
+  final ValueNotifier<Setting> settingsNotifier = ValueNotifier<Setting>(Setting());
 
   final TextEditingController masterNotifier = TextEditingController();
   final ErrorMessageNotifier masterErrorNotifier = ErrorMessageNotifier();
@@ -44,7 +44,7 @@ class GenPassData {
     domainErrorNotifier.value = _Validator.validateDomain(domain);
 
     if (masterErrorNotifier.value == null && domainErrorNotifier.value == null) {
-      final Settings settings = settingsNotifier.value;
+      final Setting settings = settingsNotifier.value;
       passNotifier.value = Crypto.generatePassword(
         settings.hashAlgorithm,
         domain,

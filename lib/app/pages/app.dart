@@ -12,7 +12,7 @@ import 'generator.dart';
 class AppModel {
   AppModel(this.settings, this.history);
 
-  Settings settings;
+  Setting settings;
   History history;
 }
 
@@ -23,7 +23,7 @@ Future<AppModel> _loadAppModel() async {
   }());
 
   Future<History> history = History.load();
-  Future<Settings> settings = Settings.load();
+  Future<Setting> settings = Setting.load();
   return AppModel(
     await settings,
     await history,
