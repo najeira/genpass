@@ -19,6 +19,7 @@ import 'package:genpass/domain/generator.dart';
 import 'package:genpass/domain/history.dart';
 import 'package:genpass/domain/settings.dart';
 
+import 'help.dart';
 import 'history.dart';
 import 'setting.dart';
 
@@ -60,8 +61,8 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
         title: const Text(kAppName),
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: _onSettingsPressed,
+            icon: const Icon(Icons.help),
+            onPressed: _onHelpPressed,
           ),
         ],
       ),
@@ -105,6 +106,17 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
         const Divider(),
         const _GeneratorList(),
       ],
+    );
+  }
+
+  void _onHelpPressed() {
+    //HelpPage
+    Navigator.of(context)?.push(
+      MaterialPageRoute<Setting>(
+        builder: (BuildContext context) {
+          return const HelpPage();
+        },
+      ),
     );
   }
 

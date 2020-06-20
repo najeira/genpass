@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
 import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/app/widgets/setting_caption.dart';
 import 'package:genpass/domain/hash_algorithm.dart';
 import 'package:genpass/domain/settings.dart';
 
@@ -50,7 +50,7 @@ class SettingPage extends StatelessWidget {
   Widget _buildScaffold(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Settings"),
+        title: const Text("Setting"),
         leading: IconButton(
           icon: const BackButtonIcon(),
           tooltip: 'Back',
@@ -85,13 +85,6 @@ class SettingPage extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
             child: _Algorithms(),
           ),
-          const Divider(),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-            child: _ThemeModeRow(),
-          ),
-          const Divider(),
-          const _AboutRow(),
           const Divider(),
         ],
       ),
@@ -130,7 +123,7 @@ class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        _Caption(
+        SettingCaption(
           title: title,
           icon: icon,
         ),
@@ -172,7 +165,7 @@ class _Algorithms extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const _Caption(
+            const SettingCaption(
               title: "Algorithms",
               icon: kIconAlgorithm,
             ),
@@ -240,120 +233,5 @@ class _Algorithms extends StatelessWidget {
         valueNotifier.value = value;
       }
     });
-  }
-}
-
-class _Caption extends StatelessWidget {
-  const _Caption({
-    Key key,
-    @required this.icon,
-    @required this.title,
-  }) : super(key: key);
-
-  final IconData icon;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
-    final TextTheme textTheme = themeData.textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        children: <Widget>[
-          Icon(
-            icon,
-            size: textTheme.subtitle1.fontSize,
-          ),
-          const SizedBox(width: 8.0),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: textTheme.subtitle1.fontSize,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AboutRow extends StatelessWidget {
-  const _AboutRow({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => _onPressed(context),
-      child: const Padding(
-        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-        child: _Caption(
-          icon: Icons.info_outline,
-          title: "About",
-        ),
-      ),
-    );
-  }
-
-  void _onPressed(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[
-                ListTile(title: Text("GenPass app made by najeira")),
-                // <div>Icons made by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
-                ListTile(title: Text("App icon made by Becris from www.flaticon.com")),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _ThemeModeRow extends StatelessWidget {
-  const _ThemeModeRow({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    ValueNotifier<ThemeMode> notifier = context.watch<ValueNotifier<ThemeMode>>();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const _Caption(
-          title: "Theme Mode",
-          icon: Icons.palette,
-        ),
-        RadioListTile<ThemeMode>(
-          title: const Text("System"),
-          value: ThemeMode.system,
-          groupValue: notifier.value,
-          onChanged: (ThemeMode value) => notifier.value = value,
-        ),
-        RadioListTile<ThemeMode>(
-          title: const Text("Light"),
-          value: ThemeMode.light,
-          groupValue: notifier.value,
-          onChanged: (ThemeMode value) => notifier.value = value,
-        ),
-        RadioListTile<ThemeMode>(
-          title: const Text("Dark"),
-          value: ThemeMode.dark,
-          groupValue: notifier.value,
-          onChanged: (ThemeMode value) => notifier.value = value,
-        ),
-      ],
-    );
   }
 }
