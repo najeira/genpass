@@ -20,7 +20,7 @@ import 'package:genpass/domain/history.dart';
 import 'package:genpass/domain/settings.dart';
 
 import 'history.dart';
-import 'settings.dart';
+import 'setting.dart';
 
 class GenPassPage extends StatefulWidget {
   const GenPassPage({

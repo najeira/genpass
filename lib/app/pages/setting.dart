@@ -19,8 +19,8 @@ class _HashAlgorithmNotifier extends ValueNotifier<HashAlgorithm> {
   _HashAlgorithmNotifier(HashAlgorithm value) : super(value);
 }
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({
+class SettingPage extends StatelessWidget {
+  const SettingPage({
     Key key,
     this.settings,
   }) : super(key: key);
