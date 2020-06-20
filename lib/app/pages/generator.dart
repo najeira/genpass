@@ -8,12 +8,14 @@ import 'package:genpass/app/gloabls.dart';
 import 'package:genpass/app/notifications/copy.dart';
 import 'package:genpass/app/notifications/history.dart';
 import 'package:genpass/app/notifications/visibility.dart';
+import 'package:genpass/app/widgets/generator.dart';
 import 'package:genpass/app/widgets/history_button.dart';
 import 'package:genpass/app/widgets/input_row.dart';
 import 'package:genpass/app/widgets/master_visibility_button.dart';
 import 'package:genpass/app/widgets/result_row.dart';
 import 'package:genpass/domain/error_message.dart';
 import 'package:genpass/domain/gen_pass_data.dart';
+import 'package:genpass/domain/generator.dart';
 import 'package:genpass/domain/history.dart';
 import 'package:genpass/domain/settings.dart';
 
@@ -101,15 +103,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
           child: _DomainInputRow(),
         ),
         const Divider(),
-        const _SectionTitle(title: "Generator"),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
-          child: _PasswordResultRow(),
-        ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
-          child: _PinResultRow(),
-        ),
+        const _GeneratorList(),
       ],
     );
   }
@@ -124,19 +118,22 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
     Navigator.of(context)?.push(
       MaterialPageRoute<Setting>(
         builder: (BuildContext context) {
-          return SettingsPage(settings: data.settingsNotifier.value);
+          // FIXME:
+          //return SettingsPage(settings: data.settingsNotifier.value.first);
+          return SizedBox();
         },
       ),
     )?.then((Setting settings) {
       if (settings == null) {
         return;
       }
-      data.settingsNotifier.value = settings;
-      Setting.save(settings).then((_) {
-        log.config("settings: succeeded to save");
-      }).catchError((Object error, StackTrace stackTrace) {
-        log.warning("settings: failed to save", error, stackTrace);
-      });
+      // FIXME:
+      //data.settingsNotifier.value = settings;
+      //Setting.save(settings).then((_) {
+      //  log.config("settings: succeeded to save");
+      //}).catchError((Object error, StackTrace stackTrace) {
+      //  log.warning("settings: failed to save", error, stackTrace);
+      //});
     });
   }
 
@@ -345,66 +342,6 @@ class _DomainInputRowInner extends StatelessWidget {
   }
 }
 
-class _PasswordResultRow extends StatelessWidget {
-  const _PasswordResultRow({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    log.fine("_PasswordResultRow.build");
-    return Selector<GenPassData, ValueNotifier<String>>(
-      selector: (BuildContext context, GenPassData value) {
-        log.fine("_PasswordResultRow.Selector.selector");
-        return value.passNotifier;
-      },
-      builder: (BuildContext context, ValueNotifier<String> value, Widget child) {
-        log.fine("_PasswordResultRow.Selector.builder");
-        return ValueListenableProvider<String>.value(
-          value: value,
-          child: child,
-        );
-      },
-      child: ResultRowController.provider(
-        child: ResultRow(
-          title: kTitlePassword,
-          icon: kIconPassword,
-        ),
-      ),
-    );
-  }
-}
-
-class _PinResultRow extends StatelessWidget {
-  const _PinResultRow({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    log.fine("_PinResultRow.Selector.build");
-    return Selector<GenPassData, ValueNotifier<String>>(
-      selector: (BuildContext context, GenPassData value) {
-        log.fine("_PinResultRow.Selector.selector");
-        return value.pinNotifier;
-      },
-      builder: (BuildContext context, ValueNotifier<String> value, Widget child) {
-        log.fine("_PinResultRow.Selector.builder");
-        return ValueListenableProvider<String>.value(
-          value: value,
-          child: child,
-        );
-      },
-      child: ResultRowController.provider(
-        child: ResultRow(
-          title: kTitlePin,
-          icon: kIconPin,
-        ),
-      ),
-    );
-  }
-}
-
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({
     Key key,
@@ -425,6 +362,42 @@ class _SectionTitle extends StatelessWidget {
           fontSize: themeData.textTheme.bodyText2.fontSize,
           fontWeight: FontWeight.w500,
         ),
+      ),
+    );
+  }
+}
+
+class _GeneratorList extends StatelessWidget {
+  const _GeneratorList({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<GenPassData, ValueNotifier<List<Generator>>>(
+      selector: (BuildContext context, GenPassData value) {
+        return value.generators;
+      },
+      builder: (BuildContext context, ValueNotifier<List<Generator>> value, Widget child) {
+        return ValueListenableProvider<List<Generator>>.value(
+          value: value,
+          child: child,
+        );
+      },
+      child: Consumer<List<Generator>>(
+        builder: (BuildContext context, List<Generator> value, Widget child) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              for (final Generator generator in value)
+                ChangeNotifierProvider.value(
+                  value: generator,
+                  child: const GeneratorSection(),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

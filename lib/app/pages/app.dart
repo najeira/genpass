@@ -12,7 +12,7 @@ import 'generator.dart';
 class AppModel {
   AppModel(this.settings, this.history);
 
-  Setting settings;
+  Settings settings;
   History history;
 }
 
@@ -23,7 +23,7 @@ Future<AppModel> _loadAppModel() async {
   }());
 
   Future<History> history = History.load();
-  Future<Setting> settings = Setting.load();
+  Future<Settings> settings = Settings.load();
   return AppModel(
     await settings,
     await history,
@@ -104,7 +104,10 @@ class AppRoot extends StatelessWidget {
           return FutureBuilder<AppModel>(
             future: value,
             builder: (BuildContext context, AsyncSnapshot<AppModel> snapshot) {
-              if (!snapshot.hasData && !snapshot.hasError) {
+              if (snapshot.hasError) {
+                log.fine("AppRoot.hasError ${snapshot.error}");
+                return const LaunchPage();
+              } else if (!snapshot.hasData) {
                 return const LaunchPage();
               }
               return _build(context, snapshot.data);
