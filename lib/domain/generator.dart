@@ -44,7 +44,7 @@ class Generator extends ChangeNotifier {
 
   set setting(Setting setting) {
     assert(setting != null);
-    _setting = _setting;
+    _setting = setting;
     _update(_lastMaster, _lastDomain);
   }
 

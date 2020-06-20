@@ -34,31 +34,6 @@ class GeneratorSection extends StatelessWidget {
       ],
     );
   }
-
-  void _onSettingsPressed(BuildContext context) {
-    final Generator generator = context.read<Generator>();
-    assert(generator != null);
-
-    Navigator.of(context)?.push<Setting>(
-      MaterialPageRoute<Setting>(
-        builder: (BuildContext context) {
-          return SettingPage(setting: generator.setting);
-        },
-      ),
-    )?.then((Setting setting) {
-      if (setting == null) {
-        return;
-      }
-      generator.setting = setting;
-
-      //data.settingsNotifier.value = settings;
-      //Setting.save(settings).then((_) {
-      //  log.config("settings: succeeded to save");
-      //}).catchError((Object error, StackTrace stackTrace) {
-      //  log.warning("settings: failed to save", error, stackTrace);
-      //});
-    });
-  }
 }
 
 class _PasswordResultRow extends StatelessWidget {
@@ -118,20 +93,45 @@ class _GeneratorTitle extends StatelessWidget {
     final int number = context.watch<int>() ?? 0;
     final ThemeData themeData = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 16.0, 8.0, 8.0),
+      padding: const EdgeInsets.fromLTRB(12.0, 16.0, 8.0, 0.0),
       child: Row(
         children: [
-          Expanded(
-            child: Text(
-              "Generator ${number + 1}",
-              style: TextStyle(
-                fontSize: themeData.textTheme.bodyText2.fontSize,
-                fontWeight: FontWeight.w500,
-              ),
+          Text(
+            "Generator ${number + 1}",
+            style: TextStyle(
+              fontSize: themeData.textTheme.bodyText2.fontSize,
+              fontWeight: FontWeight.w500,
             ),
+          ),
+          IconButton(
+            icon: Icon(Icons.settings),
+            iconSize: 20.0,
+            color: themeData.colorScheme.secondaryVariant,
+            padding: const EdgeInsets.all(0.0),
+            onPressed: () => _onSettingsPressed(context),
           ),
         ],
       ),
     );
+  }
+
+  void _onSettingsPressed(BuildContext context) {
+    final Generator generator = context.read<Generator>();
+    assert(generator != null);
+
+    Navigator.of(context)?.push<Setting>(
+      MaterialPageRoute<Setting>(
+        builder: (BuildContext context) {
+          return SettingPage(setting: generator.setting);
+        },
+      ),
+    )?.then((Setting setting) async {
+      if (setting == null) {
+        return;
+      }
+      generator.setting = setting;
+      final GenPassData data = context.read<GenPassData>();
+      await data.saveSettings();
+    });
   }
 }
