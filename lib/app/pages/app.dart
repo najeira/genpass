@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/app/notifications/theme_mode.dart';
 import 'package:genpass/domain/gen_pass_data.dart';
 import 'package:genpass/domain/history.dart';
 import 'package:genpass/domain/settings.dart';
@@ -10,18 +11,13 @@ import 'package:genpass/domain/settings.dart';
 import 'generator.dart';
 
 class AppModel {
-  AppModel(this.settings, this.history);
+  const AppModel(this.settings, this.history);
 
-  Settings settings;
-  History history;
+  final Settings settings;
+  final History history;
 }
 
 Future<AppModel> _loadAppModel() async {
-  assert(await () async {
-    Future.delayed(const Duration(seconds: 1));
-    return true;
-  }());
-
   Future<History> history = History.load();
   Future<Settings> settings = Settings.load();
   return AppModel(
@@ -30,14 +26,11 @@ Future<AppModel> _loadAppModel() async {
   );
 }
 
-class ThemeModeNotification extends Notification {
-  ThemeModeNotification(this.value);
-
-  final ThemeMode value;
-}
-
+// The root of the application, does not have a screen.
 class MyApp extends StatelessWidget {
-  const MyApp();
+  const MyApp({
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +66,13 @@ class MyApp extends StatelessWidget {
             ),
           );
         },
-        child: const AppRoot(),
+        child: const LaunchPage(),
       ),
     );
   }
 
   TextTheme _textTheme(BuildContext context) {
-    return TextTheme(
+    return const TextTheme(
       bodyText2: TextStyle(
         fontSize: 18.0,
       ),
@@ -90,8 +83,11 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AppRoot extends StatelessWidget {
-  const AppRoot();
+// Loading at startup and switching to the application screen.
+class LaunchPage extends StatelessWidget {
+  const LaunchPage({
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -105,11 +101,11 @@ class AppRoot extends StatelessWidget {
             future: value,
             builder: (BuildContext context, AsyncSnapshot<AppModel> snapshot) {
               if (snapshot.hasError) {
-                log.fine("AppRoot error ${snapshot.error}");
-                return const LaunchPage();
+                log.fine("LaunchPage error ${snapshot.error}");
+                return const LoadingPage();
               } else if (!snapshot.hasData) {
-                log.fine("AppRoot loading");
-                return const LaunchPage();
+                log.fine("LaunchPage loading");
+                return const LoadingPage();
               }
 
               assert(snapshot.data?.history != null);
@@ -141,8 +137,9 @@ class AppRoot extends StatelessWidget {
   }
 }
 
-class LaunchPage extends StatelessWidget {
-  const LaunchPage({
+// Loading
+class LoadingPage extends StatelessWidget {
+  const LoadingPage({
     Key key,
   }) : super(key: key);
 

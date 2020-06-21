@@ -6,6 +6,7 @@ import 'package:tuple/tuple.dart';
 
 import 'package:genpass/app/gloabls.dart';
 import 'package:genpass/app/notifications/copy.dart';
+import 'package:genpass/app/notifications/generator.dart';
 import 'package:genpass/app/notifications/history.dart';
 import 'package:genpass/app/notifications/visibility.dart';
 import 'package:genpass/app/widgets/generator.dart';
@@ -59,7 +60,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
         title: const Text(kAppName),
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.help),
+            icon: const Icon(Icons.info),
             onPressed: _onHelpPressed,
           ),
         ],
@@ -78,12 +79,24 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   }
 
   Widget _wrapNotificationListener(BuildContext context, Widget child) {
-    return NotificationListener<CopyNotification>(
-      onNotification: (CopyNotification notification) {
-        _addHistory();
+    return NotificationListener<GeneratorNotification>(
+      onNotification: (GeneratorNotification notification) {
+        final GenPassData data = context.read();
+        if (notification is GeneratorAddNotification) {
+          // Adds a new generator with default setting.
+          data.addSetting(const Setting());
+        } else if (notification is GeneratorRemoveNotification) {
+          data.removeSettingAt(notification.index);
+        }
         return true;
       },
-      child: child,
+      child: NotificationListener<CopyNotification>(
+        onNotification: (CopyNotification notification) {
+          _addHistory();
+          return true;
+        },
+        child: child,
+      ),
     );
   }
 
@@ -363,7 +376,7 @@ class _GeneratorList extends StatelessWidget {
       },
       builder: (BuildContext context, Generators value, Widget child) {
         log.fine("_GeneratorList.builder");
-        return ChangeNotifierProvider.value(
+        return ChangeNotifierProvider<Generators>.value(
           value: value,
           child: child,
         );
@@ -371,7 +384,6 @@ class _GeneratorList extends StatelessWidget {
       child: Consumer<Generators>(
         builder: (BuildContext context, Generators value, Widget child) {
           log.fine("_GeneratorList.Consumer.builder");
-          final ThemeData themeData = Theme.of(context);
           final int length = value?.items?.length ?? 0;
           return Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -386,17 +398,16 @@ class _GeneratorList extends StatelessWidget {
                   ),
                 ),
               Center(
-                child: RaisedButton.icon(
+                child: FlatButton.icon(
                   onPressed: () {
-                    final GenPassData data = context.read();
-                    data.addSetting(const Setting());
+                    const GeneratorAddNotification notification = GeneratorAddNotification();
+                    notification.dispatch(context);
                   },
                   icon: Icon(Icons.add_circle),
                   label: Text("Add Generator"),
-                  color: themeData.colorScheme.secondaryVariant,
-                  textColor: themeData.colorScheme.onPrimary,
                 ),
               ),
+              const SizedBox(height: 16.0),
             ],
           );
         },

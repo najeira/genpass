@@ -51,7 +51,7 @@ class Settings {
     }
 
     final List<dynamic> list = jsonDecode(str);
-    final List<Setting> settings = list.map<Setting>((dynamic elem) {
+    final List<Setting> items = list.map<Setting>((dynamic elem) {
       final Map<String, Object> map = elem;
       return Setting(
         passwordLength: map[_keyPasswordLength] ?? _defaultPasswordLength,
@@ -59,7 +59,7 @@ class Settings {
         hashAlgorithm: HashAlgorithmFactory.fromName(map[_keyHashAlgorithm]) ?? _defaultHashAlgorithm,
       );
     }).toList();
-    return Settings(settings);
+    return Settings(items);
   }
 
   static String encode(Settings settings) {

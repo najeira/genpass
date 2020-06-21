@@ -31,28 +31,27 @@ class GenPassData {
     generators?.dispose();
   }
 
-  void setSettings(Settings newSettings) {
+  // This is called only once at startup.
+  // No need to notify of updates.
+  Future<void> setSettings(Settings newSettings) {
     settings.items.clear();
     settings.items.addAll(newSettings.items);
     generators.setSettings(newSettings);
-
-    settings.save();
+    return settings.save();
   }
 
-  void addSetting(Setting setting) {
+  Future<void> addSetting(Setting setting) {
     settings.items.add(setting);
     generators.addSetting(setting);
     _onInputUpdated();
-
-    settings.save();
+    return settings.save();
   }
 
-  void removeSettingAt(int index) {
+  Future<void> removeSettingAt(int index) {
     settings.items.removeAt(index);
     generators.removeSettingAt(index);
     _onInputUpdated();
-
-    settings.save();
+    return settings.save();
   }
 
   Future<void> saveSettings() {

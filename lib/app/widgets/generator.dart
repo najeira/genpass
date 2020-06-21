@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/app/notifications/generator.dart';
 import 'package:genpass/app/pages/setting.dart';
 import 'package:genpass/app/widgets/result_row.dart';
 import 'package:genpass/domain/gen_pass_data.dart';
@@ -93,8 +94,12 @@ class _GeneratorTitle extends StatelessWidget {
     final int number = context.watch<int>() ?? 0;
     final ThemeData themeData = Theme.of(context);
     final double fontSize = themeData.textTheme.bodyText2.fontSize;
+    final BoxConstraints iconButtonConstraints = const BoxConstraints(
+      minWidth: 32.0,
+      minHeight: 24.0,
+    );
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
+      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
       child: Row(
         children: [
           Text(
@@ -110,27 +115,20 @@ class _GeneratorTitle extends StatelessWidget {
             iconSize: fontSize,
             color: themeData.colorScheme.secondaryVariant,
             padding: const EdgeInsets.all(0.0),
-            constraints: const BoxConstraints(
-              minWidth: 32.0,
-              minHeight: 24.0,
-            ),
+            constraints: iconButtonConstraints,
             onPressed: () => _onSettingsPressed(context),
           ),
-          if (number > 0)
-            IconButton(
-              icon: Icon(Icons.delete),
-              iconSize: fontSize,
-              color: themeData.colorScheme.secondaryVariant,
-              padding: const EdgeInsets.all(0.0),
-              constraints: const BoxConstraints(
-                minWidth: 32.0,
-                minHeight: 24.0,
-              ),
-              onPressed: () {
-                final GenPassData data = context.read();
-                data.removeSettingAt(number);
-              },
-            ),
+          IconButton(
+            icon: Icon(Icons.delete),
+            iconSize: fontSize,
+            color: themeData.colorScheme.secondaryVariant,
+            padding: const EdgeInsets.all(0.0),
+            constraints: iconButtonConstraints,
+            onPressed: () {
+              final GeneratorRemoveNotification notification = GeneratorRemoveNotification(number);
+              notification.dispatch(context);
+            },
+          ),
         ],
       ),
     );
