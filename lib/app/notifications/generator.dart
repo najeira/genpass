@@ -17,9 +17,7 @@ class GeneratorRemoveNotification extends GeneratorNotification {
 }
 
 class GeneratorUpdateNotification extends GeneratorNotification {
-  const GeneratorUpdateNotification(this.index, this.generator);
-  
-  final int index;
+  const GeneratorUpdateNotification(this.generator);
 
   final Generator generator;
 }

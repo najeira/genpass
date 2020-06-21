@@ -54,7 +54,13 @@ class GenPassData {
     return settings.save();
   }
 
-  Future<void> saveSettings() {
+  Future<void> updateGenerator(Generator newGenerator) {
+    for (int i = 0; i < generators.items.length; i++) {
+      final Generator generator = generators.items[i];
+      if (newGenerator == generator) {
+        settings.items[i] = newGenerator.setting;
+      }
+    }
     return settings.save();
   }
 

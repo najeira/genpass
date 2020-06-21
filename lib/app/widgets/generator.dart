@@ -149,8 +149,9 @@ class _GeneratorTitle extends StatelessWidget {
         return;
       }
       generator.setting = setting;
-      final GenPassData data = context.read<GenPassData>();
-      await data.saveSettings();
+
+      final GeneratorUpdateNotification notification = GeneratorUpdateNotification(generator);
+      notification.dispatch(context);
     });
   }
 }

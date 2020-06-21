@@ -85,6 +85,8 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
         if (notification is GeneratorAddNotification) {
           // Adds a new generator with default setting.
           data.addSetting(const Setting());
+        } else if (notification is GeneratorUpdateNotification) {
+          data.updateGenerator(notification.generator);
         } else if (notification is GeneratorRemoveNotification) {
           data.removeSettingAt(notification.index);
         }
