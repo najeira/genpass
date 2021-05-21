@@ -16,9 +16,9 @@ const String _keyHashAlgorithm = "hashAlgorithm";
 
 class Setting {
   const Setting({
-    this.passwordLength: _defaultPasswordLength,
-    this.pinLength: _defaultPinLength,
-    this.hashAlgorithm: _defaultHashAlgorithm,
+    this.passwordLength = _defaultPasswordLength,
+    this.pinLength = _defaultPinLength,
+    this.hashAlgorithm = _defaultHashAlgorithm,
   });
 
   final int passwordLength;
@@ -34,37 +34,41 @@ class Settings {
   final List<Setting> items;
 
   static Future<Settings> load() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String str = prefs.getString(_keySettings);
+    final prefs = await SharedPreferences.getInstance();
+    final str = prefs.getString(_keySettings);
     return decode(str);
   }
 
   Future<void> save() async {
-    final String str = encode(this);
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final str = encode(this);
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keySettings, str);
   }
 
-  static Settings decode(String str) {
+  static Settings decode(String? str) {
     if (str == null || str.isEmpty) {
       return Settings.single();
     }
 
-    final List<dynamic> list = jsonDecode(str);
-    final List<Setting> items = list.map<Setting>((dynamic elem) {
-      final Map<String, Object> map = elem;
+    final list = jsonDecode(str) as List<Object?>;
+    final items = list.map((elem) {
+      final map = elem as Map<String, Object?>;
+      final passwordLength = map[_keyPasswordLength] as int;
+      final pinLength = map[_keyPinLength] as int;
+      final hashAlgorithm = map[_keyHashAlgorithm] as String;
       return Setting(
-        passwordLength: map[_keyPasswordLength] ?? _defaultPasswordLength,
-        pinLength: map[_keyPinLength] ?? _defaultPinLength,
-        hashAlgorithm: HashAlgorithmFactory.fromName(map[_keyHashAlgorithm]) ?? _defaultHashAlgorithm,
+        passwordLength: passwordLength,
+        pinLength: pinLength,
+        hashAlgorithm: HashAlgorithmFactory.fromName(hashAlgorithm),
       );
     }).toList();
+
     return Settings(items);
   }
 
   static String encode(Settings settings) {
-    return jsonEncode(settings.items.map<Map<String, Object>>((Setting setting) {
-      return <String, Object>{
+    return jsonEncode(settings.items.map((Setting setting) {
+      return <String, Object?>{
         _keyPasswordLength: setting.passwordLength,
         _keyPinLength: setting.pinLength,
         _keyHashAlgorithm: setting.hashAlgorithm.name,

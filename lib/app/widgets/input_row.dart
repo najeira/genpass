@@ -8,13 +8,13 @@ import 'package:genpass/domain/error_message.dart';
 
 class InputRow extends StatelessWidget {
   const InputRow({
-    Key key,
-    @required this.inputIcon,
-    @required this.textInputType,
-    @required this.labelText,
-    @required this.hintText,
+    Key? key,
+    required this.inputIcon,
+    required this.textInputType,
+    required this.labelText,
+    required this.hintText,
     this.obscureText = false,
-    @required this.actionButton,
+    required this.actionButton,
   }) : super(key: key);
 
   final IconData inputIcon;
@@ -41,8 +41,8 @@ class InputRow extends StatelessWidget {
 
   Widget _buildTextField(BuildContext context) {
     log.fine("InputRow(${labelText})._buildTextField");
-    final TextEditingController controller = Provider.of<TextEditingController>(context, listen: false);
-    final ErrorMessage errorMessage = context.watch<ErrorMessage>();
+    final controller = Provider.of<TextEditingController>(context, listen: false);
+    final errorMessage = context.watch<ErrorMessage?>();
     return TextField(
       controller: controller,
       decoration: InputDecoration(
@@ -52,7 +52,7 @@ class InputRow extends StatelessWidget {
         errorText: errorMessage?.value,
       ),
       keyboardType: textInputType,
-      obscureText: obscureText ?? false,
+      obscureText: obscureText,
     );
   }
 }

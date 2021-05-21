@@ -9,25 +9,26 @@ import 'package:genpass/app/notifications/copy.dart';
 import 'package:genpass/app/notifications/visibility.dart';
 
 import 'copy_button.dart';
-import 'visibility_button.dart';
 import 'result_text.dart';
+import 'visibility_button.dart';
 
 class ResultRowController extends ChangeNotifier {
   static SingleChildWidget provider({
-    Widget child,
+    required Widget child,
   }) {
     return ChangeNotifierProxyProvider<String, ResultRowController>(
       create: (BuildContext context) {
         return ResultRowController();
       },
-      update: (BuildContext context, String value, ResultRowController previous) {
-        return previous..update(value);
+      update: (BuildContext context, String value, ResultRowController? previous) {
+        previous?.update(value);
+        return previous!;
       },
       child: child,
     );
   }
 
-  String _text;
+  String _text = "";
 
   String get text => _text;
 
@@ -40,7 +41,7 @@ class ResultRowController extends ChangeNotifier {
     return _text;
   }
 
-  bool get enable => _text != null && _text.isNotEmpty;
+  bool get enable => _text.isNotEmpty;
 
   bool _visible = false;
 
@@ -62,10 +63,10 @@ class ResultRowController extends ChangeNotifier {
 }
 
 class ResultRow extends StatelessWidget {
-  ResultRow({
-    Key key,
-    @required this.title,
-    @required this.icon,
+  const ResultRow({
+    Key? key,
+    required this.title,
+    required this.icon,
   }) : super(key: key);
 
   final String title;
@@ -76,7 +77,7 @@ class ResultRow extends StatelessWidget {
   Widget build(BuildContext context) {
     log.fine("ResultRow(${title}).build");
 
-    Widget child = _buildRow(context);
+    var child = _buildRow(context);
 
     child = _wrapVisibilityNotificationListener(
       context,
@@ -94,7 +95,7 @@ class ResultRow extends StatelessWidget {
   Widget _wrapVisibilityNotificationListener(BuildContext context, Widget child) {
     return NotificationListener<VisibilityNotification>(
       onNotification: (VisibilityNotification notification) {
-        final ResultRowController controller = context.read<ResultRowController>();
+        final controller = context.read<ResultRowController>();
         controller.visible = notification.visible;
         return true;
       },
@@ -105,7 +106,7 @@ class ResultRow extends StatelessWidget {
   Widget _wrapCopyNotificationListener(BuildContext context, Widget child) {
     return NotificationListener<CopyNotification>(
       onNotification: (CopyNotification notification) {
-        if (notification.text != null && notification.text.isNotEmpty) {
+        if (notification.text.isNotEmpty) {
           _copyTextToClipboard(context, title, notification.text);
         }
         return false; // dispatch to page
@@ -115,13 +116,13 @@ class ResultRow extends StatelessWidget {
   }
 
   Widget _buildRow(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
-    final TextTheme textTheme = themeData.textTheme;
+    final themeData = Theme.of(context);
+    final textTheme = themeData.textTheme;
     return Row(
       children: <Widget>[
         Icon(
           icon,
-          color: textTheme.caption.color,
+          color: textTheme.caption!.color,
         ),
         const SizedBox(width: 16.0),
         Expanded(
@@ -135,7 +136,7 @@ class ResultRow extends StatelessWidget {
 
   Widget _buildText(BuildContext context) {
     return ProxyProvider<ResultRowController, String>(
-      update: (BuildContext context, ResultRowController value, String previous) {
+      update: (BuildContext context, ResultRowController value, String? previous) {
         return value.showText;
       },
       child: ResultText(
@@ -146,10 +147,10 @@ class ResultRow extends StatelessWidget {
 }
 
 Future<void> _copyTextToClipboard(BuildContext context, String title, String text) {
-  assert(text != null && text.isNotEmpty);
+  assert(text.isNotEmpty);
   return Clipboard.setData(ClipboardData(text: text)).then((_) {
     log.config("clipboard: succeeded to copy");
-    Scaffold.of(context, nullOk: true)?.showSnackBar(
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
       SnackBar(
         content: Text("${title} copied to clipboard"),
       ),

@@ -11,7 +11,6 @@ extension HashAlgorithmStringer on HashAlgorithm {
       case HashAlgorithm.sha512:
         return "sha512";
     }
-    return null;
   }
 }
 
@@ -23,6 +22,6 @@ extension HashAlgorithmFactory on HashAlgorithm {
       case "sha512":
         return HashAlgorithm.sha512;
     }
-    return null;
+    return HashAlgorithm.sha512;
   }
 }

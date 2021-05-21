@@ -5,8 +5,8 @@ import 'package:genpass/service/crypto.dart';
 
 class _CryptoTestCase {
   const _CryptoTestCase({
-    this.expected,
-    this.masterPassword,
+    required this.expected,
+    required this.masterPassword,
     this.domainSite = "example.com",
     this.hashAlgorithm = HashAlgorithm.md5,
     this.length = 10,
@@ -20,9 +20,11 @@ class _CryptoTestCase {
 }
 
 void main() {
-  for (final _CryptoTestCase tc in testCases) {
-    test("${tc.masterPassword} ${tc.domainSite} ${tc.hashAlgorithm} ${tc.length}", () {
-      final String res = Crypto.generatePassword(
+  for (final tc in testCases) {
+    test(
+        "${tc.masterPassword} ${tc.domainSite} ${tc.hashAlgorithm} ${tc.length}",
+        () {
+      final res = Crypto.generatePassword(
         tc.hashAlgorithm,
         tc.domainSite,
         tc.masterPassword,
@@ -34,76 +36,76 @@ void main() {
 }
 
 const testCases = <_CryptoTestCase>[
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: "w9UbG0NEk7",
     masterPassword: "test",
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: "sJfoZg3nU8",
     masterPassword: "test",
     domainSite: "example.com",
     hashAlgorithm: HashAlgorithm.sha512,
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: "aC81",
     masterPassword: "test",
     domainSite: "example.com",
     hashAlgorithm: HashAlgorithm.sha512,
     length: 4,
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: "vBKDNdjhhL6dBfgDSRxZxAAA",
     masterPassword: "test",
     domainSite: "example.com",
     hashAlgorithm: HashAlgorithm.md5,
     length: 24,
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: "sJfoZg3nU8y32EyHFRlSY08u",
     masterPassword: "test",
     domainSite: "example.com",
     hashAlgorithm: HashAlgorithm.sha512,
     length: 24,
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: "aRFG84Gim9",
     masterPassword: "test",
     domainSite: "example.co.uk",
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: "hSF8nTst4A",
     masterPassword: "test",
     domainSite: "example.gov.ac",
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: "ft8iv4t5sX",
     masterPassword: "Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο",
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: "o1AWdbILuJ",
     masterPassword: "Benjamín pidió una bebida de kiwi y fresa",
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: 'iUL7ndPlsD',
     masterPassword: 'Árvíztűrő tükörfúrógép',
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: 'fDOVXY6AhC',
     masterPassword: 'わかよたれそつねならむ',
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: 'i4LtmfRGl8',
     masterPassword: 'ウヰノオクヤマ ケフコエテ',
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: 'wD8T8KozGO',
     masterPassword: 'מצא לו חברה איך הקליטה',
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: 'jtUcAzTL4l',
     masterPassword: 'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
   ),
-  const _CryptoTestCase(
+  _CryptoTestCase(
     expected: 'rnXePhv0JG',
     masterPassword: 'จงฝ่าฟันพัฒนาวิชาการ',
   ),

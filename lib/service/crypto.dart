@@ -11,7 +11,7 @@ class Crypto {
 
   // Super Gen Pass Algorithm
   static String generatePassword(HashAlgorithm algo, String domain, String password, int length) {
-    crypto.Hash hash = crypto.md5;
+    var hash = crypto.md5;
     switch (algo) {
       case HashAlgorithm.md5:
         hash = crypto.md5;
@@ -20,15 +20,16 @@ class Crypto {
         hash = crypto.sha512;
         break;
     }
-    final String secret = "";
-    final String targetText = "${password}${secret}:${domain}";
-    final String generated = _hashRound(targetText, length, hash, 10);
+    const secret = "";
+    final targetText = "${password}${secret}:${domain}";
+    final generated = _hashRound(targetText, length, hash, 10);
     return generated;
   }
 
   static String _hashRound(String input, int length, crypto.Hash hash, int round) {
-    String generated = input;
+    var generated = input;
     while (round > 0 || !_validatePassword(generated, length)) {
+      // ignore: parameter_assignments
       round--;
       generated = _hashPassword(generated, hash);
     }
@@ -36,9 +37,9 @@ class Crypto {
   }
 
   static String _hashPassword(String input, crypto.Hash hash) {
-    final List<int> bytes = utf8.encode(input);
-    final crypto.Digest digest = hash.convert(bytes);
-    String output = base64.encode(digest.bytes);
+    final bytes = utf8.encode(input);
+    final digest = hash.convert(bytes);
+    var output = base64.encode(digest.bytes);
     output = output.replaceAll(r"+", r"9");
     output = output.replaceAll(r"/", r"8");
     output = output.replaceAll(r"=", r"A");
@@ -46,7 +47,7 @@ class Crypto {
   }
 
   static bool _validatePassword(String value, int length) {
-    final String substr = value.substring(0, length);
+    final substr = value.substring(0, length);
     if (!substr.startsWith(RegExp(r"[a-z]"))) {
       return false;
     } else if (!substr.contains(RegExp(r"[A-Z]"))) {
@@ -58,11 +59,11 @@ class Crypto {
   }
 
   static String generatePin(String domain, String password, int length) {
-    String pin = _generateOtp(domain, password, length);
-    int suffix = 0;
-    int loopOverrun = 0;
+    var pin = _generateOtp(domain, password, length);
+    var suffix = 0;
+    var loopOverrun = 0;
     while (!_validatePin(pin)) {
-      final String suffixedDomain = "${domain} ${suffix.toString()}";
+      final suffixedDomain = "${domain} ${suffix.toString()}";
       pin = _generateOtp(suffixedDomain, password, length);
       loopOverrun++;
       suffix++;
@@ -75,17 +76,18 @@ class Crypto {
 
   // OATH HOTP Algorithm
   static String _generateOtp(String domain, String secret, int length) {
-    final crypto.Hmac hmac = crypto.Hmac(crypto.sha1, secret.codeUnits);
-    final crypto.Digest digest = hmac.convert(domain.codeUnits);
-    final List<int> hash = digest.bytes;
-    final int offset = hash[hash.length - 1] & 0xf;
-    final int binary = (((hash[offset] & 0x7f) << 24) |
+    final hmac = crypto.Hmac(crypto.sha1, secret.codeUnits);
+    final digest = hmac.convert(domain.codeUnits);
+    final hash = digest.bytes;
+    final offset = hash[hash.length - 1] & 0xf;
+    final binary = ((hash[offset] & 0x7f) << 24) |
         ((hash[offset + 1] & 0xff) << 16) |
         ((hash[offset + 2] & 0xff) << 8) |
-        (hash[offset + 3] & 0xff));
-    final int otp = binary % _digitsPower[length];
-    String result = otp.toString();
+        (hash[offset + 3] & 0xff);
+    final otp = binary % _digitsPower[length];
+    var result = otp.toString();
     while (result.length < length) {
+      // ignore: prefer_interpolation_to_compose_strings
       result = "0" + result;
     }
     return result;
@@ -93,8 +95,8 @@ class Crypto {
 
   static bool _validatePin(String pin) {
     if (pin.length == 4) {
-      final int start = int.parse(pin.substring(0, 2));
-      final int end = int.parse(pin.substring(2, 4));
+      final start = int.parse(pin.substring(0, 2));
+      final end = int.parse(pin.substring(2, 4));
       if (start == 19 || (start == 20 && end < 30)) {
         // 19xx pins look like years, so might as well ditch them.
         return false;
@@ -104,8 +106,8 @@ class Crypto {
     }
 
     if (pin.length % 2 == 0) {
-      bool paired = true;
-      for (int i = 0; i < pin.length - 1; i += 2) {
+      var paired = true;
+      for (var i = 0; i < pin.length - 1; i += 2) {
         if (pin.codeUnitAt(i) != pin.codeUnitAt(i + 1)) {
           paired = false;
         }
@@ -126,12 +128,12 @@ class Crypto {
   }
 
   static bool _isNumericalRun(String pin) {
-    int prevDigit = int.parse(pin[0]);
-    int prevDiff = 0x7FFFFFFF;
-    bool isRun = true; // assume it's true...
-    for (int i = 1; isRun && i < pin.length; i++) {
-      final int digit = int.parse(pin[i]);
-      final int diff = digit - prevDigit;
+    var prevDigit = int.parse(pin[0]);
+    var prevDiff = 0x7FFFFFFF;
+    var isRun = true; // assume it's true...
+    for (var i = 1; isRun && i < pin.length; i++) {
+      final digit = int.parse(pin[i]);
+      final diff = digit - prevDigit;
       if (prevDiff != 0x7FFFFFFF && diff != prevDiff) {
         isRun = false; // ... and prove it's false
       }
@@ -142,10 +144,10 @@ class Crypto {
   }
 
   static bool _isIncompleteNumericalRun(String pin) {
-    int consecutive = 0;
-    int last = pin.codeUnitAt(0);
-    for (int i = 1; i < pin.length; i++) {
-      final int c = pin.codeUnitAt(i);
+    var consecutive = 0;
+    var last = pin.codeUnitAt(0);
+    for (var i = 1; i < pin.length; i++) {
+      final c = pin.codeUnitAt(i);
       if (last == c) {
         consecutive++;
       } else {

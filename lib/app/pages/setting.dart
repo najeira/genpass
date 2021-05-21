@@ -21,28 +21,28 @@ class _HashAlgorithmNotifier extends ValueNotifier<HashAlgorithm> {
 
 class SettingPage extends StatelessWidget {
   const SettingPage({
-    Key key,
+    Key? key,
     this.setting,
   }) : super(key: key);
 
-  final Setting setting;
+  final Setting? setting;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<_PasswordLengthNotifier>(
-          create: (BuildContext context) => _PasswordLengthNotifier(setting.passwordLength),
+          create: (BuildContext context) => _PasswordLengthNotifier(setting!.passwordLength),
         ),
         ChangeNotifierProvider<_PinLengthNotifier>(
-          create: (BuildContext context) => _PinLengthNotifier(setting.pinLength),
+          create: (BuildContext context) => _PinLengthNotifier(setting!.pinLength),
         ),
         ChangeNotifierProvider<_HashAlgorithmNotifier>(
-          create: (BuildContext context) => _HashAlgorithmNotifier(setting.hashAlgorithm),
+          create: (BuildContext context) => _HashAlgorithmNotifier(setting!.hashAlgorithm),
         ),
       ],
       child: Builder(
-        builder: (BuildContext context) => _buildScaffold(context),
+        builder: _buildScaffold,
       ),
     );
   }
@@ -60,8 +60,8 @@ class SettingPage extends StatelessWidget {
         ),
       ),
       body: ListView(
-        children: <Widget>[
-          const Padding(
+        children: const <Widget>[
+          Padding(
             padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
             child: _Slider<_PasswordLengthNotifier>(
               title: "Password length",
@@ -70,8 +70,8 @@ class SettingPage extends StatelessWidget {
               max: 20,
             ),
           ),
-          const Divider(),
-          const Padding(
+          Divider(),
+          Padding(
             padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
             child: _Slider<_PinLengthNotifier>(
               title: "PIN length",
@@ -80,12 +80,12 @@ class SettingPage extends StatelessWidget {
               max: 10,
             ),
           ),
-          const Divider(),
-          const Padding(
+          Divider(),
+          Padding(
             padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
             child: _Algorithms(),
           ),
-          const Divider(),
+          Divider(),
         ],
       ),
     );
@@ -104,11 +104,11 @@ class SettingPage extends StatelessWidget {
 
 class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
   const _Slider({
-    Key key,
-    @required this.icon,
-    @required this.title,
-    @required this.min,
-    @required this.max,
+    Key? key,
+    required this.icon,
+    required this.title,
+    required this.min,
+    required this.max,
   }) : super(key: key);
 
   final IconData icon;
@@ -118,8 +118,8 @@ class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final T valueNotifier = context.watch<T>();
-    final int value = valueNotifier.value;
+    final valueNotifier = context.watch<T>();
+    final value = valueNotifier.value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -132,7 +132,7 @@ class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
           value: value.toDouble(),
           min: min.toDouble(),
           max: max.toDouble(),
-          divisions: (max - min),
+          divisions: max - min,
           onChanged: (double value) {
             valueNotifier.value = value.toInt();
           },
@@ -144,7 +144,7 @@ class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
 
 class _Algorithms extends StatelessWidget {
   const _Algorithms({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -160,7 +160,7 @@ class _Algorithms extends StatelessWidget {
       builder: (
         BuildContext context,
         _HashAlgorithmNotifier valueNotifier,
-        Widget child,
+        Widget? child,
       ) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,7 +173,7 @@ class _Algorithms extends StatelessWidget {
               title: const Text("MD5"),
               value: HashAlgorithm.md5,
               groupValue: valueNotifier.value,
-              onChanged: (HashAlgorithm value) => _onHashAlgorithmChanged(
+              onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
                 context,
                 valueNotifier,
                 value,
@@ -183,7 +183,7 @@ class _Algorithms extends StatelessWidget {
               title: const Text("SHA512"),
               value: HashAlgorithm.sha512,
               groupValue: valueNotifier.value,
-              onChanged: (HashAlgorithm value) => _onHashAlgorithmChanged(
+              onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
                 context,
                 valueNotifier,
                 value,
@@ -198,9 +198,13 @@ class _Algorithms extends StatelessWidget {
   void _onHashAlgorithmChanged(
     BuildContext context,
     _HashAlgorithmNotifier valueNotifier,
-    HashAlgorithm value,
+    HashAlgorithm? value,
   ) {
-    final ValueNotifier<bool> confirmation = context.read<ValueNotifier<bool>>();
+    if (value == null) {
+      return;
+    }
+
+    final confirmation = context.read<ValueNotifier<bool>>();
     if (confirmation.value == true) {
       valueNotifier.value = value;
       return;
@@ -212,13 +216,13 @@ class _Algorithms extends StatelessWidget {
         return AlertDialog(
           content: const Text("Changing the algorithm changes the generating password."),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: const Text("Cancel"),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
             ),
-            FlatButton(
+            TextButton(
               child: const Text("OK"),
               onPressed: () {
                 Navigator.of(context).pop(true);
@@ -227,7 +231,7 @@ class _Algorithms extends StatelessWidget {
           ],
         );
       },
-    ).then((bool confirm) {
+    ).then((bool? confirm) {
       if (confirm == true) {
         confirmation.value = true;
         valueNotifier.value = value;

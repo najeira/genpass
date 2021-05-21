@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class SettingCaption extends StatelessWidget {
   const SettingCaption({
-    Key key,
-    @required this.icon,
-    @required this.title,
+    Key? key,
+    required this.icon,
+    required this.title,
   }) : super(key: key);
 
   final IconData icon;
@@ -12,8 +12,8 @@ class SettingCaption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
-    final TextTheme textTheme = themeData.textTheme;
+    final themeData = Theme.of(context);
+    final textTheme = themeData.textTheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -21,13 +21,13 @@ class SettingCaption extends StatelessWidget {
         children: <Widget>[
           Icon(
             icon,
-            size: textTheme.subtitle1.fontSize,
+            size: textTheme.subtitle1!.fontSize,
           ),
           const SizedBox(width: 8.0),
           Text(
             title,
             style: TextStyle(
-              fontSize: textTheme.subtitle1.fontSize,
+              fontSize: textTheme.subtitle1!.fontSize,
               fontWeight: FontWeight.w500,
             ),
           ),

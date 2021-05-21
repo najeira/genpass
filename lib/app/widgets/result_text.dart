@@ -6,8 +6,8 @@ import 'package:genpass/app/gloabls.dart' show log;
 
 class ResultText extends StatelessWidget {
   const ResultText({
-    Key key,
-    @required this.title,
+    Key? key,
+    required this.title,
   }) : super(key: key);
 
   final String title;
@@ -16,10 +16,10 @@ class ResultText extends StatelessWidget {
   Widget build(BuildContext context) {
     log.fine("ResultText(${title}).build");
 
-    final ThemeData themeData = Theme.of(context);
-    final TextTheme textTheme = themeData.textTheme;
+    final themeData = Theme.of(context);
+    final textTheme = themeData.textTheme;
 
-    final String text = context.watch<String>();
+    final text = context.watch<String>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,7 +30,7 @@ class ResultText extends StatelessWidget {
         ),
         const SizedBox(height: 4.0),
         Text(
-          text ?? "",
+          text,
           style: textTheme.bodyText2,
         ),
       ],

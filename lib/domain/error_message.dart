@@ -17,9 +17,9 @@ class ErrorMessage {
   int get hashCode => value.hashCode;
 
   @override
-  String toString() => '${runtimeType}("${value}")';
+  String toString() => '$ErrorMessage("${value}")';
 }
 
-class ErrorMessageNotifier extends ValueNotifier<ErrorMessage> {
-  ErrorMessageNotifier([ErrorMessage value]) : super(value);
+class ErrorMessageNotifier extends ValueNotifier<ErrorMessage?> {
+  ErrorMessageNotifier([ErrorMessage? value]) : super(value);
 }

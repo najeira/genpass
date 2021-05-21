@@ -24,7 +24,7 @@ import 'history.dart';
 
 class GenPassPage extends StatefulWidget {
   const GenPassPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -37,12 +37,12 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 
@@ -81,7 +81,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   Widget _wrapNotificationListener(BuildContext context, Widget child) {
     return NotificationListener<GeneratorNotification>(
       onNotification: (GeneratorNotification notification) {
-        final GenPassData data = context.read();
+        final data = context.read<GenPassData>();
         if (notification is GeneratorAddNotification) {
           // Adds a new generator with default setting.
           data.addSetting(const Setting());
@@ -106,25 +106,25 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const _SectionTitle(title: "Form"),
-        const Padding(
+      children: const <Widget>[
+        _SectionTitle(title: "Form"),
+        Padding(
           padding: EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
           child: _MasterInputRow(),
         ),
-        const Padding(
+        Padding(
           padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 24.0),
           child: _DomainInputRow(),
         ),
-        const Divider(),
-        const _GeneratorList(),
+        Divider(),
+        _GeneratorList(),
       ],
     );
   }
 
   void _onHelpPressed() {
     //HelpPage
-    Navigator.of(context)?.push(
+    Navigator.maybeOf(context)?.push(
       MaterialPageRoute<Setting>(
         builder: (BuildContext context) {
           return const HelpPage();
@@ -134,20 +134,11 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   }
 
   Future<bool> _addHistory() async {
-    final History history = context.read<History>();
-    if (history == null) {
-      log.warning("History is not provided");
-      return false;
-    }
+    final history = context.read<History>();
+    final data = context.read<GenPassData>();
 
-    final GenPassData data = context.read<GenPassData>();
-    if (data == null) {
-      log.warning("GenPassData is not provided");
-      return false;
-    }
-
-    final String domainText = data.domainNotifier.text;
-    if (domainText == null || domainText.isEmpty) {
+    final domainText = data.domainNotifier.text;
+    if (domainText.isEmpty) {
       log.config("domain is empty");
       return false;
     }
@@ -161,7 +152,7 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
 
 class _MasterInputRow extends StatelessWidget {
   const _MasterInputRow({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -175,14 +166,14 @@ class _MasterInputRow extends StatelessWidget {
           value.masterErrorNotifier,
         );
       },
-      builder: (BuildContext context, Tuple2<TextEditingController, ErrorMessageNotifier> value, Widget child) {
+      builder: (BuildContext context, Tuple2<TextEditingController, ErrorMessageNotifier> value, Widget? child) {
         log.fine("_MasterInputRow.Selector.builder");
         return MultiProvider(
           providers: [
             ListenableProvider<TextEditingController>.value(
               value: value.item1,
             ),
-            ValueListenableProvider<ErrorMessage>.value(
+            ValueListenableProvider<ErrorMessage?>.value(
               value: value.item2,
               child: child,
             ),
@@ -200,7 +191,7 @@ class _MasterInputRow extends StatelessWidget {
 
 class _MasterInputRowInner extends StatelessWidget {
   const _MasterInputRowInner({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -212,7 +203,7 @@ class _MasterInputRowInner extends StatelessWidget {
   Widget _buildNotificationListener(BuildContext context) {
     return NotificationListener<VisibilityNotification>(
       onNotification: (VisibilityNotification notification) {
-        final ValueNotifier<bool> notifier = context.read<ValueNotifier<bool>>();
+        final notifier = context.read<ValueNotifier<bool>>();
         notifier.value = notification.visible;
         return true;
       },
@@ -222,8 +213,8 @@ class _MasterInputRowInner extends StatelessWidget {
 
   Widget _buildInputRow(BuildContext context) {
     return Consumer<ValueNotifier<bool>>(
-      builder: (BuildContext context, ValueNotifier<bool> value, Widget child) {
-        final bool visible = value.value ?? false;
+      builder: (BuildContext context, ValueNotifier<bool> value, Widget? child) {
+        final visible = value.value;
         return InputRow(
           textInputType: TextInputType.visiblePassword,
           inputIcon: Icons.bubble_chart,
@@ -242,7 +233,7 @@ class _MasterInputRowInner extends StatelessWidget {
 
 class _DomainInputRow extends StatelessWidget {
   const _DomainInputRow({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -256,14 +247,14 @@ class _DomainInputRow extends StatelessWidget {
           value.domainErrorNotifier,
         );
       },
-      builder: (BuildContext context, Tuple2<TextEditingController, ErrorMessageNotifier> value, Widget child) {
+      builder: (BuildContext context, Tuple2<TextEditingController, ErrorMessageNotifier> value, Widget? child) {
         log.fine("_DomainInputRow.Selector.builder");
         return MultiProvider(
           providers: [
             ListenableProvider<TextEditingController>.value(
               value: value.item1,
             ),
-            ValueListenableProvider<ErrorMessage>.value(
+            ValueListenableProvider<ErrorMessage?>.value(
               value: value.item2,
               child: child,
             ),
@@ -278,7 +269,7 @@ class _DomainInputRow extends StatelessWidget {
 
 class _DomainInputRowInner extends StatelessWidget {
   const _DomainInputRowInner({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -298,29 +289,20 @@ class _DomainInputRowInner extends StatelessWidget {
   }
 
   Widget _buildInputRow(BuildContext context) {
-    return InputRow(
+    return const InputRow(
       textInputType: TextInputType.url,
       inputIcon: Icons.business,
       labelText: "domain / site",
       hintText: "example.com",
-      actionButton: const HistoryButton(),
+      actionButton: HistoryButton(),
     );
   }
 
   void _showHistoryPage(BuildContext context) {
-    final History history = context.read<History>();
-    if (history == null) {
-      log.warning("History is not provided");
-      return;
-    }
+    final history = context.read<History>();
+    final controller = context.read<TextEditingController>();
 
-    final TextEditingController controller = context.read<TextEditingController>();
-    if (controller == null) {
-      log.warning("TextEditingController is not provided");
-      return;
-    }
-
-    Navigator.of(context)?.push(
+    Navigator.maybeOf(context)?.push(
       MaterialPageRoute<String>(
         builder: (BuildContext context) {
           return HistoryPage(
@@ -329,7 +311,7 @@ class _DomainInputRowInner extends StatelessWidget {
           );
         },
       ),
-    )?.then((String domainText) {
+    ).then((String? domainText) {
       if (domainText != null && domainText.isNotEmpty) {
         controller.text = domainText;
         log.config("domain is ${domainText}");
@@ -340,22 +322,22 @@ class _DomainInputRowInner extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({
-    Key key,
+    Key? key,
     this.title,
   }) : super(key: key);
 
-  final String title;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
     log.fine("_SectionTitle.build");
-    final ThemeData themeData = Theme.of(context);
+    final themeData = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 16.0, 8.0, 8.0),
       child: Text(
-        title,
+        title!,
         style: TextStyle(
-          fontSize: themeData.textTheme.bodyText2.fontSize,
+          fontSize: themeData.textTheme.bodyText2!.fontSize,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -365,7 +347,7 @@ class _SectionTitle extends StatelessWidget {
 
 class _GeneratorList extends StatelessWidget {
   const _GeneratorList({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -376,7 +358,7 @@ class _GeneratorList extends StatelessWidget {
         log.fine("_GeneratorList.selector");
         return value.generators;
       },
-      builder: (BuildContext context, Generators value, Widget child) {
+      builder: (BuildContext context, Generators value, Widget? child) {
         log.fine("_GeneratorList.builder");
         return ChangeNotifierProvider<Generators>.value(
           value: value,
@@ -384,29 +366,29 @@ class _GeneratorList extends StatelessWidget {
         );
       },
       child: Consumer<Generators>(
-        builder: (BuildContext context, Generators value, Widget child) {
+        builder: (BuildContext context, Generators value, Widget? child) {
           log.fine("_GeneratorList.Consumer.builder");
-          final int length = value?.items?.length ?? 0;
+          final length = value.items.length;
           return Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               for (int i = 0; i < length; i++)
                 ChangeNotifierProvider<Generator>.value(
-                  value: value?.items[i],
+                  value: value.items[i],
                   child: Provider<int>.value(
                     value: i,
                     child: const GeneratorSection(),
                   ),
                 ),
               Center(
-                child: FlatButton.icon(
+                child: TextButton.icon(
                   onPressed: () {
-                    const GeneratorAddNotification notification = GeneratorAddNotification();
+                    const notification = GeneratorAddNotification();
                     notification.dispatch(context);
                   },
-                  icon: Icon(Icons.add_circle),
-                  label: Text("Add Generator"),
+                  icon: const Icon(Icons.add_circle),
+                  label: const Text("Add Generator"),
                 ),
               ),
               const SizedBox(height: 16.0),

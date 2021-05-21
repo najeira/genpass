@@ -1,25 +1,24 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 const String _keyHistoryEntries = "historyEntries";
 
 class History {
-  final Set<String> entries = LinkedHashSet<String>();
-
-  History.list(List<String> value) {
+  History.list(List<String>? value) {
     if (value != null && value.isNotEmpty) {
       entries.addAll(value);
     }
   }
 
+  final Set<String> entries = <String>{};
+
   void add(String entry) {
     entries.remove(entry);
     entries.add(entry);
 
-    final int overflow = (entries.length - 100);
-    for (int i = 0; i < overflow; i++) {
+    final overflow = entries.length - 100;
+    for (var i = 0; i < overflow; i++) {
       entries.remove(entries.first);
     }
   }
@@ -29,14 +28,14 @@ class History {
   }
 
   static Future<History> load() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final List<String> value = prefs.getStringList(_keyHistoryEntries);
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getStringList(_keyHistoryEntries);
     return History.list(value);
   }
 
   Future<void> save() async {
-    final List<String> value = entries.toList();
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final value = entries.toList();
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_keyHistoryEntries, value);
   }
 }

@@ -6,7 +6,7 @@ import 'package:genpass/app/widgets/setting_caption.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -16,14 +16,14 @@ class HelpPage extends StatelessWidget {
         title: const Text("Help"),
       ),
       body: ListView(
-        children: <Widget>[
-          const Padding(
+        children: const <Widget>[
+          Padding(
             padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
             child: _ThemeModeRow(),
           ),
-          const Divider(),
-          const _AboutRow(),
-          const Divider(),
+          Divider(),
+          _AboutRow(),
+          Divider(),
         ],
       ),
     );
@@ -32,12 +32,12 @@ class HelpPage extends StatelessWidget {
 
 class _ThemeModeRow extends StatelessWidget {
   const _ThemeModeRow({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    ValueNotifier<ThemeMode> notifier = context.watch<ValueNotifier<ThemeMode>>();
+    final notifier = context.watch<ValueNotifier<ThemeMode>>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -49,19 +49,31 @@ class _ThemeModeRow extends StatelessWidget {
           title: const Text("System"),
           value: ThemeMode.system,
           groupValue: notifier.value,
-          onChanged: (ThemeMode value) => notifier.value = value,
+          onChanged: (ThemeMode? value) {
+            if (value != null) {
+              notifier.value = value;
+            }
+          },
         ),
         RadioListTile<ThemeMode>(
           title: const Text("Light"),
           value: ThemeMode.light,
           groupValue: notifier.value,
-          onChanged: (ThemeMode value) => notifier.value = value,
+          onChanged: (ThemeMode? value) {
+            if (value != null) {
+              notifier.value = value;
+            }
+          },
         ),
         RadioListTile<ThemeMode>(
           title: const Text("Dark"),
           value: ThemeMode.dark,
           groupValue: notifier.value,
-          onChanged: (ThemeMode value) => notifier.value = value,
+          onChanged: (ThemeMode? value) {
+            if (value != null) {
+              notifier.value = value;
+            }
+          },
         ),
       ],
     );
@@ -70,7 +82,7 @@ class _ThemeModeRow extends StatelessWidget {
 
 class _AboutRow extends StatelessWidget {
   const _AboutRow({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -88,7 +100,7 @@ class _AboutRow extends StatelessWidget {
   }
 
   void _onPressed(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(

@@ -9,8 +9,9 @@ class Generators extends ChangeNotifier {
 
   final List<Generator> items;
 
+  @override
   void dispose() {
-    for (final Generator item in items) {
+    for (final item in items) {
       item.dispose();
     }
     super.dispose();
@@ -36,30 +37,29 @@ class Generators extends ChangeNotifier {
 }
 
 class Generator extends ChangeNotifier {
-  Generator(this._setting) : assert(_setting != null);
+  Generator(this._setting);
 
   Setting _setting;
 
   Setting get setting => _setting;
 
   set setting(Setting setting) {
-    assert(setting != null);
     _setting = setting;
     _update(_lastMaster, _lastDomain);
   }
 
-  String _lastMaster;
-  String _lastDomain;
+  String _lastMaster = "";
+  String _lastDomain = "";
 
-  String password;
-  String pin;
+  String password = "";
+  String pin = "";
 
   void clear() {
-    _lastMaster = null;
-    _lastDomain = null;
-    if (password != null || pin != null) {
-      password = null;
-      pin = null;
+    _lastMaster = "";
+    _lastDomain = "";
+    if (password.isNotEmpty || pin.isNotEmpty) {
+      password = "";
+      pin = "";
       notifyListeners();
     }
   }
@@ -71,14 +71,14 @@ class Generator extends ChangeNotifier {
   }
 
   void _update(String master, String domain) {
-    final String password = Crypto.generatePassword(
+    final password = Crypto.generatePassword(
       setting.hashAlgorithm,
       domain,
       master,
       setting.passwordLength,
     );
 
-    final String pin = Crypto.generatePin(
+    final pin = Crypto.generatePin(
       domain,
       master,
       setting.pinLength,

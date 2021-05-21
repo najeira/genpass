@@ -29,7 +29,7 @@ Future<AppModel> _loadAppModel() async {
 // The root of the application, does not have a screen.
 class MyApp extends StatelessWidget {
   const MyApp({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
         return ValueNotifier<ThemeMode>(ThemeMode.system);
       },
       child: Consumer<ValueNotifier<ThemeMode>>(
-        builder: (BuildContext context, ValueNotifier<ThemeMode> value, Widget child) {
+        builder: (BuildContext context, ValueNotifier<ThemeMode> value, Widget? child) {
           return NotificationListener<ThemeModeNotification>(
             onNotification: (ThemeModeNotification notification) {
               value.value = notification.value;
@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
 // Loading at startup and switching to the application screen.
 class LaunchPage extends StatelessWidget {
   const LaunchPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -96,7 +96,7 @@ class LaunchPage extends StatelessWidget {
         return _loadAppModel();
       },
       child: Consumer<Future<AppModel>>(
-        builder: (BuildContext context, Future<AppModel> value, Widget child) {
+        builder: (BuildContext context, Future<AppModel> value, Widget? child) {
           return FutureBuilder<AppModel>(
             future: value,
             builder: (BuildContext context, AsyncSnapshot<AppModel> snapshot) {
@@ -110,7 +110,7 @@ class LaunchPage extends StatelessWidget {
 
               assert(snapshot.data?.history != null);
               assert(snapshot.data?.settings != null);
-              return _build(context, snapshot.data);
+              return _build(context, snapshot.data!);
             },
           );
         },
@@ -126,7 +126,7 @@ class LaunchPage extends StatelessWidget {
         ),
         Provider<GenPassData>(
           create: (BuildContext context) {
-            final GenPassData data = GenPassData();
+            final data = GenPassData();
             data.setSettings(appModel.settings);
             return data;
           },
@@ -140,7 +140,7 @@ class LaunchPage extends StatelessWidget {
 // Loading
 class LoadingPage extends StatelessWidget {
   const LoadingPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -159,7 +159,7 @@ class LoadingPage extends StatelessWidget {
             const SizedBox(height: 32.0),
             Text(
               "Launching Generator...",
-              style: textTheme.caption.copyWith(
+              style: textTheme.caption!.copyWith(
                 fontSize: 24.0,
               ),
             ),

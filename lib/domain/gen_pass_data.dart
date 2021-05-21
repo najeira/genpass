@@ -5,6 +5,12 @@ import 'generator.dart';
 import 'settings.dart';
 
 class GenPassData {
+  GenPassData(){
+    generators.setSettings(settings);
+    masterNotifier.addListener(_onInputUpdated);
+    domainNotifier.addListener(_onInputUpdated);
+  }
+
   final ValueNotifier<bool> darkThemeNotifier = ValueNotifier<bool>(false);
 
   final TextEditingController masterNotifier = TextEditingController();
@@ -16,19 +22,13 @@ class GenPassData {
   final Settings settings = Settings.single();
   final Generators generators = Generators();
 
-  GenPassData(){
-    generators.setSettings(settings);
-    masterNotifier.addListener(_onInputUpdated);
-    domainNotifier.addListener(_onInputUpdated);
-  }
-
   void dispose() {
-    darkThemeNotifier?.dispose();
-    masterNotifier?.dispose();
-    masterErrorNotifier?.dispose();
-    domainNotifier?.dispose();
-    domainErrorNotifier?.dispose();
-    generators?.dispose();
+    darkThemeNotifier.dispose();
+    masterNotifier.dispose();
+    masterErrorNotifier.dispose();
+    domainNotifier.dispose();
+    domainErrorNotifier.dispose();
+    generators.dispose();
   }
 
   // This is called only once at startup.
@@ -55,8 +55,8 @@ class GenPassData {
   }
 
   Future<void> updateGenerator(Generator newGenerator) {
-    for (int i = 0; i < generators.items.length; i++) {
-      final Generator generator = generators.items[i];
+    for (var i = 0; i < generators.items.length; i++) {
+      final generator = generators.items[i];
       if (newGenerator == generator) {
         settings.items[i] = newGenerator.setting;
       }
@@ -65,15 +65,15 @@ class GenPassData {
   }
 
   void _onInputUpdated() {
-    final String master = masterNotifier.value.text ?? "";
-    final String domain = domainNotifier.value.text ?? "";
+    final master = masterNotifier.value.text;
+    final domain = domainNotifier.value.text;
 
     masterErrorNotifier.value = _Validator.validateMaster(master);
     domainErrorNotifier.value = _Validator.validateDomain(domain);
 
-    final bool hasValue = masterErrorNotifier.value == null && domainErrorNotifier.value == null;
+    final hasValue = masterErrorNotifier.value == null && domainErrorNotifier.value == null;
 
-    for (final Generator generator in generators.items) {
+    for (final generator in generators.items) {
       if (hasValue) {
         generator.update(master, domain);
       } else {
@@ -86,16 +86,16 @@ class GenPassData {
 class _Validator {
   _Validator._();
 
-  static ErrorMessage validateMaster(String value) {
-    if (value == null || value.isEmpty || value.length < 8) {
-      return ErrorMessage("enter 8 or more characters");
+  static ErrorMessage? validateMaster(String value) {
+    if (value.isEmpty || value.length < 8) {
+      return const ErrorMessage("enter 8 or more characters");
     }
     return null;
   }
 
-  static ErrorMessage validateDomain(String value) {
-    if (value == null || value.isEmpty) {
-      return ErrorMessage("enter");
+  static ErrorMessage? validateDomain(String value) {
+    if (value.isEmpty) {
+      return const ErrorMessage("enter");
     }
     return null;
   }
