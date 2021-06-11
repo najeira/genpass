@@ -15,13 +15,17 @@ final historyProvider = ChangeNotifierProvider<History>((ref) {
   return History();
 });
 
-final settingListProvider =
-    ChangeNotifierProvider<SettingList>((ref) {
+final settingListProvider = ChangeNotifierProvider<SettingList>((ref) {
   return SettingList();
 });
 
 final _launchFutureProvider = FutureProvider<void>((ref) async {
-  await Future<void>.delayed(const Duration(milliseconds: 3000));
+  var wait = Duration.zero;
+  assert(() {
+    wait = const Duration(milliseconds: 3000);
+    return true;
+  }());
+  await Future<void>.delayed(wait);
 });
 
 final _isLaunchingProvider = Provider<bool>((ref) {
