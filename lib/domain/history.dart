@@ -1,17 +1,20 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const String _keyHistoryEntries = "historyEntries";
 
-class History {
-  History.list(List<String>? value) {
-    if (value != null && value.isNotEmpty) {
-      entries.addAll(value);
-    }
+class History extends ChangeNotifier {
+  History() {
+    load();
   }
 
   final Set<String> entries = <String>{};
+
+  bool _isLoading = false;
+
+  bool get isLoading => _isLoading;
 
   void add(String entry) {
     entries.remove(entry);
@@ -21,16 +24,33 @@ class History {
     for (var i = 0; i < overflow; i++) {
       entries.remove(entries.first);
     }
+
+    notifyListeners();
   }
 
   void remove(String entry) {
-    entries.remove(entry);
+    final removed = entries.remove(entry);
+    if (removed) {
+      notifyListeners();
+    }
   }
 
-  static Future<History> load() async {
+  Future<void> load() {
+    _isLoading = true;
+    try {
+      return _load();
+    } finally {
+      _isLoading = false;
+    }
+  }
+
+  Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final value = prefs.getStringList(_keyHistoryEntries);
-    return History.list(value);
+    if (value != null && value.isNotEmpty) {
+      entries.addAll(value);
+      notifyListeners();
+    }
   }
 
   Future<void> save() async {

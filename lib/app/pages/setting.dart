@@ -1,88 +1,59 @@
 import 'package:flutter/material.dart';
-
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/app/providers.dart';
 import 'package:genpass/app/widgets/setting_caption.dart';
 import 'package:genpass/domain/hash_algorithm.dart';
 import 'package:genpass/domain/settings.dart';
 
-class _PasswordLengthNotifier extends ValueNotifier<int> {
-  _PasswordLengthNotifier(int value) : super(value);
-}
+const _padding = EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
 
-class _PinLengthNotifier extends ValueNotifier<int> {
-  _PinLengthNotifier(int value) : super(value);
-}
-
-class _HashAlgorithmNotifier extends ValueNotifier<HashAlgorithm> {
-  _HashAlgorithmNotifier(HashAlgorithm value) : super(value);
-}
+final _confirmationProvider =
+    StateNotifierProvider.autoDispose<StateController<bool>, bool>((ref) {
+  return StateController<bool>(false);
+});
 
 class SettingPage extends StatelessWidget {
-  const SettingPage({
+  const SettingPage._({
     Key? key,
-    this.setting,
   }) : super(key: key);
 
-  final Setting? setting;
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<_PasswordLengthNotifier>(
-          create: (BuildContext context) => _PasswordLengthNotifier(setting!.passwordLength),
-        ),
-        ChangeNotifierProvider<_PinLengthNotifier>(
-          create: (BuildContext context) => _PinLengthNotifier(setting!.pinLength),
-        ),
-        ChangeNotifierProvider<_HashAlgorithmNotifier>(
-          create: (BuildContext context) => _HashAlgorithmNotifier(setting!.hashAlgorithm),
-        ),
-      ],
-      child: Builder(
-        builder: _buildScaffold,
+  static Future<void> push(BuildContext context, int index) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<Setting>(
+        builder: (BuildContext context) {
+          return ProviderScope(
+            overrides: [
+              selectedSettingIndexProvider.overrideWithValue(index),
+            ],
+            child: const SettingPage._(),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildScaffold(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Setting"),
-        leading: IconButton(
-          icon: const BackButtonIcon(),
-          tooltip: 'Back',
-          onPressed: () {
-            _onBackPressed(context);
-          },
-        ),
       ),
       body: ListView(
         children: const <Widget>[
           Padding(
-            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-            child: _Slider<_PasswordLengthNotifier>(
-              title: "Password length",
-              icon: kIconPassword,
-              min: 8,
-              max: 20,
-            ),
+            padding: _padding,
+            child: _PasswordLengthSlider(),
           ),
           Divider(),
           Padding(
-            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-            child: _Slider<_PinLengthNotifier>(
-              title: "PIN length",
-              icon: kIconPin,
-              min: 3,
-              max: 10,
-            ),
+            padding: _padding,
+            child: _PinLengthSlider(),
           ),
           Divider(),
           Padding(
-            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+            padding: _padding,
             child: _Algorithms(),
           ),
           Divider(),
@@ -90,36 +61,72 @@ class SettingPage extends StatelessWidget {
       ),
     );
   }
+}
 
-  void _onBackPressed(BuildContext context) {
-    Navigator.of(context).maybePop(
-      Setting(
-        passwordLength: context.read<_PasswordLengthNotifier>().value,
-        pinLength: context.read<_PinLengthNotifier>().value,
-        hashAlgorithm: context.read<_HashAlgorithmNotifier>().value,
-      ),
+class _PasswordLengthSlider extends ConsumerWidget {
+  const _PasswordLengthSlider({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, ScopedReader watch) {
+    final setting = selectedSetting(watch);
+    return _Slider(
+      onChanged: (int value) {
+        final ctrl = selectedSettingController(context.read);
+        ctrl.state = ctrl.state.copyWith(passwordLength: value);
+      },
+      title: "Password length",
+      icon: kIconPassword,
+      value: setting.passwordLength,
+      min: 8,
+      max: 20,
     );
   }
 }
 
-class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
+class _PinLengthSlider extends ConsumerWidget {
+  const _PinLengthSlider({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, ScopedReader watch) {
+    final setting = selectedSetting(watch);
+    return _Slider(
+      onChanged: (int value) {
+        final ctrl = selectedSettingController(context.read);
+        ctrl.state = ctrl.state.copyWith(pinLength: value);
+      },
+      title: "PIN length",
+      icon: kIconPin,
+      value: setting.pinLength,
+      min: 3,
+      max: 10,
+    );
+  }
+}
+
+class _Slider extends StatelessWidget {
   const _Slider({
     Key? key,
+    required this.onChanged,
     required this.icon,
     required this.title,
+    required this.value,
     required this.min,
     required this.max,
   }) : super(key: key);
 
+  final ValueChanged<int> onChanged;
   final IconData icon;
   final String title;
+  final int value;
   final int min;
   final int max;
 
   @override
   Widget build(BuildContext context) {
-    final valueNotifier = context.watch<T>();
-    final value = valueNotifier.value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -134,7 +141,7 @@ class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
           max: max.toDouble(),
           divisions: max - min,
           onChanged: (double value) {
-            valueNotifier.value = value.toInt();
+            onChanged(value.toInt());
           },
         ),
       ],
@@ -142,71 +149,50 @@ class _Slider<T extends ValueNotifier<int>> extends StatelessWidget {
   }
 }
 
-class _Algorithms extends StatelessWidget {
+class _Algorithms extends ConsumerWidget {
   const _Algorithms({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ValueNotifier<bool>>(
-      create: (BuildContext context) => ValueNotifier<bool>(false),
-      child: _build(context),
-    );
-  }
-
-  Widget _build(BuildContext context) {
-    return Consumer<_HashAlgorithmNotifier>(
-      builder: (
-        BuildContext context,
-        _HashAlgorithmNotifier valueNotifier,
-        Widget? child,
-      ) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const SettingCaption(
-              title: "Algorithms",
-              icon: kIconAlgorithm,
-            ),
-            RadioListTile<HashAlgorithm>(
-              title: const Text("MD5"),
-              value: HashAlgorithm.md5,
-              groupValue: valueNotifier.value,
-              onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
-                context,
-                valueNotifier,
-                value,
-              ),
-            ),
-            RadioListTile<HashAlgorithm>(
-              title: const Text("SHA512"),
-              value: HashAlgorithm.sha512,
-              groupValue: valueNotifier.value,
-              onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
-                context,
-                valueNotifier,
-                value,
-              ),
-            ),
-          ],
-        );
-      },
+  Widget build(BuildContext context, ScopedReader watch) {
+    final setting = selectedSetting(watch);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const SettingCaption(
+          title: "Algorithms",
+          icon: kIconAlgorithm,
+        ),
+        RadioListTile<HashAlgorithm>(
+          title: const Text("MD5"),
+          value: HashAlgorithm.md5,
+          groupValue: setting.hashAlgorithm,
+          onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
+            context,
+            value,
+          ),
+        ),
+        RadioListTile<HashAlgorithm>(
+          title: const Text("SHA512"),
+          value: HashAlgorithm.sha512,
+          groupValue: setting.hashAlgorithm,
+          onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
+            context,
+            value,
+          ),
+        ),
+      ],
     );
   }
 
   void _onHashAlgorithmChanged(
     BuildContext context,
-    _HashAlgorithmNotifier valueNotifier,
     HashAlgorithm? value,
   ) {
-    if (value == null) {
-      return;
-    }
-
-    final confirmation = context.read<ValueNotifier<bool>>();
-    if (confirmation.value == true) {
-      valueNotifier.value = value;
+    final confirmation = context.read(_confirmationProvider);
+    if (confirmation) {
+      _updateHashAlgorithm(context, value);
       return;
     }
 
@@ -214,7 +200,10 @@ class _Algorithms extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          content: const Text("Changing the algorithm changes the generating password."),
+          content: const Text(
+            "Changing the algorithm changes "
+            "the generating password.",
+          ),
           actions: <Widget>[
             TextButton(
               child: const Text("Cancel"),
@@ -232,10 +221,21 @@ class _Algorithms extends StatelessWidget {
         );
       },
     ).then((bool? confirm) {
+      // confirmed
+      final ctrl = context.read(_confirmationProvider.notifier);
+      ctrl.state = true;
+
       if (confirm == true) {
-        confirmation.value = true;
-        valueNotifier.value = value;
+        _updateHashAlgorithm(context, value);
       }
     });
+  }
+
+  void _updateHashAlgorithm(
+    BuildContext context,
+    HashAlgorithm? value,
+  ) {
+    final ctrl = selectedSettingController(context.read);
+    ctrl.state = ctrl.state.copyWith(hashAlgorithm: value);
   }
 }

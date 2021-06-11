@@ -1,40 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:provider/provider.dart';
+import 'package:genpass/app/providers.dart';
 
-import 'package:genpass/domain/history.dart';
+final _textEditingProvider =
+    ChangeNotifierProvider.autoDispose<TextEditingController>((ref) {
+  // read domain text when initializing
+  final domain = ref.read(domainTextEditingProvider);
+  return TextEditingController(text: domain.text);
+});
+
+final _filteredHistoryProvider = Provider.autoDispose<Iterable<String>>((ref) {
+  final history = ref.watch(historyProvider);
+  final text = ref.watch(_textEditingProvider);
+  if (text.text.isEmpty) {
+    return history.entries;
+  } else {
+    return history.entries.where((String entry) {
+      return entry.contains(text.text);
+    });
+  }
+});
 
 class HistoryPage extends StatelessWidget {
-  const HistoryPage({
+  const HistoryPage._({
     Key? key,
-    required this.text,
-    required this.history,
   }) : super(key: key);
 
-  final String text;
-
-  final History history;
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ListenableProvider<FocusNode>(
-          create: (BuildContext context) => FocusNode(),
-          dispose: (BuildContext context, FocusNode value) => value.dispose(),
-        ),
-        ListenableProvider<TextEditingController>(
-          create: (BuildContext context) => TextEditingController(text: text),
-          dispose: (BuildContext context, TextEditingController value) => value.dispose(),
-        ),
-      ],
-      child: Builder(
-        builder: _buildScaffold,
+  static Future<String?> push(BuildContext context) {
+    return Navigator.of(context).push<String>(
+      MaterialPageRoute<String>(
+        builder: (BuildContext context) {
+          return const HistoryPage._();
+        },
       ),
     );
   }
 
-  Widget _buildScaffold(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Theme(
@@ -42,22 +46,28 @@ class HistoryPage extends StatelessWidget {
             brightness: Brightness.dark,
             accentColor: Colors.white,
           ),
-          child: _buildTextField(context),
+          child: const _SearchTextField(),
         ),
       ),
       body: _HistoryListView(
-        entries: history.entries,
-        onSelected: (String value) => Navigator.maybeOf(context)?.maybePop(value),
+        onSelected: (String value) {
+          Navigator.maybeOf(context)?.maybePop(value);
+        },
       ),
     );
   }
+}
 
-  Widget _buildTextField(BuildContext context) {
-    final controller = Provider.of<TextEditingController>(context, listen: false);
-    final focusNode = Provider.of<FocusNode>(context, listen: false);
+class _SearchTextField extends ConsumerWidget {
+  const _SearchTextField({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, ScopedReader watch) {
+    final text = watch(_textEditingProvider);
     return TextField(
-      controller: controller,
-      focusNode: focusNode,
+      controller: text,
       decoration: const InputDecoration(
         hintText: "example.com",
       ),
@@ -69,60 +79,22 @@ class HistoryPage extends StatelessWidget {
   }
 }
 
-typedef _ValueSelected<T> = void Function(T value);
-
-class _HistoryListView extends StatefulWidget {
+class _HistoryListView extends ConsumerWidget {
   const _HistoryListView({
     Key? key,
-    required this.entries,
     required this.onSelected,
   }) : super(key: key);
 
-  final Iterable<String> entries;
-
-  final _ValueSelected<String> onSelected;
+  final ValueChanged<String> onSelected;
 
   @override
-  _HistoryListViewState createState() => _HistoryListViewState();
-}
-
-class _HistoryListViewState extends State<_HistoryListView> {
-  ScrollController? _scrollController;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _scrollController?.removeListener(_onScroll);
-    _scrollController = PrimaryScrollController.of(context);
-    _scrollController?.addListener(_onScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController?.removeListener(_onScroll);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = context.watch<TextEditingController>();
-    final text = controller.text;
-
-    Iterable<String> targets;
-    if (text.isEmpty) {
-      targets = widget.entries;
-    } else {
-      targets = widget.entries.where((String entry) {
-        return entry.contains(text);
-      });
-    }
-
+  Widget build(BuildContext context, ScopedReader watch) {
+    final entries = watch(_filteredHistoryProvider);
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      controller: _scrollController,
-      itemCount: targets.length,
+      itemCount: entries.length,
       itemBuilder: (BuildContext context, int index) {
-        return _buildListTile(context, targets.elementAt(index));
+        return _buildListTile(context, entries.elementAt(index));
       },
     );
   }
@@ -130,11 +102,10 @@ class _HistoryListViewState extends State<_HistoryListView> {
   Widget _buildListTile(BuildContext context, String value) {
     final themeData = Theme.of(context);
     final textTheme = themeData.textTheme;
-
     return InkWell(
       key: ValueKey<String>(value),
       onTap: () {
-        widget.onSelected.call(value);
+        onSelected(value);
       },
       child: Container(
         padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
@@ -149,11 +120,5 @@ class _HistoryListViewState extends State<_HistoryListView> {
         ),
       ),
     );
-  }
-
-  void _onScroll() {
-    if (mounted) {
-      Provider.of<FocusNode>(context, listen: false).unfocus();
-    }
   }
 }

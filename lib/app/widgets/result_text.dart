@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
 
-import 'package:provider/provider.dart';
-
 import 'package:genpass/app/gloabls.dart' show log;
 
 class ResultText extends StatelessWidget {
   const ResultText({
     Key? key,
     required this.title,
+    required this.value,
   }) : super(key: key);
 
   final String title;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
     log.fine("ResultText(${title}).build");
-
     final themeData = Theme.of(context);
     final textTheme = themeData.textTheme;
-
-    final text = context.watch<String>();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -30,7 +26,7 @@ class ResultText extends StatelessWidget {
         ),
         const SizedBox(height: 4.0),
         Text(
-          text,
+          value,
           style: textTheme.bodyText2,
         ),
       ],
