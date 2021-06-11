@@ -63,6 +63,10 @@ class SettingList extends ChangeNotifier {
     load();
   }
 
+  SettingList.items(List<Setting> items) {
+    this.items.addAll(items);
+  }
+
   final items = <Setting>[];
 
   bool _isLoading = false;
