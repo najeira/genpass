@@ -101,8 +101,18 @@ final pinVisibilityProvider = StateNotifierProvider.family
 
 final resultProvider = Provider.family.autoDispose<Result, int>((ref, index) {
   final master = ref.watch(masterTextEditingProvider);
+  final masterError = ref.watch(masterErrorTextProvider);
   final domain = ref.watch(domainTextEditingProvider);
+  final domainError = ref.watch(domainErrorTextProvider);
   final setting = ref.watch(selectedSettingProvider(index));
+
+  if (masterError != null || domainError != null) {
+    return const Result(
+      password: "",
+      pin: "",
+    );
+  }
+
   final password = Crypto.generatePassword(
     setting.hashAlgorithm,
     domain.text,
