@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
-
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:genpass/app/gloabls.dart';
-import 'package:genpass/app/notifications/generator.dart';
 import 'package:genpass/app/pages/setting.dart';
+import 'package:genpass/app/providers.dart';
 import 'package:genpass/app/widgets/result_row.dart';
-import 'package:genpass/domain/generator.dart';
-import 'package:genpass/domain/settings.dart';
 
 class GeneratorSection extends StatelessWidget {
-  const GeneratorSection({
+  const GeneratorSection._({
     Key? key,
   }) : super(key: key);
+
+  static Widget withIndex(BuildContext context, int index) {
+    return ProviderScope(
+      overrides: [
+        selectedSettingIndexProvider.overrideWithValue(index),
+      ],
+      child: const GeneratorSection._(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,61 +42,65 @@ class GeneratorSection extends StatelessWidget {
   }
 }
 
-class _PasswordResultRow extends StatelessWidget {
+class _PasswordResultRow extends ConsumerWidget {
   const _PasswordResultRow({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ScopedReader watch) {
     log.fine("_PasswordResultRow.build");
-    return ProxyProvider<Generator, String>(
-      update: (BuildContext context, Generator value, String? previous) {
-        log.fine("_PasswordResultRow.update");
-        return value.password;
+    final index = watch(selectedSettingIndexProvider);
+    final visible = watch(passwordVisibilityProvider(index));
+    final value = watch(resultPasswordProvider(index));
+    return ResultRow(
+      title: kTitlePassword,
+      icon: kIconPassword,
+      value: value,
+      enable: value != "-",
+      visible: visible,
+      onVisiblityChanged: (value) {
+        final ctrl = watch(passwordVisibilityProvider(index).notifier);
+        ctrl.state = value;
       },
-      child: ResultRowController.provider(
-        child: const ResultRow(
-          title: kTitlePassword,
-          icon: kIconPassword,
-        ),
-      ),
     );
   }
 }
 
-class _PinResultRow extends StatelessWidget {
+class _PinResultRow extends ConsumerWidget {
   const _PinResultRow({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ScopedReader watch) {
     log.fine("_PinResultRow.build");
-    return ProxyProvider<Generator, String>(
-      update: (BuildContext context, Generator value, String? previous) {
-        log.fine("_PinResultRow.update");
-        return value.pin;
+    final index = watch(selectedSettingIndexProvider);
+    final visible = watch(pinVisibilityProvider(index));
+    final value = watch(resultPinProvider(index));
+    return ResultRow(
+      title: kTitlePin,
+      icon: kIconPin,
+      value: value,
+      enable: value != "-",
+      visible: visible,
+      onVisiblityChanged: (value) {
+        final ctrl = watch(pinVisibilityProvider(index).notifier);
+        ctrl.state = value;
       },
-      child: ResultRowController.provider(
-        child: const ResultRow(
-          title: kTitlePin,
-          icon: kIconPin,
-        ),
-      ),
     );
   }
 }
 
-class _GeneratorTitle extends StatelessWidget {
+class _GeneratorTitle extends ConsumerWidget {
   const _GeneratorTitle({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ScopedReader watch) {
     log.fine("_GeneratorTitle.build");
-    final number = context.watch<int>();
+    final number = watch(selectedSettingIndexProvider);
     final themeData = Theme.of(context);
     final fontSize = themeData.textTheme.bodyText2!.fontSize!;
     const iconButtonConstraints = BoxConstraints(
@@ -115,7 +125,7 @@ class _GeneratorTitle extends StatelessWidget {
             color: themeData.colorScheme.secondaryVariant,
             padding: const EdgeInsets.all(0.0),
             constraints: iconButtonConstraints,
-            onPressed: () => _onSettingsPressed(context),
+            onPressed: () => SettingPage.push(context, number),
           ),
           IconButton(
             icon: const Icon(Icons.delete),
@@ -124,32 +134,13 @@ class _GeneratorTitle extends StatelessWidget {
             padding: const EdgeInsets.all(0.0),
             constraints: iconButtonConstraints,
             onPressed: () {
-              final notification = GeneratorRemoveNotification(number);
-              notification.dispatch(context);
+              final ctrl = context.read(settingListProvider.notifier);
+              ctrl.removeAt(number);
+              ctrl.save();
             },
           ),
         ],
       ),
     );
-  }
-
-  void _onSettingsPressed(BuildContext context) {
-    final generator = context.read<Generator>();
-
-    Navigator.maybeOf(context)?.push<Setting>(
-      MaterialPageRoute<Setting>(
-        builder: (BuildContext context) {
-          return SettingPage(setting: generator.setting);
-        },
-      ),
-    ).then((Setting? setting) async {
-      if (setting == null) {
-        return;
-      }
-      generator.setting = setting;
-
-      final notification = GeneratorUpdateNotification(generator);
-      notification.dispatch(context);
-    });
   }
 }

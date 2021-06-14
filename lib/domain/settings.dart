@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'hash_algorithm.dart';
@@ -14,6 +16,7 @@ const String _keyPasswordLength = "passwordLength";
 const String _keyPinLength = "pinLength";
 const String _keyHashAlgorithm = "hashAlgorithm";
 
+@immutable
 class Setting {
   const Setting({
     this.passwordLength = _defaultPasswordLength,
@@ -24,30 +27,88 @@ class Setting {
   final int passwordLength;
   final int pinLength;
   final HashAlgorithm hashAlgorithm;
+
+  Setting copyWith({
+    int? passwordLength,
+    int? pinLength,
+    HashAlgorithm? hashAlgorithm,
+  }) {
+    return Setting(
+      passwordLength: passwordLength ?? this.passwordLength,
+      pinLength: pinLength ?? this.pinLength,
+      hashAlgorithm: hashAlgorithm ?? this.hashAlgorithm,
+    );
+  }
 }
 
-class Settings {
-  Settings(this.items);
+class SettingController extends StateController<Setting> {
+  SettingController(
+    this.parent,
+    this.index,
+  ) : super(parent.items[index]);
 
-  Settings.single() : this(<Setting>[const Setting()]);
+  final SettingList parent;
 
-  final List<Setting> items;
+  final int index;
 
-  static Future<Settings> load() async {
+  @override
+  set state(Setting value) {
+    assert(parent.items[index] == state);
+    super.state = parent.items[index] = value;
+  }
+}
+
+class SettingList extends ChangeNotifier {
+  SettingList() {
+    load();
+  }
+
+  SettingList.items(List<Setting> items) {
+    this.items.addAll(items);
+  }
+
+  final items = <Setting>[];
+
+  bool _isLoading = false;
+
+  bool get isLoading => _isLoading;
+
+  void add(Setting item) {
+    items.add(item);
+    notifyListeners();
+  }
+
+  void removeAt(int index) {
+    items.removeAt(index);
+    notifyListeners();
+  }
+
+  Future<void> load() {
+    _isLoading = true;
+    try {
+      return _load();
+    } finally {
+      _isLoading = false;
+    }
+  }
+
+  Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final str = prefs.getString(_keySettings);
-    return decode(str);
+    final decodedItems = decode(str);
+    items.addAll(decodedItems);
+    notifyListeners();
   }
 
   Future<void> save() async {
-    final str = encode(this);
+    final str = encode(items);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keySettings, str);
   }
 
-  static Settings decode(String? str) {
+  static List<Setting> decode(String? str) {
     if (str == null || str.isEmpty) {
-      return Settings.single();
+      return [const Setting()];
     }
 
     final list = jsonDecode(str) as List<Object?>;
@@ -62,16 +123,15 @@ class Settings {
         hashAlgorithm: HashAlgorithmFactory.fromName(hashAlgorithm),
       );
     }).toList();
-
-    return Settings(items);
+    return items;
   }
 
-  static String encode(Settings settings) {
-    return jsonEncode(settings.items.map((Setting setting) {
+  static String encode(List<Setting> settings) {
+    return jsonEncode(settings.map((e) {
       return <String, Object?>{
-        _keyPasswordLength: setting.passwordLength,
-        _keyPinLength: setting.pinLength,
-        _keyHashAlgorithm: setting.hashAlgorithm.name,
+        _keyPasswordLength: e.passwordLength,
+        _keyPinLength: e.pinLength,
+        _keyHashAlgorithm: e.hashAlgorithm.name,
       };
     }).toList());
   }

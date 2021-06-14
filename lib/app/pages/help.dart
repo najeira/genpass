@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:provider/provider.dart';
-
+import 'package:genpass/app/providers.dart';
 import 'package:genpass/app/widgets/setting_caption.dart';
 
 class HelpPage extends StatelessWidget {
-  const HelpPage({
+  const HelpPage._({
     Key? key,
   }) : super(key: key);
+
+  static Future<void> push(BuildContext context) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return const HelpPage._();
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,14 +40,14 @@ class HelpPage extends StatelessWidget {
   }
 }
 
-class _ThemeModeRow extends StatelessWidget {
+class _ThemeModeRow extends ConsumerWidget {
   const _ThemeModeRow({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final notifier = context.watch<ValueNotifier<ThemeMode>>();
+  Widget build(BuildContext context, ScopedReader watch) {
+    final themeMode = watch(themeModeProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -48,35 +58,37 @@ class _ThemeModeRow extends StatelessWidget {
         RadioListTile<ThemeMode>(
           title: const Text("System"),
           value: ThemeMode.system,
-          groupValue: notifier.value,
+          groupValue: themeMode,
           onChanged: (ThemeMode? value) {
-            if (value != null) {
-              notifier.value = value;
-            }
+            _updateThemeMode(context, value);
           },
         ),
         RadioListTile<ThemeMode>(
           title: const Text("Light"),
           value: ThemeMode.light,
-          groupValue: notifier.value,
+          groupValue: themeMode,
           onChanged: (ThemeMode? value) {
-            if (value != null) {
-              notifier.value = value;
-            }
+            _updateThemeMode(context, value);
           },
         ),
         RadioListTile<ThemeMode>(
           title: const Text("Dark"),
           value: ThemeMode.dark,
-          groupValue: notifier.value,
+          groupValue: themeMode,
           onChanged: (ThemeMode? value) {
-            if (value != null) {
-              notifier.value = value;
-            }
+            _updateThemeMode(context, value);
           },
         ),
       ],
     );
+  }
+
+  void _updateThemeMode(BuildContext context, ThemeMode? value) {
+    if (value == null) {
+      return;
+    }
+    final ctrl = context.read(themeModeProvider.notifier);
+    ctrl.state = value;
   }
 }
 
@@ -108,9 +120,17 @@ class _AboutRow extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const <Widget>[
-                ListTile(title: Text("GenPass app made by najeira")),
+                ListTile(
+                  title: Text(
+                    "GenPass app made by najeira",
+                  ),
+                ),
                 // <div>Icons made by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
-                ListTile(title: Text("App icon made by Becris from www.flaticon.com")),
+                ListTile(
+                  title: Text(
+                    "App icon made by Becris from www.flaticon.com",
+                  ),
+                ),
               ],
             ),
           ],

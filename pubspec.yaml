@@ -3,19 +3,18 @@ description: A password generator app written by Flutter/Dart.
 
 publish_to: 'none'
 
-version: 2.2.0+2020000
+version: 2.3.1+2030100
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.13.0 <3.0.0'
 
 dependencies:
   crypto: ^3.0.1
   flutter:
     sdk: flutter
+  flutter_riverpod: ^0.14.0+3
   logging: ^1.0.1
-  provider: ^5.0.0
-  shared_preferences: ^2.0.5
-  tuple: ^2.0.0
+  shared_preferences: ^2.0.6
 
 dev_dependencies:
   fake_async: ^1.2.0
@@ -26,3 +25,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/appicon.png
+  fonts:
+    - family: SourceCodePro
+      fonts:
+        - asset: assets/SourceCodePro-Regular.ttf

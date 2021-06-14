@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-import 'package:provider/provider.dart';
 
 import 'package:genpass/app/gloabls.dart';
-import 'package:genpass/domain/error_message.dart';
 
 class InputRow extends StatelessWidget {
   const InputRow({
     Key? key,
+    required this.controller,
     required this.inputIcon,
     required this.textInputType,
     required this.labelText,
     required this.hintText,
+    this.errorText,
     this.obscureText = false,
     required this.actionButton,
   }) : super(key: key);
 
+  final TextEditingController controller;
   final IconData inputIcon;
-
   final TextInputType textInputType;
   final String labelText;
   final String hintText;
+  final String? errorText;
   final bool obscureText;
-
   final Widget actionButton;
 
   @override
@@ -40,16 +38,13 @@ class InputRow extends StatelessWidget {
   }
 
   Widget _buildTextField(BuildContext context) {
-    log.fine("InputRow(${labelText})._buildTextField");
-    final controller = Provider.of<TextEditingController>(context, listen: false);
-    final errorMessage = context.watch<ErrorMessage?>();
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         icon: Icon(inputIcon, size: kInputIconSize),
         labelText: labelText,
         hintText: hintText,
-        errorText: errorMessage?.value,
+        errorText: errorText,
       ),
       keyboardType: textInputType,
       obscureText: obscureText,
