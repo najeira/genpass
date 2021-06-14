@@ -25,3 +25,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/appicon.png
+  fonts:
+    - family: SourceCodePro
+      fonts:
+        - asset: assets/SourceCodePro-Regular.ttf
