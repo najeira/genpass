@@ -8,22 +8,24 @@ class Result {
   final String pin;
 }
 
-class ResultRow {
-  const ResultRow({
-    required this.text,
+class Value {
+  const Value({
+    required this.rawText,
     required this.visible,
   });
 
-  final String text;
+  final String rawText;
 
   final bool visible;
 
+  bool get enable => rawText.isNotEmpty;
+
   String get showText {
-    if (text.isEmpty) {
+    if (rawText.isEmpty) {
       return "-";
     } else if (!visible) {
-      return "".padRight(text.length, "*");
+      return "".padRight(rawText.length, "*");
     }
-    return text;
+    return rawText;
   }
 }

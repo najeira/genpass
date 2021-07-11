@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:genpass/app/gloabls.dart' show log;
+import 'package:genpass/domain/result.dart';
 
 import 'copy_button.dart';
 import 'result_text.dart';
@@ -13,16 +14,12 @@ class ResultRow extends StatelessWidget {
     required this.title,
     required this.value,
     required this.icon,
-    required this.enable,
-    required this.visible,
     required this.onVisiblityChanged,
   }) : super(key: key);
 
   final String title;
-  final String value;
+  final Value value;
   final IconData icon;
-  final bool enable;
-  final bool visible;
   final ValueChanged<bool> onVisiblityChanged;
 
   @override
@@ -40,18 +37,18 @@ class ResultRow extends StatelessWidget {
         Expanded(
           child: ResultText(
             title: title,
-            value: value,
+            value: value.showText,
           ),
         ),
         VisibilityButton(
-          enable: enable,
-          visible: visible,
+          enable: value.enable,
+          visible: value.visible,
           onSelected: onVisiblityChanged,
         ),
         CopyButton(
           enable: true,
           onPressed: () {
-            _copyTextToClipboard(context, title, value);
+            _copyTextToClipboard(context, title, value.rawText);
           },
         ),
       ],
