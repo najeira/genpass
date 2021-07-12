@@ -51,14 +51,11 @@ class _PasswordResultRow extends ConsumerWidget {
   Widget build(BuildContext context, ScopedReader watch) {
     log.fine("_PasswordResultRow.build");
     final index = watch(selectedSettingIndexProvider);
-    final visible = watch(passwordVisibilityProvider(index));
     final value = watch(resultPasswordProvider(index));
     return ResultRow(
       title: kTitlePassword,
       icon: kIconPassword,
       value: value,
-      enable: value != "-",
-      visible: visible,
       onVisiblityChanged: (value) {
         final ctrl = watch(passwordVisibilityProvider(index).notifier);
         ctrl.state = value;
@@ -76,14 +73,11 @@ class _PinResultRow extends ConsumerWidget {
   Widget build(BuildContext context, ScopedReader watch) {
     log.fine("_PinResultRow.build");
     final index = watch(selectedSettingIndexProvider);
-    final visible = watch(pinVisibilityProvider(index));
     final value = watch(resultPinProvider(index));
     return ResultRow(
       title: kTitlePin,
       icon: kIconPin,
       value: value,
-      enable: value != "-",
-      visible: visible,
       onVisiblityChanged: (value) {
         final ctrl = watch(pinVisibilityProvider(index).notifier);
         ctrl.state = value;

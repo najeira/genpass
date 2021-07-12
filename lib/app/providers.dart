@@ -135,27 +135,23 @@ final resultProvider = Provider.family.autoDispose<Result, int>((ref, index) {
 });
 
 final resultPasswordProvider =
-    Provider.family.autoDispose<String, int>((ref, index) {
+    Provider.family.autoDispose<Value, int>((ref, index) {
   final visible = ref.watch(passwordVisibilityProvider(index));
   final result = ref.watch(resultProvider(index));
   final text = result.password;
-  if (text.isEmpty) {
-    return "-";
-  } else if (!visible) {
-    return "".padRight(text.length, "*");
-  }
-  return text;
+  return Value(
+    rawText: text,
+    visible: visible,
+  );
 });
 
 final resultPinProvider =
-    Provider.family.autoDispose<String, int>((ref, index) {
+    Provider.family.autoDispose<Value, int>((ref, index) {
   final visible = ref.watch(pinVisibilityProvider(index));
   final result = ref.watch(resultProvider(index));
   final text = result.pin;
-  if (text.isEmpty) {
-    return "-";
-  } else if (!visible) {
-    return "".padRight(text.length, "*");
-  }
-  return text;
+  return Value(
+    rawText: text,
+    visible: visible,
+  );
 });
