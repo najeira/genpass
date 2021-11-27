@@ -84,7 +84,7 @@ class LoadingPage extends StatelessWidget {
           children: [
             const SizedBox(height: 32.0),
             Text(
-              "GenPass",
+              "IdemPass",
               style: textTheme.caption!.copyWith(
                 fontSize: 24.0,
               ),

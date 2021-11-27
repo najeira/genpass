@@ -122,7 +122,7 @@ class _AboutRow extends StatelessWidget {
               children: const <Widget>[
                 ListTile(
                   title: Text(
-                    "GenPass app made by najeira",
+                    "IdemPass app made by najeira",
                   ),
                 ),
                 // <div>Icons made by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
