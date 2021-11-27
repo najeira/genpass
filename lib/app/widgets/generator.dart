@@ -48,16 +48,16 @@ class _PasswordResultRow extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_PasswordResultRow.build");
-    final index = watch(selectedSettingIndexProvider);
-    final value = watch(resultPasswordProvider(index));
+    final index = ref.watch(selectedSettingIndexProvider);
+    final value = ref.watch(resultPasswordProvider(index));
     return ResultRow(
       title: kTitlePassword,
       icon: kIconPassword,
       value: value,
       onVisiblityChanged: (value) {
-        final ctrl = watch(passwordVisibilityProvider(index).notifier);
+        final ctrl = ref.watch(passwordVisibilityProvider(index).notifier);
         ctrl.state = value;
       },
     );
@@ -70,16 +70,16 @@ class _PinResultRow extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_PinResultRow.build");
-    final index = watch(selectedSettingIndexProvider);
-    final value = watch(resultPinProvider(index));
+    final index = ref.watch(selectedSettingIndexProvider);
+    final value = ref.watch(resultPinProvider(index));
     return ResultRow(
       title: kTitlePin,
       icon: kIconPin,
       value: value,
       onVisiblityChanged: (value) {
-        final ctrl = watch(pinVisibilityProvider(index).notifier);
+        final ctrl = ref.watch(pinVisibilityProvider(index).notifier);
         ctrl.state = value;
       },
     );
@@ -92,9 +92,9 @@ class _GeneratorTitle extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_GeneratorTitle.build");
-    final number = watch(selectedSettingIndexProvider);
+    final number = ref.watch(selectedSettingIndexProvider);
     final themeData = Theme.of(context);
     final fontSize = themeData.textTheme.bodyText2!.fontSize!;
     const iconButtonConstraints = BoxConstraints(
@@ -128,7 +128,7 @@ class _GeneratorTitle extends ConsumerWidget {
             padding: const EdgeInsets.all(0.0),
             constraints: iconButtonConstraints,
             onPressed: () {
-              final ctrl = context.read(settingListProvider.notifier);
+              final ctrl = ref.read(settingListProvider.notifier);
               ctrl.removeAt(number);
               ctrl.save();
             },

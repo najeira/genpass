@@ -46,8 +46,8 @@ class _ThemeModeRow extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final themeMode = watch(themeModeProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -60,7 +60,7 @@ class _ThemeModeRow extends ConsumerWidget {
           value: ThemeMode.system,
           groupValue: themeMode,
           onChanged: (ThemeMode? value) {
-            _updateThemeMode(context, value);
+            _updateThemeMode(context, ref, value);
           },
         ),
         RadioListTile<ThemeMode>(
@@ -68,7 +68,7 @@ class _ThemeModeRow extends ConsumerWidget {
           value: ThemeMode.light,
           groupValue: themeMode,
           onChanged: (ThemeMode? value) {
-            _updateThemeMode(context, value);
+            _updateThemeMode(context, ref, value);
           },
         ),
         RadioListTile<ThemeMode>(
@@ -76,18 +76,18 @@ class _ThemeModeRow extends ConsumerWidget {
           value: ThemeMode.dark,
           groupValue: themeMode,
           onChanged: (ThemeMode? value) {
-            _updateThemeMode(context, value);
+            _updateThemeMode(context, ref, value);
           },
         ),
       ],
     );
   }
 
-  void _updateThemeMode(BuildContext context, ThemeMode? value) {
+  void _updateThemeMode(BuildContext context, WidgetRef ref, ThemeMode? value) {
     if (value == null) {
       return;
     }
-    final ctrl = context.read(themeModeProvider.notifier);
+    final ctrl = ref.read(themeModeProvider.notifier);
     ctrl.state = value;
   }
 }
@@ -122,7 +122,7 @@ class _AboutRow extends StatelessWidget {
               children: const <Widget>[
                 ListTile(
                   title: Text(
-                    "GenPass app made by najeira",
+                    "IdemPass app made by najeira",
                   ),
                 ),
                 // <div>Icons made by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>

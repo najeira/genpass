@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:genpass/app/providers.dart';
 import 'package:genpass/app/gloabls.dart';
+import 'package:genpass/app/providers.dart';
 
 import 'generator.dart';
 
@@ -13,9 +13,9 @@ class MyApp extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     log.fine("MyApp.build");
-    final themeMode = watch(themeModeProvider);
+    final themeMode = ref.watch(themeModeProvider);
     final textTheme = _textTheme(context);
     final lightTheme = ThemeData.from(
       colorScheme: const ColorScheme.light(),
@@ -53,9 +53,9 @@ class LaunchPage extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     log.fine("LaunchPage.build");
-    final isLoading = watch(isLaunchingProvider);
+    final isLoading = ref.watch(isLaunchingProvider);
     if (isLoading) {
       return const LoadingPage();
     }
@@ -84,7 +84,7 @@ class LoadingPage extends StatelessWidget {
           children: [
             const SizedBox(height: 32.0),
             Text(
-              "GenPass",
+              "IdemPass",
               style: textTheme.caption!.copyWith(
                 fontSize: 24.0,
               ),

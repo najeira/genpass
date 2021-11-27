@@ -64,8 +64,8 @@ class _SearchTextField extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final text = watch(_textEditingProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = ref.watch(_textEditingProvider);
     return TextField(
       controller: text,
       decoration: const InputDecoration(
@@ -88,8 +88,8 @@ class _HistoryListView extends ConsumerWidget {
   final ValueChanged<String> onSelected;
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final entries = watch(_filteredHistoryProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final entries = ref.watch(_filteredHistoryProvider);
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: entries.length,

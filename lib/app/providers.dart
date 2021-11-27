@@ -44,7 +44,7 @@ final isLaunchingProvider = Provider<bool>((ref) {
   return h.isLoading || s.isLoading || l;
 });
 
-final selectedSettingIndexProvider = ScopedProvider<int>(null);
+final selectedSettingIndexProvider = Provider<int>((ref) => 0);
 
 final selectedSettingProvider = StateNotifierProvider.family
     .autoDispose<SettingController, Setting, int>((ref, index) {
@@ -52,14 +52,14 @@ final selectedSettingProvider = StateNotifierProvider.family
   return SettingController(settings, index);
 });
 
-Setting selectedSetting(ScopedReader reader) {
-  final index = reader(selectedSettingIndexProvider);
-  return reader(selectedSettingProvider(index));
+Setting watchSelectedSetting(WidgetRef ref) {
+  final index = ref.watch(selectedSettingIndexProvider);
+  return ref.watch(selectedSettingProvider(index));
 }
 
-SettingController selectedSettingController(ScopedReader reader) {
-  final index = reader(selectedSettingIndexProvider);
-  return reader(selectedSettingProvider(index).notifier);
+SettingController readSelectedSettingController(WidgetRef ref) {
+  final index = ref.read(selectedSettingIndexProvider);
+  return ref.read(selectedSettingProvider(index).notifier);
 }
 
 final masterTextEditingProvider =

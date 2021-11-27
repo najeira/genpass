@@ -12,18 +12,19 @@ import 'package:genpass/domain/settings.dart';
 import 'help.dart';
 import 'history.dart';
 
-class GenPassPage extends StatefulWidget {
+class GenPassPage extends ConsumerStatefulWidget {
   const GenPassPage({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() {
+  ConsumerState createState() {
     return _GenPassPageState();
   }
 }
 
-class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
+class _GenPassPageState extends ConsumerState<GenPassPage>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -62,13 +63,13 @@ class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   }
 
   Future<bool> _addHistory() async {
-    final domain = context.read(domainTextEditingProvider);
+    final domain = ref.read(domainTextEditingProvider);
     if (domain.text.isEmpty) {
       log.config("domain is empty");
       return false;
     }
 
-    final history = context.read(historyProvider);
+    final history = ref.read(historyProvider);
     history.add(domain.text);
     await history.save();
     log.config("domain ${domain.text} is added to history");
@@ -111,11 +112,11 @@ class _MasterInputRow extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_MasterInputRow.build");
-    final text = watch(masterTextEditingProvider);
-    final visible = watch(masterVisibleProvider);
-    final errorText = watch(masterErrorTextProvider);
+    final text = ref.watch(masterTextEditingProvider);
+    final visible = ref.watch(masterVisibleProvider);
+    final errorText = ref.watch(masterErrorTextProvider);
     return InputRow(
       controller: text,
       textInputType: TextInputType.visiblePassword,
@@ -128,7 +129,7 @@ class _MasterInputRow extends ConsumerWidget {
         enable: true,
         visible: visible,
         onSelected: (value) {
-          final ctrl = context.read(masterVisibleProvider.notifier);
+          final ctrl = ref.read(masterVisibleProvider.notifier);
           ctrl.state = value;
         },
       ),
@@ -142,10 +143,10 @@ class _DomainInputRow extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_DomainInputRow.build");
-    final text = watch(domainTextEditingProvider);
-    final errorText = watch(domainErrorTextProvider);
+    final text = ref.watch(domainTextEditingProvider);
+    final errorText = ref.watch(domainErrorTextProvider);
     return InputRow(
       controller: text,
       textInputType: TextInputType.url,
@@ -156,16 +157,16 @@ class _DomainInputRow extends ConsumerWidget {
       obscureText: false,
       actionButton: HistoryButton(
         onPressed: () {
-          _showHistoryPage(context);
+          _showHistoryPage(context, ref);
         },
       ),
     );
   }
 
-  void _showHistoryPage(BuildContext context) {
+  void _showHistoryPage(BuildContext context, WidgetRef ref) {
     HistoryPage.push(context).then((String? domainText) {
       if (domainText != null && domainText.isNotEmpty) {
-        final domain = context.read(domainTextEditingProvider);
+        final domain = ref.read(domainTextEditingProvider);
         domain.text = domainText;
         log.config("domain is ${domainText}");
       }
@@ -204,9 +205,9 @@ class _GeneratorList extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_GeneratorList.build");
-    final settings = watch(settingListProvider);
+    final settings = ref.watch(settingListProvider);
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,7 +217,7 @@ class _GeneratorList extends ConsumerWidget {
         Center(
           child: TextButton.icon(
             onPressed: () {
-              _onAddSetting(context);
+              _onAddSetting(context, ref);
             },
             icon: const Icon(Icons.add_circle),
             label: const Text("Add Generator"),
@@ -227,8 +228,8 @@ class _GeneratorList extends ConsumerWidget {
     );
   }
 
-  Future<void> _onAddSetting(BuildContext context) {
-    final ctrl = context.read(settingListProvider.notifier);
+  Future<void> _onAddSetting(BuildContext context, WidgetRef ref) {
+    final ctrl = ref.read(settingListProvider.notifier);
     ctrl.add(const Setting());
     return ctrl.save();
   }

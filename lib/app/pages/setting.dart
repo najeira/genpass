@@ -69,11 +69,11 @@ class _PasswordLengthSlider extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final setting = selectedSetting(watch);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final setting = watchSelectedSetting(ref);
     return _Slider(
       onChanged: (int value) {
-        final ctrl = selectedSettingController(context.read);
+        final ctrl = readSelectedSettingController(ref);
         ctrl.state = ctrl.state.copyWith(passwordLength: value);
       },
       title: "Password length",
@@ -91,11 +91,11 @@ class _PinLengthSlider extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final setting = selectedSetting(watch);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final setting = watchSelectedSetting(ref);
     return _Slider(
       onChanged: (int value) {
-        final ctrl = selectedSettingController(context.read);
+        final ctrl = readSelectedSettingController(ref);
         ctrl.state = ctrl.state.copyWith(pinLength: value);
       },
       title: "PIN length",
@@ -155,8 +155,8 @@ class _Algorithms extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final setting = selectedSetting(watch);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final setting = watchSelectedSetting(ref);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -169,18 +169,14 @@ class _Algorithms extends ConsumerWidget {
           value: HashAlgorithm.md5,
           groupValue: setting.hashAlgorithm,
           onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
-            context,
-            value,
-          ),
+            context, ref, value),
         ),
         RadioListTile<HashAlgorithm>(
           title: const Text("SHA512"),
           value: HashAlgorithm.sha512,
           groupValue: setting.hashAlgorithm,
           onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
-            context,
-            value,
-          ),
+            context, ref, value),
         ),
       ],
     );
@@ -188,11 +184,12 @@ class _Algorithms extends ConsumerWidget {
 
   void _onHashAlgorithmChanged(
     BuildContext context,
+    WidgetRef ref,
     HashAlgorithm? value,
   ) {
-    final confirmation = context.read(_confirmationProvider);
+    final confirmation = ref.read(_confirmationProvider);
     if (confirmation) {
-      _updateHashAlgorithm(context, value);
+      _updateHashAlgorithm(context, ref, value);
       return;
     }
 
@@ -222,20 +219,21 @@ class _Algorithms extends ConsumerWidget {
       },
     ).then((bool? confirm) {
       // confirmed
-      final ctrl = context.read(_confirmationProvider.notifier);
+      final ctrl = ref.read(_confirmationProvider.notifier);
       ctrl.state = true;
 
       if (confirm == true) {
-        _updateHashAlgorithm(context, value);
+        _updateHashAlgorithm(context, ref, value);
       }
     });
   }
 
   void _updateHashAlgorithm(
     BuildContext context,
+    WidgetRef ref,
     HashAlgorithm? value,
   ) {
-    final ctrl = selectedSettingController(context.read);
+    final ctrl = readSelectedSettingController(ref);
     ctrl.state = ctrl.state.copyWith(hashAlgorithm: value);
   }
 }
