@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:genpass/app/gloabls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const String _keyHistoryEntries = "historyEntries";
@@ -51,11 +52,13 @@ class History extends ChangeNotifier {
       entries.addAll(value);
       notifyListeners();
     }
+    log.config("histories is loaded ${entries.length}");
   }
 
   Future<void> save() async {
     final value = entries.toList();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_keyHistoryEntries, value);
+    log.config("histories is saved ${entries.length}");
   }
 }

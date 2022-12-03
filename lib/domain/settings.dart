@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:genpass/app/gloabls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'hash_algorithm.dart';
@@ -97,6 +98,7 @@ class SettingList extends ChangeNotifier {
     final str = prefs.getString(_keySettings);
     final decodedItems = decode(str);
     items.addAll(decodedItems);
+    log.config("settings is loaded ${items.length}");
     notifyListeners();
   }
 
@@ -104,6 +106,7 @@ class SettingList extends ChangeNotifier {
     final str = encode(items);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keySettings, str);
+    log.config("settings is saved ${items.length}");
   }
 
   static List<Setting> decode(String? str) {
