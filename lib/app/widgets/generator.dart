@@ -119,7 +119,11 @@ class _GeneratorTitle extends ConsumerWidget {
             color: themeData.colorScheme.secondaryVariant,
             padding: const EdgeInsets.all(0.0),
             constraints: iconButtonConstraints,
-            onPressed: () => SettingPage.push(context, number),
+            onPressed: () async {
+              await SettingPage.push(context, number);
+              final ctrl = ref.read(settingListProvider.notifier);
+              await ctrl.save();
+            },
           ),
           IconButton(
             icon: const Icon(Icons.delete),
@@ -127,10 +131,10 @@ class _GeneratorTitle extends ConsumerWidget {
             color: themeData.colorScheme.secondaryVariant,
             padding: const EdgeInsets.all(0.0),
             constraints: iconButtonConstraints,
-            onPressed: () {
+            onPressed: () async {
               final ctrl = ref.read(settingListProvider.notifier);
               ctrl.removeAt(number);
-              ctrl.save();
+              await ctrl.save();
             },
           ),
         ],
