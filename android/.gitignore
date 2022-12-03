@@ -5,4 +5,6 @@ gradle-wrapper.jar
 /gradlew.bat
 /local.properties
 GeneratedPluginRegistrant.java
-keystore.properties
+/app/google-services.json
+key.properties
+key.jks
