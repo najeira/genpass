@@ -76,7 +76,7 @@ class LoadingPage extends StatelessWidget {
     final textTheme = themeData.textTheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(kAppName),
+        title: Text(kAppName),
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -84,7 +84,7 @@ class LoadingPage extends StatelessWidget {
           children: [
             const SizedBox(height: 32.0),
             Text(
-              "IdemPass",
+              kAppName,
               style: textTheme.caption!.copyWith(
                 fontSize: 24.0,
               ),

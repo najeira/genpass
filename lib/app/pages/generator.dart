@@ -50,7 +50,7 @@ class _GenPassPageState extends ConsumerState<GenPassPage>
     log.fine("GenPassPage.build");
     return Scaffold(
       appBar: AppBar(
-        title: const Text(kAppName),
+        title: Text(kAppName),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.info),
