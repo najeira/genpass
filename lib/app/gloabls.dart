@@ -22,5 +22,5 @@ String _getAppName() {
   if (p == TargetPlatform.android) {
     return "GenPass";
   }
-  return "IdemPass";
+  return "GenPass";
 }

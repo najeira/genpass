@@ -1,8 +1,8 @@
-# IdemPass
+# GenPass
 
 ## ja
 
-IdemPass - 暗号パスワード生成
+GenPass - 暗号パスワード生成
 
 サイト名とパスフレーズの組み合わせから、暗号学的ハッシュ関数を利用して強固なパスワードを生成します
 
@@ -18,7 +18,7 @@ IdemPass - 暗号パスワード生成
 
 ## en
 
-IdemPass - cryptographic password generator
+GenPass - cryptographic password generator
 
 Generate strong passwords using a cryptographic hash function.
 
