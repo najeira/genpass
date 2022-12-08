@@ -2,7 +2,7 @@
     package="com.najeira.genpass">
     <application
         android:name="${applicationName}"
-        android:label="GenPass"
+        android:label="AlgoGenPass"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

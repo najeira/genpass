@@ -20,7 +20,7 @@ final Logger log = Logger(kAppName);
 String _getAppName() {
   final p = defaultTargetPlatform;
   if (p == TargetPlatform.android) {
-    return "GenPass";
+    return "AlgoGenPass";
   }
-  return "GenPass";
+  return "AlgoGenPass";
 }
