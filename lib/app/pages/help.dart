@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:genpass/app/gloabls.dart';
 import 'package:genpass/app/providers.dart';
 import 'package:genpass/app/widgets/setting_caption.dart';
 
@@ -119,14 +120,14 @@ class _AboutRow extends StatelessWidget {
           children: <Widget>[
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[
+              children: <Widget>[
                 ListTile(
                   title: Text(
-                    "IdemPass app made by najeira",
+                    "${kAppName} app made by najeira",
                   ),
                 ),
                 // <div>Icons made by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
-                ListTile(
+                const ListTile(
                   title: Text(
                     "App icon made by Becris from www.flaticon.com",
                   ),
