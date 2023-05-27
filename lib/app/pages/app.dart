@@ -36,10 +36,10 @@ class MyApp extends ConsumerWidget {
 
   TextTheme _textTheme(BuildContext context) {
     return const TextTheme(
-      bodyText2: TextStyle(
+      bodySmall: TextStyle(
         fontSize: 18.0,
       ),
-      subtitle1: TextStyle(
+      titleSmall: TextStyle(
         fontSize: 18.0,
       ),
     );
@@ -85,7 +85,7 @@ class LoadingPage extends StatelessWidget {
             const SizedBox(height: 32.0),
             Text(
               kAppName,
-              style: textTheme.caption!.copyWith(
+              style: textTheme.bodySmall!.copyWith(
                 fontSize: 24.0,
               ),
             ),

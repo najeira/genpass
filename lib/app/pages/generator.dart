@@ -191,7 +191,7 @@ class _SectionTitle extends StatelessWidget {
       child: Text(
         title!,
         style: TextStyle(
-          fontSize: themeData.textTheme.bodyText2!.fontSize,
+          fontSize: themeData.textTheme.bodyMedium!.fontSize,
           fontWeight: FontWeight.w500,
         ),
       ),
