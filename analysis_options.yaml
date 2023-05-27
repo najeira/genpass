@@ -84,7 +84,6 @@ linter:
     - exhaustive_cases
     - file_names
     #- flutter_style_todos
-    - invariant_booleans
     - iterable_contains_unrelated_type
     #- join_return_with_assignment
     #- leading_newlines_in_multiline_strings
@@ -196,7 +195,6 @@ linter:
     - prefer_collection_literals
     - prefer_conditional_assignment
     - prefer_contains
-    - prefer_equal_for_default_values
     - prefer_final_fields
     - prefer_for_elements_to_map_fromIterable
     - prefer_generic_function_type_aliases
