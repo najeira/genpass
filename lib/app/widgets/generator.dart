@@ -23,10 +23,10 @@ class GeneratorSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     log.fine("GeneratorSection.build");
-    return Column(
+    return const Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const <Widget>[
+      children: <Widget>[
         _GeneratorTitle(),
         Padding(
           padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),

@@ -84,11 +84,11 @@ class _GeneratorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return const SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const <Widget>[
+        children: <Widget>[
           _SectionTitle(title: "Form"),
           Padding(
             padding: EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
