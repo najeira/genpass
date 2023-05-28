@@ -3,10 +3,11 @@ description: A password generator app written by Flutter/Dart.
 
 publish_to: 'none'
 
-version: 2.5.2+2050200
+version: 2.6.0+2060000
 
 environment:
-  sdk: '>=2.14.0 <3.0.0'
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.0.0"
 
 dependencies:
   crypto: ^3.0.1

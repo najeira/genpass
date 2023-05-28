@@ -31,7 +31,7 @@ class ResultRow extends StatelessWidget {
       children: <Widget>[
         Icon(
           icon,
-          color: textTheme.caption!.color,
+          color: textTheme.bodySmall!.color,
         ),
         const SizedBox(width: 16.0),
         Expanded(

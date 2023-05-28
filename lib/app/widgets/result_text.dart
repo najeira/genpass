@@ -22,7 +22,7 @@ class ResultText extends StatelessWidget {
       children: <Widget>[
         Text(
           title,
-          style: textTheme.caption,
+          style: textTheme.bodySmall,
         ),
         const SizedBox(height: 4.0),
         _PasswordText(value: value),
@@ -67,7 +67,7 @@ class _PasswordText extends StatelessWidget {
           );
         }).toList(),
       ),
-      style: theme.textTheme.bodyText2!.copyWith(
+      style: theme.textTheme.bodyMedium!.copyWith(
         fontFamily: "SourceCodePro",
       ),
     );

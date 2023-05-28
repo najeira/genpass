@@ -21,13 +21,13 @@ class SettingCaption extends StatelessWidget {
         children: <Widget>[
           Icon(
             icon,
-            size: textTheme.subtitle1!.fontSize,
+            size: textTheme.titleMedium!.fontSize,
           ),
           const SizedBox(width: 8.0),
           Text(
             title,
             style: TextStyle(
-              fontSize: textTheme.subtitle1!.fontSize,
+              fontSize: textTheme.titleMedium!.fontSize,
               fontWeight: FontWeight.w500,
             ),
           ),

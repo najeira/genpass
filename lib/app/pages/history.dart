@@ -41,13 +41,7 @@ class HistoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Theme(
-          data: ThemeData(
-            brightness: Brightness.dark,
-            accentColor: Colors.white,
-          ),
-          child: const _SearchTextField(),
-        ),
+        title: const _SearchTextField(),
       ),
       body: _HistoryListView(
         onSelected: (String value) {
@@ -116,7 +110,7 @@ class _HistoryListView extends ConsumerWidget {
         ),
         child: Text(
           value,
-          style: textTheme.bodyText2,
+          style: textTheme.bodyMedium,
         ),
       ),
     );

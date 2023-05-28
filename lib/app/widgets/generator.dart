@@ -23,10 +23,10 @@ class GeneratorSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     log.fine("GeneratorSection.build");
-    return Column(
+    return const Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const <Widget>[
+      children: <Widget>[
         _GeneratorTitle(),
         Padding(
           padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
@@ -96,7 +96,7 @@ class _GeneratorTitle extends ConsumerWidget {
     log.fine("_GeneratorTitle.build");
     final number = ref.watch(selectedSettingIndexProvider);
     final themeData = Theme.of(context);
-    final fontSize = themeData.textTheme.bodyText2!.fontSize!;
+    final fontSize = themeData.textTheme.bodyMedium!.fontSize!;
     const iconButtonConstraints = BoxConstraints(
       minWidth: 32.0,
       minHeight: 24.0,
@@ -116,7 +116,7 @@ class _GeneratorTitle extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.settings),
             iconSize: fontSize,
-            color: themeData.colorScheme.secondaryVariant,
+            color: themeData.colorScheme.secondaryContainer,
             padding: const EdgeInsets.all(0.0),
             constraints: iconButtonConstraints,
             onPressed: () async {
@@ -128,7 +128,7 @@ class _GeneratorTitle extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.delete),
             iconSize: fontSize,
-            color: themeData.colorScheme.secondaryVariant,
+            color: themeData.colorScheme.secondaryContainer,
             padding: const EdgeInsets.all(0.0),
             constraints: iconButtonConstraints,
             onPressed: () async {
