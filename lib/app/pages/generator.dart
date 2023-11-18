@@ -51,11 +51,8 @@ class _GenPassPageState extends ConsumerState<GenPassPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(kAppName),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.info),
-            onPressed: () => HelpPage.push(context),
-          ),
+        actions: const <Widget>[
+          _HelpButton(),
         ],
       ),
       body: const _GeneratorBody(),
@@ -77,6 +74,20 @@ class _GenPassPageState extends ConsumerState<GenPassPage>
   }
 }
 
+class _HelpButton extends StatelessWidget {
+  const _HelpButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.info),
+      onPressed: () => HelpPage.push(context),
+    );
+  }
+}
+
 class _GeneratorBody extends StatelessWidget {
   const _GeneratorBody({
     Key? key,
@@ -84,24 +95,19 @@ class _GeneratorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _SectionTitle(title: "Form"),
-          Padding(
-            padding: EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
-            child: _MasterInputRow(),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 24.0),
-            child: _DomainInputRow(),
-          ),
-          Divider(),
-          _GeneratorList(),
-        ],
-      ),
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: const <Widget>[
+        _SectionTitle(title: "Source"),
+        SizedBox(height: 8.0),
+        _MasterInputRow(),
+        SizedBox(height: 12.0),
+        _DomainInputRow(),
+        SizedBox(height: 24.0),
+        Divider(height: 1.0),
+        _GeneratorList(),
+        SizedBox(height: 100.0),
+      ],
     );
   }
 }
@@ -186,15 +192,9 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     log.fine("_SectionTitle.build");
     final themeData = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 16.0, 8.0, 8.0),
-      child: Text(
-        title!,
-        style: TextStyle(
-          fontSize: themeData.textTheme.bodyMedium!.fontSize,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
+    return Text(
+      title!,
+      style: themeData.textTheme.titleSmall,
     );
   }
 }
@@ -223,7 +223,6 @@ class _GeneratorList extends ConsumerWidget {
             label: const Text("Add Generator"),
           ),
         ),
-        const SizedBox(height: 16.0),
       ],
     );
   }

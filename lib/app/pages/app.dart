@@ -15,37 +15,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     log.fine("MyApp.build");
-    final textTheme = _textTheme(context);
+    const seedColor = Colors.indigo;
+    const useMaterial3 = true;
     final lightTheme = ThemeData.from(
-      useMaterial3: true,
+      useMaterial3: useMaterial3,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xff6200ee),
+        seedColor: seedColor,
         brightness: Brightness.light,
       ),
-      textTheme: textTheme,
     );
     final darkTheme = ThemeData.from(
-      useMaterial3: true,
+      useMaterial3: useMaterial3,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xffbb86fc),
+        seedColor: seedColor,
         brightness: Brightness.dark,
       ),
-      textTheme: textTheme,
     );
     return _MyApp(
       lightTheme: lightTheme,
       darkTheme: darkTheme,
-    );
-  }
-
-  TextTheme _textTheme(BuildContext context) {
-    return const TextTheme(
-      bodySmall: TextStyle(
-        fontSize: 18.0,
-      ),
-      titleSmall: TextStyle(
-        fontSize: 18.0,
-      ),
     );
   }
 }

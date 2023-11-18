@@ -27,14 +27,14 @@ class HelpPage extends StatelessWidget {
         title: const Text("Help"),
       ),
       body: ListView(
+        padding: const EdgeInsets.all(16.0),
         children: const <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-            child: _ThemeModeRow(),
-          ),
-          Divider(),
+          _ThemeModeRow(),
+          Divider(height: 32.0),
+          SizedBox(height: 8.0),
           _AboutRow(),
-          Divider(),
+          Divider(height: 32.0),
+          SizedBox(height: 100.0),
         ],
       ),
     );
@@ -102,12 +102,9 @@ class _AboutRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _onPressed(context),
-      child: const Padding(
-        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-        child: SettingCaption(
-          icon: Icons.info_outline,
-          title: "About",
-        ),
+      child: const SettingCaption(
+        icon: Icons.copyright,
+        title: "About",
       ),
     );
   }
@@ -115,28 +112,48 @@ class _AboutRow extends StatelessWidget {
   void _onPressed(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                ListTile(
-                  title: Text(
-                    "${kAppName} app made by najeira",
-                  ),
-                ),
-                // <div>Icons made by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
-                const ListTile(
-                  title: Text(
-                    "App icon made by Becris from www.flaticon.com",
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
+      builder: (BuildContext context) => const _Dialog(),
+    );
+  }
+}
+
+class _Dialog extends StatelessWidget {
+  const _Dialog({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final themeData = Theme.of(context);
+    return AlertDialog(
+      icon: const Icon(Icons.copyright),
+      title: const Text("About"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            "${kAppName} app made by najeira.",
+          ),
+          const SizedBox(height: 8.0),
+          // <div>Icons made by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+          const Text(
+            "App icon made by Becris from www.flaticon.com.",
+          ),
+        ],
+      ),
+      actions: <Widget>[
+        ElevatedButton(
+          child: const Text("OK"),
+          style: ElevatedButton.styleFrom(
+            foregroundColor: themeData.colorScheme.onPrimary,
+            backgroundColor: themeData.colorScheme.primary,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop(true);
+          },
+        ),
+      ],
     );
   }
 }

@@ -26,12 +26,11 @@ class ResultRow extends StatelessWidget {
   Widget build(BuildContext context) {
     log.fine("ResultRow(${title}).build");
     final themeData = Theme.of(context);
-    final textTheme = themeData.textTheme;
     return Row(
       children: <Widget>[
         Icon(
           icon,
-          color: textTheme.bodySmall!.color,
+          color: themeData.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(width: 16.0),
         Expanded(

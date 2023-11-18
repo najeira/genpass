@@ -16,13 +16,12 @@ class ResultText extends StatelessWidget {
   Widget build(BuildContext context) {
     log.fine("ResultText(${title}).build");
     final themeData = Theme.of(context);
-    final textTheme = themeData.textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           title,
-          style: textTheme.bodySmall,
+          style: themeData.textTheme.bodySmall,
         ),
         const SizedBox(height: 4.0),
         _PasswordText(value: value),
@@ -53,21 +52,22 @@ class _PasswordText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final numberColor = theme.colorScheme.secondary;
+    final themeData = Theme.of(context);
+    final isDark = themeData.brightness == Brightness.dark; 
+    final numberColor = isDark ? Colors.cyan.shade100 : Colors.cyan.shade900;
     final pin = segments.length == 1 && !segments.first.alphabet;
     return Text.rich(
       TextSpan(
-        children: segments.map((e) {
-          return TextSpan(
-            text: e.text,
-            style: TextStyle(
-              color: (e.alphabet || pin) ? null : numberColor,
-            ),
-          );
-        }).toList(),
+        children: segments
+            .map((e) => TextSpan(
+                  text: e.text,
+                  style: TextStyle(
+                    color: (e.alphabet || pin) ? null : numberColor,
+                  ),
+                ))
+            .toList(),
       ),
-      style: theme.textTheme.bodyMedium!.copyWith(
+      style: themeData.textTheme.bodyLarge?.copyWith(
         fontFamily: "SourceCodePro",
       ),
     );

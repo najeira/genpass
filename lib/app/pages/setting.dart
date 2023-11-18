@@ -7,13 +7,6 @@ import 'package:genpass/app/widgets/setting_caption.dart';
 import 'package:genpass/domain/hash_algorithm.dart';
 import 'package:genpass/domain/settings.dart';
 
-const _padding = EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
-
-final _confirmationProvider =
-    StateNotifierProvider.autoDispose<StateController<bool>, bool>((ref) {
-  return StateController<bool>(false);
-});
-
 class SettingPage extends StatelessWidget {
   const SettingPage._({
     Key? key,
@@ -38,28 +31,33 @@ class SettingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Setting"),
+        title: const _AppBarText(),
       ),
       body: ListView(
+        padding: const EdgeInsets.all(16.0),
         children: const <Widget>[
-          Padding(
-            padding: _padding,
-            child: _PasswordLengthSlider(),
-          ),
-          Divider(),
-          Padding(
-            padding: _padding,
-            child: _PinLengthSlider(),
-          ),
-          Divider(),
-          Padding(
-            padding: _padding,
-            child: _Algorithms(),
-          ),
-          Divider(),
+          _PasswordLengthSlider(),
+          Divider(height: 32.0),
+          _PinLengthSlider(),
+          Divider(height: 32.0),
+          _Algorithms(),
+          Divider(height: 32.0),
+          SizedBox(height: 100.0),
         ],
       ),
     );
+  }
+}
+
+class _AppBarText extends ConsumerWidget {
+  const _AppBarText({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final index = ref.watch(selectedSettingIndexProvider);
+    return Text("Generator ${index + 1}");
   }
 }
 
@@ -168,15 +166,15 @@ class _Algorithms extends ConsumerWidget {
           title: const Text("MD5"),
           value: HashAlgorithm.md5,
           groupValue: setting.hashAlgorithm,
-          onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
-            context, ref, value),
+          onChanged: (HashAlgorithm? value) =>
+              _onHashAlgorithmChanged(context, ref, value),
         ),
         RadioListTile<HashAlgorithm>(
           title: const Text("SHA512"),
           value: HashAlgorithm.sha512,
           groupValue: setting.hashAlgorithm,
-          onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
-            context, ref, value),
+          onChanged: (HashAlgorithm? value) =>
+              _onHashAlgorithmChanged(context, ref, value),
         ),
       ],
     );
@@ -187,41 +185,10 @@ class _Algorithms extends ConsumerWidget {
     WidgetRef ref,
     HashAlgorithm? value,
   ) {
-    final confirmation = ref.read(_confirmationProvider);
-    if (confirmation) {
-      _updateHashAlgorithm(context, ref, value);
-      return;
-    }
-
     showDialog<bool>(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: const Text(
-            "Changing the algorithm changes "
-            "the generating password.",
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-            TextButton(
-              child: const Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
+      builder: (BuildContext context) => const _Dialog(),
     ).then((bool? confirm) {
-      // confirmed
-      final ctrl = ref.read(_confirmationProvider.notifier);
-      ctrl.state = true;
-
       if (confirm == true) {
         _updateHashAlgorithm(context, ref, value);
       }
@@ -235,5 +202,43 @@ class _Algorithms extends ConsumerWidget {
   ) {
     final ctrl = readSelectedSettingController(ref);
     ctrl.state = ctrl.state.copyWith(hashAlgorithm: value);
+  }
+}
+
+class _Dialog extends StatelessWidget {
+  const _Dialog({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    log.fine("_AlertDialog.build");
+    final themeData = Theme.of(context);
+    return AlertDialog(
+      icon: const Icon(Icons.warning_amber_rounded),
+      title: const Text("Algorithm"),
+      content: const Text(
+        "Changing the algorithm changes "
+        "the generating password.",
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text("Cancel"),
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+        ),
+        ElevatedButton(
+          child: const Text("OK"),
+          style: ElevatedButton.styleFrom(
+            foregroundColor: themeData.colorScheme.onPrimary,
+            backgroundColor: themeData.colorScheme.primary,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop(true);
+          },
+        ),
+      ],
+    );
   }
 }

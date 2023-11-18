@@ -15,7 +15,7 @@ class HistoryButton extends StatelessWidget {
     log.fine("HistoryButton.build");
     final themeData = Theme.of(context);
     return IconButton(
-      icon: const Icon(Icons.assignment),
+      icon: const Icon(Icons.list_alt),
       color: themeData.colorScheme.primary,
       onPressed: onPressed,
     );

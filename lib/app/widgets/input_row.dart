@@ -41,13 +41,17 @@ class InputRow extends StatelessWidget {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
-        icon: Icon(inputIcon, size: kInputIconSize),
+        prefixIcon: Icon(inputIcon),
         labelText: labelText,
         hintText: hintText,
         errorText: errorText,
+        filled: true,
       ),
       keyboardType: textInputType,
       obscureText: obscureText,
+      autofocus: false,
+      autocorrect: false,
+      enableSuggestions: false,
     );
   }
 }
