@@ -90,7 +90,6 @@ class LoadingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     log.fine("LoadingPage.build");
     final themeData = Theme.of(context);
-    final textTheme = themeData.textTheme;
     return Scaffold(
       body: Center(
         child: Column(
@@ -99,7 +98,7 @@ class LoadingPage extends StatelessWidget {
           children: [
             Text(
               kAppName,
-              style: textTheme.headlineLarge,
+              style: themeData.textTheme.headlineLarge,
             ),
             Image.asset(
               "assets/appicon.png",

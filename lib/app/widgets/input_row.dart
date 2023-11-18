@@ -30,28 +30,24 @@ class InputRow extends StatelessWidget {
     return Row(
       children: <Widget>[
         Expanded(
-          child: _buildTextField(context),
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              prefixIcon: Icon(inputIcon),
+              labelText: labelText,
+              hintText: hintText,
+              errorText: errorText,
+              filled: true,
+            ),
+            keyboardType: textInputType,
+            obscureText: obscureText,
+            autofocus: false,
+            autocorrect: false,
+            enableSuggestions: false,
+          ),
         ),
         actionButton,
       ],
-    );
-  }
-
-  Widget _buildTextField(BuildContext context) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        prefixIcon: Icon(inputIcon),
-        labelText: labelText,
-        hintText: hintText,
-        errorText: errorText,
-        filled: true,
-      ),
-      keyboardType: textInputType,
-      obscureText: obscureText,
-      autofocus: false,
-      autocorrect: false,
-      enableSuggestions: false,
     );
   }
 }

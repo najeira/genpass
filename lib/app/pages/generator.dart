@@ -134,12 +134,13 @@ class _MasterInputRow extends ConsumerWidget {
       actionButton: VisibilityButton(
         enable: true,
         visible: visible,
-        onSelected: (value) {
-          final ctrl = ref.read(masterVisibleProvider.notifier);
-          ctrl.state = value;
-        },
+        onSelected: (value) => _onSelected(context, ref, value),
       ),
     );
+  }
+
+  void _onSelected(BuildContext context, WidgetRef ref, bool value) {
+    ref.read(masterVisibleProvider.notifier).state = value;
   }
 }
 
@@ -162,18 +163,15 @@ class _DomainInputRow extends ConsumerWidget {
       errorText: errorText,
       obscureText: false,
       actionButton: HistoryButton(
-        onPressed: () {
-          _showHistoryPage(context, ref);
-        },
+        onPressed: () => _showHistoryPage(context, ref),
       ),
     );
   }
 
-  void _showHistoryPage(BuildContext context, WidgetRef ref) {
-    HistoryPage.push(context).then((String? domainText) {
+  Future<void> _showHistoryPage(BuildContext context, WidgetRef ref) {
+    return HistoryPage.push(context).then((String? domainText) {
       if (domainText != null && domainText.isNotEmpty) {
-        final domain = ref.read(domainTextEditingProvider);
-        domain.text = domainText;
+        ref.read(domainTextEditingProvider).text = domainText;
         log.config("domain is ${domainText}");
       }
     });
@@ -183,17 +181,17 @@ class _DomainInputRow extends ConsumerWidget {
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({
     super.key,
-    this.title,
+    required this.title,
   });
 
-  final String? title;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
     log.fine("_SectionTitle.build");
     final themeData = Theme.of(context);
     return Text(
-      title!,
+      title,
       style: themeData.textTheme.titleSmall,
     );
   }
@@ -241,7 +239,6 @@ class _AddButton extends ConsumerWidget {
   }
 
   Future<void> _onAddSetting(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(settingListProvider.notifier);
-    return notifier.add(const Setting());
+    return ref.read(settingListProvider.notifier).add(const Setting());
   }
 }

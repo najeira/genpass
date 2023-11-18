@@ -46,9 +46,7 @@ class ResultRow extends StatelessWidget {
         ),
         CopyButton(
           enable: true,
-          onPressed: () {
-            _copyTextToClipboard(context, title, value.rawText);
-          },
+          onPressed: () => _copyTextToClipboard(context, title, value.rawText),
         ),
       ],
     );
@@ -56,7 +54,10 @@ class ResultRow extends StatelessWidget {
 }
 
 Future<void> _copyTextToClipboard(
-    BuildContext context, String title, String text) {
+  BuildContext context,
+  String title,
+  String text,
+) {
   assert(text.isNotEmpty);
   return Clipboard.setData(ClipboardData(text: text)).then((_) {
     log.config("clipboard: succeeded to copy");

@@ -45,7 +45,7 @@ class _PasswordText extends StatelessWidget {
     super.key,
     required String value,
   }) {
-    segments = parseString(value);
+    segments = _parseString(value);
   }
 
   late final List<_Segment> segments;
@@ -53,71 +53,72 @@ class _PasswordText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
-    final isDark = themeData.brightness == Brightness.dark; 
+    final isDark = themeData.brightness == Brightness.dark;
     final numberColor = isDark ? Colors.cyan.shade100 : Colors.cyan.shade900;
     final pin = segments.length == 1 && !segments.first.alphabet;
     return Text.rich(
       TextSpan(
-        children: segments
-            .map((e) => TextSpan(
-                  text: e.text,
-                  style: TextStyle(
-                    color: (e.alphabet || pin) ? null : numberColor,
-                  ),
-                ))
-            .toList(),
+        children: [
+          for (final segment in segments)
+            TextSpan(
+              text: segment.text,
+              style: TextStyle(
+                color: (segment.alphabet || pin) ? null : numberColor,
+              ),
+            ),
+        ],
       ),
       style: themeData.textTheme.bodyLarge?.copyWith(
         fontFamily: "SourceCodePro",
       ),
     );
   }
+}
 
-  List<_Segment> parseString(String value) {
-    final segments = <_Segment>[];
+List<_Segment> _parseString(String value) {
+  final segments = <_Segment>[];
 
-    if (value == "-" || value.startsWith("*")) {
-      segments.add(_Segment(
-        text: value,
-        alphabet: true,
-      ));
-      return segments;
-    }
-
-    var inAlphabets = true;
-    var buf = StringBuffer();
-    for (final rune in value.runes) {
-      if (rune >= 48 && rune <= 57) {
-        if (inAlphabets) {
-          if (buf.isNotEmpty) {
-            segments.add(_Segment(
-              text: buf.toString(),
-              alphabet: inAlphabets,
-            ));
-            buf = StringBuffer();
-          }
-        }
-        inAlphabets = false;
-      } else {
-        if (!inAlphabets) {
-          if (buf.isNotEmpty) {
-            segments.add(_Segment(
-              text: buf.toString(),
-              alphabet: inAlphabets,
-            ));
-            buf = StringBuffer();
-          }
-        }
-        inAlphabets = true;
-      }
-      buf.writeCharCode(rune);
-    }
-    if (buf.isNotEmpty) {
-      segments.add(_Segment(
-        text: buf.toString(),
-        alphabet: inAlphabets,
-      ));
-    }
+  if (value == "-" || value.startsWith("*")) {
+    segments.add(_Segment(
+      text: value,
+      alphabet: true,
+    ));
     return segments;
   }
+
+  var inAlphabets = true;
+  var buf = StringBuffer();
+  for (final rune in value.runes) {
+    if (rune >= 48 && rune <= 57) {
+      if (inAlphabets) {
+        if (buf.isNotEmpty) {
+          segments.add(_Segment(
+            text: buf.toString(),
+            alphabet: inAlphabets,
+          ));
+          buf = StringBuffer();
+        }
+      }
+      inAlphabets = false;
+    } else {
+      if (!inAlphabets) {
+        if (buf.isNotEmpty) {
+          segments.add(_Segment(
+            text: buf.toString(),
+            alphabet: inAlphabets,
+          ));
+          buf = StringBuffer();
+        }
+      }
+      inAlphabets = true;
+    }
+    buf.writeCharCode(rune);
+  }
+  if (buf.isNotEmpty) {
+    segments.add(_Segment(
+      text: buf.toString(),
+      alphabet: inAlphabets,
+    ));
+  }
+  return segments;
 }

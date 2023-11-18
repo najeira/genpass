@@ -88,8 +88,7 @@ class _ThemeModeRow extends ConsumerWidget {
     if (value == null) {
       return;
     }
-    final ctrl = ref.read(themeModeProvider.notifier);
-    ctrl.state = value;
+    ref.read(themeModeProvider.notifier).state = value;
   }
 }
 

@@ -94,13 +94,13 @@ const _kEmptyResult = Result(
 );
 
 final resultProvider = Provider.family.autoDispose<Result, int>((ref, index) {
-  final master = ref.watch(
-    masterTextEditingProvider.select((value) => value.text),
-  );
+  final master = ref.watch(masterTextEditingProvider.select(
+    (value) => value.text,
+  ));
   final masterError = ref.watch(masterErrorTextProvider);
-  final domain = ref.watch(
-    domainTextEditingProvider.select((value) => value.text),
-  );
+  final domain = ref.watch(domainTextEditingProvider.select(
+    (value) => value.text,
+  ));
   final domainError = ref.watch(domainErrorTextProvider);
   final settings = ref.watch(settingListProvider);
   return settings.when(
@@ -136,20 +136,22 @@ final resultProvider = Provider.family.autoDispose<Result, int>((ref, index) {
 final resultPasswordProvider =
     Provider.family.autoDispose<Value, int>((ref, index) {
   final visible = ref.watch(passwordVisibilityProvider(index));
-  final result = ref.watch(resultProvider(index));
-  final text = result.password;
+  final result = ref.watch(resultProvider(index).select(
+    (value) => value.password,
+  ));
   return Value(
-    rawText: text,
+    rawText: result,
     visible: visible,
   );
-}, dependencies: [passwordVisibilityProvider, resultProvider]);
+});
 
 final resultPinProvider = Provider.family.autoDispose<Value, int>((ref, index) {
   final visible = ref.watch(pinVisibilityProvider(index));
-  final result = ref.watch(resultProvider(index));
-  final text = result.pin;
+  final result = ref.watch(resultProvider(index).select(
+    (value) => value.pin,
+  ));
   return Value(
-    rawText: text,
+    rawText: result,
     visible: visible,
   );
-}, dependencies: [pinVisibilityProvider, resultProvider]);
+});

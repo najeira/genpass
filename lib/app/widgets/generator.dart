@@ -54,8 +54,7 @@ class _PasswordResultRow extends ConsumerWidget {
       icon: kIconPassword,
       value: value,
       onVisiblityChanged: (value) {
-        final ctrl = ref.watch(passwordVisibilityProvider(index).notifier);
-        ctrl.state = value;
+        ref.read(passwordVisibilityProvider(index).notifier).state = value;
       },
     );
   }
@@ -76,8 +75,7 @@ class _PinResultRow extends ConsumerWidget {
       icon: kIconPin,
       value: value,
       onVisiblityChanged: (value) {
-        final ctrl = ref.watch(pinVisibilityProvider(index).notifier);
-        ctrl.state = value;
+        ref.read(pinVisibilityProvider(index).notifier).state = value;
       },
     );
   }
@@ -108,9 +106,9 @@ class _GeneratorTitle extends ConsumerWidget {
         ),
         _IconButton(
           iconData: Icons.delete,
-          onPressed: () async {
-            final ctrl = ref.read(settingListProvider.notifier);
-            ctrl.removeAt(number);
+          onPressed: () {
+            final notifier = ref.read(settingListProvider.notifier);
+            Future.delayed(Duration.zero, () => notifier.removeAt(number));
           },
         ),
       ],

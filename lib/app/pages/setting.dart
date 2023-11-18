@@ -85,9 +85,9 @@ class _PasswordLengthSlider extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(
-      _scopedSettingProvider.select((value) => value.passwordLength),
-    );
+    final value = ref.watch(_scopedSettingProvider.select(
+      (value) => value.passwordLength,
+    ));
     return _Slider(
       onChanged: (int value) {
         final notifier = ref.read(_scopedSettingProvider.notifier);
@@ -179,9 +179,9 @@ class _Algorithms extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(
-      _scopedSettingProvider.select((value) => value.hashAlgorithm),
-    );
+    final value = ref.watch(_scopedSettingProvider.select(
+      (value) => value.hashAlgorithm,
+    ));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -193,15 +193,13 @@ class _Algorithms extends ConsumerWidget {
           title: const Text("MD5"),
           value: HashAlgorithm.md5,
           groupValue: value,
-          onChanged: (HashAlgorithm? value) =>
-              _onHashAlgorithmChanged(context, ref, value),
+          onChanged: (value) => _onHashAlgorithmChanged(context, ref, value),
         ),
         RadioListTile<HashAlgorithm>(
           title: const Text("SHA512"),
           value: HashAlgorithm.sha512,
           groupValue: value,
-          onChanged: (HashAlgorithm? value) =>
-              _onHashAlgorithmChanged(context, ref, value),
+          onChanged: (value) => _onHashAlgorithmChanged(context, ref, value),
         ),
       ],
     );
@@ -215,7 +213,7 @@ class _Algorithms extends ConsumerWidget {
     showDialog<bool>(
       context: context,
       builder: (BuildContext context) => const _Dialog(),
-    ).then((bool? confirm) {
+    ).then((confirm) {
       if (confirm == true) {
         final notifier = ref.read(_scopedSettingProvider.notifier);
         notifier.state = notifier.state.copyWith(
@@ -233,7 +231,7 @@ class _Dialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log.fine("_AlertDialog.build");
+    log.fine("_Dialog.build");
     final themeData = Theme.of(context);
     return AlertDialog(
       icon: const Icon(Icons.warning_amber_rounded),
