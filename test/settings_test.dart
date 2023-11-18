@@ -10,21 +10,22 @@ void main() {
 
 void testSettingsEncode() {
   test("Settings encode one", () {
-    final ss = SettingList.items(<Setting>[
+    final items = <Setting>[
       const Setting(
         passwordLength: 10,
         pinLength: 4,
         hashAlgorithm: HashAlgorithm.md5,
       ),
-    ]);
-    final str = SettingList.encode(ss.items);
+    ];
+    final str = SettingList.encode(items);
     expect(str, '[{"passwordLength":10,"pinLength":4,"hashAlgorithm":"md5"}]');
   });
 }
 
 void testSettingsDecode() {
   test("Settings decode one", () {
-    final ss = SettingList.decode('[{"passwordLength":10,"pinLength":4,"hashAlgorithm":"md5"}]');
+    final ss = SettingList.decode(
+        '[{"passwordLength":10,"pinLength":4,"hashAlgorithm":"md5"}]');
     expect(ss.length, 1);
     expect(ss.first.passwordLength, 10);
     expect(ss.first.pinLength, 4);
