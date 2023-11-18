@@ -7,30 +7,34 @@ import 'package:genpass/app/providers.dart';
 import 'generator.dart';
 
 // The root of the application, does not have a screen.
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     log.fine("MyApp.build");
-    final themeMode = ref.watch(themeModeProvider);
     final textTheme = _textTheme(context);
     final lightTheme = ThemeData.from(
-      colorScheme: const ColorScheme.light(),
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xff6200ee),
+        brightness: Brightness.light,
+      ),
       textTheme: textTheme,
     );
     final darkTheme = ThemeData.from(
-      colorScheme: const ColorScheme.dark(),
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xffbb86fc),
+        brightness: Brightness.dark,
+      ),
       textTheme: textTheme,
     );
-    return MaterialApp(
-      title: kAppName,
-      theme: lightTheme,
+    return _MyApp(
+      lightTheme: lightTheme,
       darkTheme: darkTheme,
-      themeMode: themeMode,
-      home: const LaunchPage(),
     );
   }
 
@@ -42,6 +46,31 @@ class MyApp extends ConsumerWidget {
       titleSmall: TextStyle(
         fontSize: 18.0,
       ),
+    );
+  }
+}
+
+class _MyApp extends ConsumerWidget {
+  const _MyApp({
+    required this.lightTheme,
+    required this.darkTheme,
+    Key? key,
+  }) : super(key: key);
+
+  final ThemeData lightTheme;
+
+  final ThemeData darkTheme;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    log.fine("_MyApp.build");
+    final themeMode = ref.watch(themeModeProvider);
+    return MaterialApp(
+      title: kAppName,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: themeMode,
+      home: const LaunchPage(),
     );
   }
 }
@@ -75,25 +104,23 @@ class LoadingPage extends StatelessWidget {
     final themeData = Theme.of(context);
     final textTheme = themeData.textTheme;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(kAppName),
-      ),
-      body: Align(
-        alignment: Alignment.topCenter,
+      body: Center(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 32.0),
             Text(
               kAppName,
-              style: textTheme.bodySmall!.copyWith(
-                fontSize: 24.0,
-              ),
+              style: textTheme.headlineLarge,
             ),
-            const SizedBox(height: 64.0),
+            Image.asset(
+              "assets/appicon.png",
+              width: 96.0,
+              height: 96.0,
+            ),
             const SizedBox(
-              width: 64.0,
-              height: 64.0,
-              child: CircularProgressIndicator(),
+              width: 96.0,
+              child: LinearProgressIndicator(),
             ),
           ],
         ),
