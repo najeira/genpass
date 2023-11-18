@@ -208,28 +208,40 @@ class _GeneratorList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_GeneratorList.build");
     final settings = ref.watch(settingListProvider);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        for (int i = 0; i < settings.items.length; i++)
-          GeneratorSection.withIndex(context, i),
-        Center(
-          child: TextButton.icon(
-            onPressed: () {
-              _onAddSetting(context, ref);
-            },
-            icon: const Icon(Icons.add_circle),
-            label: const Text("Add Generator"),
-          ),
-        ),
-      ],
+    return settings.when(
+      data: (settings) => Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          for (int i = 0; i < settings.length; i++)
+            GeneratorSection.withIndex(context, i),
+          const _AddButton(),
+        ],
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      loading: () => const CircularProgressIndicator(),
+    );
+  }
+}
+
+class _AddButton extends ConsumerWidget {
+  const _AddButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: TextButton.icon(
+        onPressed: () => _onAddSetting(context, ref),
+        icon: const Icon(Icons.add_circle),
+        label: const Text("Add Generator"),
+      ),
     );
   }
 
   Future<void> _onAddSetting(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.read(settingListProvider.notifier);
-    ctrl.add(const Setting());
-    return ctrl.save();
+    final notifier = ref.read(settingListProvider.notifier);
+    return notifier.add(const Setting());
   }
 }

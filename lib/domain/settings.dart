@@ -42,67 +42,65 @@ class Setting {
   }
 }
 
-class SettingController extends StateController<Setting> {
-  SettingController(
-    this.parent,
-    this.index,
-  ) : super(parent.items[index]);
-
-  final SettingList parent;
-
-  final int index;
-
+class SettingList extends AsyncNotifier<List<Setting>> {
   @override
-  set state(Setting value) {
-    assert(parent.items[index] == state);
-    super.state = parent.items[index] = value;
-  }
-}
+  Future<List<Setting>> build() => _load();
 
-class SettingList extends ChangeNotifier {
-  SettingList() {
-    load();
-  }
+  List<Setting>? get _items => state.unwrapPrevious().valueOrNull; 
 
-  SettingList.items(List<Setting> items) {
-    this.items.addAll(items);
+  Setting getAt(int index) {
+    final items = _items;
+    if (items != null && items.length > index) {
+      return items[index];
+    }
+    return const Setting();
   }
 
-  final items = <Setting>[];
-
-  bool _isLoading = false;
-
-  bool get isLoading => _isLoading;
-
-  void add(Setting item) {
-    items.add(item);
-    notifyListeners();
+  Future<void> add(Setting item) async {
+    final items = _items;
+    if (items != null) {
+      final newValue = List<Setting>.of(items);
+      newValue.add(item);
+      state = AsyncValue.data(newValue);
+    } else {
+      state = AsyncValue.data(<Setting>[item]);
+    }
+    await _save();
   }
 
-  void removeAt(int index) {
-    items.removeAt(index);
-    notifyListeners();
-  }
-
-  Future<void> load() {
-    _isLoading = true;
-    try {
-      return _load();
-    } finally {
-      _isLoading = false;
+  Future<void> removeAt(int index) async {
+    final items = _items;
+    if (items != null && items.length > index) {
+      final newValue = List<Setting>.of(items);
+      newValue.removeAt(index);
+      state = AsyncValue.data(newValue);
+      await _save();
     }
   }
 
-  Future<void> _load() async {
+  Future<void> replaceAt(int index, Setting item) async {
+    final items = _items;
+    if (items != null && items.length > index) {
+      final newValue = List<Setting>.of(items);
+      newValue[index] = item;
+      state = AsyncValue.data(newValue);
+      await _save();
+    }
+  }
+
+  Future<List<Setting>> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final str = prefs.getString(_keySettings);
     final decodedItems = decode(str);
-    items.addAll(decodedItems);
-    log.config("settings is loaded ${items.length}");
-    notifyListeners();
+    log.config("settings is loaded ${decodedItems.length}");
+    return decodedItems;
   }
 
-  Future<void> save() async {
+  Future<void> _save() async {
+    final items = _items;
+    if (items == null) {
+      return;
+    }
     final str = encode(items);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keySettings, str);
