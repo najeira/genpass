@@ -7,24 +7,52 @@ import 'package:genpass/app/providers.dart';
 import 'generator.dart';
 
 // The root of the application, does not have a screen.
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    log.fine("MyApp.build");
+    const seedColor = Colors.indigo;
+    const useMaterial3 = true;
+    final lightTheme = ThemeData.from(
+      useMaterial3: useMaterial3,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: seedColor,
+        brightness: Brightness.light,
+      ),
+    );
+    final darkTheme = ThemeData.from(
+      useMaterial3: useMaterial3,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: seedColor,
+        brightness: Brightness.dark,
+      ),
+    );
+    return _MyApp(
+      lightTheme: lightTheme,
+      darkTheme: darkTheme,
+    );
+  }
+}
+
+class _MyApp extends ConsumerWidget {
+  const _MyApp({
+    required this.lightTheme,
+    required this.darkTheme,
+    super.key,
+  });
+
+  final ThemeData lightTheme;
+
+  final ThemeData darkTheme;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    log.fine("MyApp.build");
+    log.fine("_MyApp.build");
     final themeMode = ref.watch(themeModeProvider);
-    final textTheme = _textTheme(context);
-    final lightTheme = ThemeData.from(
-      colorScheme: const ColorScheme.light(),
-      textTheme: textTheme,
-    );
-    final darkTheme = ThemeData.from(
-      colorScheme: const ColorScheme.dark(),
-      textTheme: textTheme,
-    );
     return MaterialApp(
       title: kAppName,
       theme: lightTheme,
@@ -33,24 +61,13 @@ class MyApp extends ConsumerWidget {
       home: const LaunchPage(),
     );
   }
-
-  TextTheme _textTheme(BuildContext context) {
-    return const TextTheme(
-      bodySmall: TextStyle(
-        fontSize: 18.0,
-      ),
-      titleSmall: TextStyle(
-        fontSize: 18.0,
-      ),
-    );
-  }
 }
 
 // Loading at startup and switching to the application screen.
 class LaunchPage extends ConsumerWidget {
   const LaunchPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -66,34 +83,31 @@ class LaunchPage extends ConsumerWidget {
 // Loading
 class LoadingPage extends StatelessWidget {
   const LoadingPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     log.fine("LoadingPage.build");
     final themeData = Theme.of(context);
-    final textTheme = themeData.textTheme;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(kAppName),
-      ),
-      body: Align(
-        alignment: Alignment.topCenter,
+      body: Center(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 32.0),
             Text(
               kAppName,
-              style: textTheme.bodySmall!.copyWith(
-                fontSize: 24.0,
-              ),
+              style: themeData.textTheme.headlineLarge,
             ),
-            const SizedBox(height: 64.0),
+            Image.asset(
+              "assets/appicon.png",
+              width: 96.0,
+              height: 96.0,
+            ),
             const SizedBox(
-              width: 64.0,
-              height: 64.0,
-              child: CircularProgressIndicator(),
+              width: 96.0,
+              child: LinearProgressIndicator(),
             ),
           ],
         ),

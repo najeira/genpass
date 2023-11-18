@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class SettingCaption extends StatelessWidget {
   const SettingCaption({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final String title;
@@ -13,23 +13,18 @@ class SettingCaption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
-    final textTheme = themeData.textTheme;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         children: <Widget>[
           Icon(
             icon,
-            size: textTheme.titleMedium!.fontSize,
+            size: 20.0,
           ),
           const SizedBox(width: 8.0),
           Text(
             title,
-            style: TextStyle(
-              fontSize: textTheme.titleMedium!.fontSize,
-              fontWeight: FontWeight.w500,
-            ),
+            style: themeData.textTheme.titleMedium,
           ),
         ],
       ),

@@ -7,57 +7,72 @@ import 'package:genpass/app/widgets/setting_caption.dart';
 import 'package:genpass/domain/hash_algorithm.dart';
 import 'package:genpass/domain/settings.dart';
 
-const _padding = EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0);
-
-final _confirmationProvider =
-    StateNotifierProvider.autoDispose<StateController<bool>, bool>((ref) {
-  return StateController<bool>(false);
-});
+final _scopedSettingProvider = StateProvider<Setting>(
+  (ref) => const Setting(),
+);
 
 class SettingPage extends StatelessWidget {
   const SettingPage._({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+    required this.index,
+  });
 
-  static Future<void> push(BuildContext context, int index) {
-    return Navigator.of(context).push<void>(
+  final int index;
+
+  static Future<void> push(BuildContext context, int index) async {
+    final nav = Navigator.of(context);
+
+    final ps = ProviderScope.containerOf(context, listen: false);
+    final items = await ps.read(settingListProvider.future);
+    final item = items[index];
+
+    final newItem = await nav.push<Setting?>(
       MaterialPageRoute<Setting>(
         builder: (BuildContext context) {
           return ProviderScope(
             overrides: [
-              selectedSettingIndexProvider.overrideWithValue(index),
+              _scopedSettingProvider.overrideWith((ref) => item),
             ],
-            child: const SettingPage._(),
+            child: SettingPage._(index: index),
           );
         },
       ),
     );
+    if (newItem != null) {
+      final notifier = ps.read(settingListProvider.notifier);
+      await notifier.replaceAt(index, newItem);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Setting"),
-      ),
-      body: ListView(
-        children: const <Widget>[
-          Padding(
-            padding: _padding,
-            child: _PasswordLengthSlider(),
-          ),
-          Divider(),
-          Padding(
-            padding: _padding,
-            child: _PinLengthSlider(),
-          ),
-          Divider(),
-          Padding(
-            padding: _padding,
-            child: _Algorithms(),
-          ),
-          Divider(),
-        ],
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (bool didPop) {
+        if (didPop) {
+          return;
+        }
+        final ps = ProviderScope.containerOf(context, listen: false);
+        final item = ps.read(_scopedSettingProvider);
+        log.config("SettingPage.onPopInvoked: ${item}");
+        Navigator.of(context).pop(item);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Generator ${index + 1}"),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: const <Widget>[
+            _PasswordLengthSlider(),
+            Divider(height: 32.0),
+            _PinLengthSlider(),
+            Divider(height: 32.0),
+            _Algorithms(),
+            Divider(height: 32.0),
+            SizedBox(height: 100.0),
+          ],
+        ),
       ),
     );
   }
@@ -65,20 +80,24 @@ class SettingPage extends StatelessWidget {
 
 class _PasswordLengthSlider extends ConsumerWidget {
   const _PasswordLengthSlider({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final setting = watchSelectedSetting(ref);
+    final value = ref.watch(_scopedSettingProvider.select(
+      (value) => value.passwordLength,
+    ));
     return _Slider(
       onChanged: (int value) {
-        final ctrl = readSelectedSettingController(ref);
-        ctrl.state = ctrl.state.copyWith(passwordLength: value);
+        final notifier = ref.read(_scopedSettingProvider.notifier);
+        notifier.state = notifier.state.copyWith(
+          passwordLength: value,
+        );
       },
       title: "Password length",
       icon: kIconPassword,
-      value: setting.passwordLength,
+      value: value,
       min: 8,
       max: 20,
     );
@@ -87,20 +106,24 @@ class _PasswordLengthSlider extends ConsumerWidget {
 
 class _PinLengthSlider extends ConsumerWidget {
   const _PinLengthSlider({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final setting = watchSelectedSetting(ref);
+    final value = ref.watch(_scopedSettingProvider.select(
+      (value) => value.pinLength,
+    ));
     return _Slider(
       onChanged: (int value) {
-        final ctrl = readSelectedSettingController(ref);
-        ctrl.state = ctrl.state.copyWith(pinLength: value);
+        final notifier = ref.read(_scopedSettingProvider.notifier);
+        notifier.state = notifier.state.copyWith(
+          pinLength: value,
+        );
       },
       title: "PIN length",
       icon: kIconPin,
-      value: setting.pinLength,
+      value: value,
       min: 3,
       max: 10,
     );
@@ -109,14 +132,14 @@ class _PinLengthSlider extends ConsumerWidget {
 
 class _Slider extends StatelessWidget {
   const _Slider({
-    Key? key,
+    super.key,
     required this.onChanged,
     required this.icon,
     required this.title,
     required this.value,
     required this.min,
     required this.max,
-  }) : super(key: key);
+  });
 
   final ValueChanged<int> onChanged;
   final IconData icon;
@@ -151,12 +174,14 @@ class _Slider extends StatelessWidget {
 
 class _Algorithms extends ConsumerWidget {
   const _Algorithms({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final setting = watchSelectedSetting(ref);
+    final value = ref.watch(_scopedSettingProvider.select(
+      (value) => value.hashAlgorithm,
+    ));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -167,16 +192,14 @@ class _Algorithms extends ConsumerWidget {
         RadioListTile<HashAlgorithm>(
           title: const Text("MD5"),
           value: HashAlgorithm.md5,
-          groupValue: setting.hashAlgorithm,
-          onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
-            context, ref, value),
+          groupValue: value,
+          onChanged: (value) => _onHashAlgorithmChanged(context, ref, value),
         ),
         RadioListTile<HashAlgorithm>(
           title: const Text("SHA512"),
           value: HashAlgorithm.sha512,
-          groupValue: setting.hashAlgorithm,
-          onChanged: (HashAlgorithm? value) => _onHashAlgorithmChanged(
-            context, ref, value),
+          groupValue: value,
+          onChanged: (value) => _onHashAlgorithmChanged(context, ref, value),
         ),
       ],
     );
@@ -187,53 +210,54 @@ class _Algorithms extends ConsumerWidget {
     WidgetRef ref,
     HashAlgorithm? value,
   ) {
-    final confirmation = ref.read(_confirmationProvider);
-    if (confirmation) {
-      _updateHashAlgorithm(context, ref, value);
-      return;
-    }
-
     showDialog<bool>(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: const Text(
-            "Changing the algorithm changes "
-            "the generating password.",
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-            TextButton(
-              child: const Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    ).then((bool? confirm) {
-      // confirmed
-      final ctrl = ref.read(_confirmationProvider.notifier);
-      ctrl.state = true;
-
+      builder: (BuildContext context) => const _Dialog(),
+    ).then((confirm) {
       if (confirm == true) {
-        _updateHashAlgorithm(context, ref, value);
+        final notifier = ref.read(_scopedSettingProvider.notifier);
+        notifier.state = notifier.state.copyWith(
+          hashAlgorithm: value,
+        );
       }
     });
   }
+}
 
-  void _updateHashAlgorithm(
-    BuildContext context,
-    WidgetRef ref,
-    HashAlgorithm? value,
-  ) {
-    final ctrl = readSelectedSettingController(ref);
-    ctrl.state = ctrl.state.copyWith(hashAlgorithm: value);
+class _Dialog extends StatelessWidget {
+  const _Dialog({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    log.fine("_Dialog.build");
+    final themeData = Theme.of(context);
+    return AlertDialog(
+      icon: const Icon(Icons.warning_amber_rounded),
+      title: const Text("Algorithm"),
+      content: const Text(
+        "Changing the algorithm changes "
+        "the generating password.",
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text("Cancel"),
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: themeData.colorScheme.onPrimary,
+            backgroundColor: themeData.colorScheme.primary,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop(true);
+          },
+          child: const Text("OK"),
+        ),
+      ],
+    );
   }
 }

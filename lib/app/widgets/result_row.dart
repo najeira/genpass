@@ -10,12 +10,12 @@ import 'visibility_button.dart';
 
 class ResultRow extends StatelessWidget {
   const ResultRow({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
     required this.onVisiblityChanged,
-  }) : super(key: key);
+  });
 
   final String title;
   final Value value;
@@ -26,12 +26,11 @@ class ResultRow extends StatelessWidget {
   Widget build(BuildContext context) {
     log.fine("ResultRow(${title}).build");
     final themeData = Theme.of(context);
-    final textTheme = themeData.textTheme;
     return Row(
       children: <Widget>[
         Icon(
           icon,
-          color: textTheme.bodySmall!.color,
+          color: themeData.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(width: 16.0),
         Expanded(
@@ -47,9 +46,7 @@ class ResultRow extends StatelessWidget {
         ),
         CopyButton(
           enable: true,
-          onPressed: () {
-            _copyTextToClipboard(context, title, value.rawText);
-          },
+          onPressed: () => _copyTextToClipboard(context, title, value.rawText),
         ),
       ],
     );
@@ -57,7 +54,10 @@ class ResultRow extends StatelessWidget {
 }
 
 Future<void> _copyTextToClipboard(
-    BuildContext context, String title, String text) {
+  BuildContext context,
+  String title,
+  String text,
+) {
   assert(text.isNotEmpty);
   return Clipboard.setData(ClipboardData(text: text)).then((_) {
     log.config("clipboard: succeeded to copy");

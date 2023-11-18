@@ -15,7 +15,8 @@ final historyProvider = ChangeNotifierProvider<History>((ref) {
   return History();
 });
 
-final settingListProvider = ChangeNotifierProvider<SettingList>((ref) {
+final settingListProvider =
+    AsyncNotifierProvider<SettingList, List<Setting>>(() {
   return SettingList();
 });
 
@@ -45,22 +46,6 @@ final isLaunchingProvider = Provider<bool>((ref) {
 });
 
 final selectedSettingIndexProvider = Provider<int>((ref) => 0);
-
-final selectedSettingProvider = StateNotifierProvider.family
-    .autoDispose<SettingController, Setting, int>((ref, index) {
-  final settings = ref.watch(settingListProvider);
-  return SettingController(settings, index);
-});
-
-Setting watchSelectedSetting(WidgetRef ref) {
-  final index = ref.watch(selectedSettingIndexProvider);
-  return ref.watch(selectedSettingProvider(index));
-}
-
-SettingController readSelectedSettingController(WidgetRef ref) {
-  final index = ref.read(selectedSettingIndexProvider);
-  return ref.read(selectedSettingProvider(index).notifier);
-}
 
 final masterTextEditingProvider =
     ChangeNotifierProvider<TextEditingController>((ref) {
@@ -103,55 +88,70 @@ final pinVisibilityProvider = StateNotifierProvider.family
   return StateController<bool>(false);
 });
 
+const _kEmptyResult = Result(
+  password: "",
+  pin: "",
+);
+
 final resultProvider = Provider.family.autoDispose<Result, int>((ref, index) {
-  final master = ref.watch(masterTextEditingProvider);
+  final master = ref.watch(masterTextEditingProvider.select(
+    (value) => value.text,
+  ));
   final masterError = ref.watch(masterErrorTextProvider);
-  final domain = ref.watch(domainTextEditingProvider);
+  final domain = ref.watch(domainTextEditingProvider.select(
+    (value) => value.text,
+  ));
   final domainError = ref.watch(domainErrorTextProvider);
-  final setting = ref.watch(selectedSettingProvider(index));
+  final settings = ref.watch(settingListProvider);
+  return settings.when(
+    data: (settings) {
+      if (settings.length <= index) {
+        return _kEmptyResult;
+      } else if (masterError != null || domainError != null) {
+        return _kEmptyResult;
+      }
 
-  if (masterError != null || domainError != null) {
-    return const Result(
-      password: "",
-      pin: "",
-    );
-  }
-
-  final password = Crypto.generatePassword(
-    setting.hashAlgorithm,
-    domain.text,
-    master.text,
-    setting.passwordLength,
-  );
-  final pin = Crypto.generatePin(
-    domain.text,
-    master.text,
-    setting.pinLength,
-  );
-  return Result(
-    password: password,
-    pin: pin,
+      final setting = settings[index];
+      final password = Crypto.generatePassword(
+        setting.hashAlgorithm,
+        domain,
+        master,
+        setting.passwordLength,
+      );
+      final pin = Crypto.generatePin(
+        domain,
+        master,
+        setting.pinLength,
+      );
+      return Result(
+        password: password,
+        pin: pin,
+      );
+    },
+    error: (_, __) => _kEmptyResult,
+    loading: () => _kEmptyResult,
   );
 });
 
 final resultPasswordProvider =
     Provider.family.autoDispose<Value, int>((ref, index) {
   final visible = ref.watch(passwordVisibilityProvider(index));
-  final result = ref.watch(resultProvider(index));
-  final text = result.password;
+  final result = ref.watch(resultProvider(index).select(
+    (value) => value.password,
+  ));
   return Value(
-    rawText: text,
+    rawText: result,
     visible: visible,
   );
 });
 
-final resultPinProvider =
-    Provider.family.autoDispose<Value, int>((ref, index) {
+final resultPinProvider = Provider.family.autoDispose<Value, int>((ref, index) {
   final visible = ref.watch(pinVisibilityProvider(index));
-  final result = ref.watch(resultProvider(index));
-  final text = result.pin;
+  final result = ref.watch(resultProvider(index).select(
+    (value) => value.pin,
+  ));
   return Value(
-    rawText: text,
+    rawText: result,
     visible: visible,
   );
 });

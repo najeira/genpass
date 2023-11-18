@@ -4,7 +4,7 @@ import 'package:genpass/app/gloabls.dart';
 
 class InputRow extends StatelessWidget {
   const InputRow({
-    Key? key,
+    super.key,
     required this.controller,
     required this.inputIcon,
     required this.textInputType,
@@ -13,7 +13,7 @@ class InputRow extends StatelessWidget {
     this.errorText,
     this.obscureText = false,
     required this.actionButton,
-  }) : super(key: key);
+  });
 
   final TextEditingController controller;
   final IconData inputIcon;
@@ -30,24 +30,24 @@ class InputRow extends StatelessWidget {
     return Row(
       children: <Widget>[
         Expanded(
-          child: _buildTextField(context),
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              prefixIcon: Icon(inputIcon),
+              labelText: labelText,
+              hintText: hintText,
+              errorText: errorText,
+              filled: true,
+            ),
+            keyboardType: textInputType,
+            obscureText: obscureText,
+            autofocus: false,
+            autocorrect: false,
+            enableSuggestions: false,
+          ),
         ),
         actionButton,
       ],
-    );
-  }
-
-  Widget _buildTextField(BuildContext context) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        icon: Icon(inputIcon, size: kInputIconSize),
-        labelText: labelText,
-        hintText: hintText,
-        errorText: errorText,
-      ),
-      keyboardType: textInputType,
-      obscureText: obscureText,
     );
   }
 }

@@ -7,8 +7,8 @@ import 'package:genpass/app/widgets/setting_caption.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage._({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static Future<void> push(BuildContext context) {
     return Navigator.of(context).push<void>(
@@ -27,14 +27,14 @@ class HelpPage extends StatelessWidget {
         title: const Text("Help"),
       ),
       body: ListView(
+        padding: const EdgeInsets.all(16.0),
         children: const <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-            child: _ThemeModeRow(),
-          ),
-          Divider(),
+          _ThemeModeRow(),
+          Divider(height: 32.0),
+          SizedBox(height: 8.0),
           _AboutRow(),
-          Divider(),
+          Divider(height: 32.0),
+          SizedBox(height: 100.0),
         ],
       ),
     );
@@ -43,8 +43,8 @@ class HelpPage extends StatelessWidget {
 
 class _ThemeModeRow extends ConsumerWidget {
   const _ThemeModeRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -88,26 +88,22 @@ class _ThemeModeRow extends ConsumerWidget {
     if (value == null) {
       return;
     }
-    final ctrl = ref.read(themeModeProvider.notifier);
-    ctrl.state = value;
+    ref.read(themeModeProvider.notifier).state = value;
   }
 }
 
 class _AboutRow extends StatelessWidget {
   const _AboutRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _onPressed(context),
-      child: const Padding(
-        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-        child: SettingCaption(
-          icon: Icons.info_outline,
-          title: "About",
-        ),
+      child: const SettingCaption(
+        icon: Icons.copyright,
+        title: "About",
       ),
     );
   }
@@ -115,28 +111,48 @@ class _AboutRow extends StatelessWidget {
   void _onPressed(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                ListTile(
-                  title: Text(
-                    "${kAppName} app made by najeira",
-                  ),
-                ),
-                // <div>Icons made by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
-                const ListTile(
-                  title: Text(
-                    "App icon made by Becris from www.flaticon.com",
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
+      builder: (BuildContext context) => const _Dialog(),
+    );
+  }
+}
+
+class _Dialog extends StatelessWidget {
+  const _Dialog({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final themeData = Theme.of(context);
+    return AlertDialog(
+      icon: const Icon(Icons.copyright),
+      title: const Text("About"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            "${kAppName} app made by najeira.",
+          ),
+          const SizedBox(height: 8.0),
+          // <div>Icons made by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+          const Text(
+            "App icon made by Becris from www.flaticon.com.",
+          ),
+        ],
+      ),
+      actions: <Widget>[
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: themeData.colorScheme.onPrimary,
+            backgroundColor: themeData.colorScheme.primary,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop(true);
+          },
+          child: const Text("OK"),
+        ),
+      ],
     );
   }
 }

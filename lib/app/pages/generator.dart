@@ -14,8 +14,8 @@ import 'history.dart';
 
 class GenPassPage extends ConsumerStatefulWidget {
   const GenPassPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState createState() {
@@ -51,11 +51,8 @@ class _GenPassPageState extends ConsumerState<GenPassPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(kAppName),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.info),
-            onPressed: () => HelpPage.push(context),
-          ),
+        actions: const <Widget>[
+          _HelpButton(),
         ],
       ),
       body: const _GeneratorBody(),
@@ -77,39 +74,48 @@ class _GenPassPageState extends ConsumerState<GenPassPage>
   }
 }
 
-class _GeneratorBody extends StatelessWidget {
-  const _GeneratorBody({
-    Key? key,
-  }) : super(key: key);
+class _HelpButton extends StatelessWidget {
+  const _HelpButton({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _SectionTitle(title: "Form"),
-          Padding(
-            padding: EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
-            child: _MasterInputRow(),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 24.0),
-            child: _DomainInputRow(),
-          ),
-          Divider(),
-          _GeneratorList(),
-        ],
-      ),
+    return IconButton(
+      icon: const Icon(Icons.info),
+      onPressed: () => HelpPage.push(context),
+    );
+  }
+}
+
+class _GeneratorBody extends StatelessWidget {
+  const _GeneratorBody({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: const <Widget>[
+        _SectionTitle(title: "Source"),
+        SizedBox(height: 8.0),
+        _MasterInputRow(),
+        SizedBox(height: 12.0),
+        _DomainInputRow(),
+        SizedBox(height: 24.0),
+        Divider(height: 1.0),
+        _GeneratorList(),
+        SizedBox(height: 100.0),
+      ],
     );
   }
 }
 
 class _MasterInputRow extends ConsumerWidget {
   const _MasterInputRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -128,19 +134,20 @@ class _MasterInputRow extends ConsumerWidget {
       actionButton: VisibilityButton(
         enable: true,
         visible: visible,
-        onSelected: (value) {
-          final ctrl = ref.read(masterVisibleProvider.notifier);
-          ctrl.state = value;
-        },
+        onSelected: (value) => _onSelected(context, ref, value),
       ),
     );
+  }
+
+  void _onSelected(BuildContext context, WidgetRef ref, bool value) {
+    ref.read(masterVisibleProvider.notifier).state = value;
   }
 }
 
 class _DomainInputRow extends ConsumerWidget {
   const _DomainInputRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -156,18 +163,15 @@ class _DomainInputRow extends ConsumerWidget {
       errorText: errorText,
       obscureText: false,
       actionButton: HistoryButton(
-        onPressed: () {
-          _showHistoryPage(context, ref);
-        },
+        onPressed: () => _showHistoryPage(context, ref),
       ),
     );
   }
 
-  void _showHistoryPage(BuildContext context, WidgetRef ref) {
-    HistoryPage.push(context).then((String? domainText) {
+  Future<void> _showHistoryPage(BuildContext context, WidgetRef ref) {
+    return HistoryPage.push(context).then((String? domainText) {
       if (domainText != null && domainText.isNotEmpty) {
-        final domain = ref.read(domainTextEditingProvider);
-        domain.text = domainText;
+        ref.read(domainTextEditingProvider).text = domainText;
         log.config("domain is ${domainText}");
       }
     });
@@ -176,61 +180,65 @@ class _DomainInputRow extends ConsumerWidget {
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({
-    Key? key,
-    this.title,
-  }) : super(key: key);
+    super.key,
+    required this.title,
+  });
 
-  final String? title;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
     log.fine("_SectionTitle.build");
     final themeData = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 16.0, 8.0, 8.0),
-      child: Text(
-        title!,
-        style: TextStyle(
-          fontSize: themeData.textTheme.bodyMedium!.fontSize,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
+    return Text(
+      title,
+      style: themeData.textTheme.titleSmall,
     );
   }
 }
 
 class _GeneratorList extends ConsumerWidget {
   const _GeneratorList({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_GeneratorList.build");
     final settings = ref.watch(settingListProvider);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        for (int i = 0; i < settings.items.length; i++)
-          GeneratorSection.withIndex(context, i),
-        Center(
-          child: TextButton.icon(
-            onPressed: () {
-              _onAddSetting(context, ref);
-            },
-            icon: const Icon(Icons.add_circle),
-            label: const Text("Add Generator"),
-          ),
-        ),
-        const SizedBox(height: 16.0),
-      ],
+    return settings.when(
+      data: (settings) => Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          for (int i = 0; i < settings.length; i++)
+            GeneratorSection.withIndex(context, i),
+          const _AddButton(),
+        ],
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      loading: () => const CircularProgressIndicator(),
+    );
+  }
+}
+
+class _AddButton extends ConsumerWidget {
+  const _AddButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: TextButton.icon(
+        onPressed: () => _onAddSetting(context, ref),
+        icon: const Icon(Icons.add_circle),
+        label: const Text("Add Generator"),
+      ),
     );
   }
 
   Future<void> _onAddSetting(BuildContext context, WidgetRef ref) {
-    final ctrl = ref.read(settingListProvider.notifier);
-    ctrl.add(const Setting());
-    return ctrl.save();
+    return ref.read(settingListProvider.notifier).add(const Setting());
   }
 }

@@ -15,10 +15,8 @@ class Crypto {
     switch (algo) {
       case HashAlgorithm.md5:
         hash = crypto.md5;
-        break;
       case HashAlgorithm.sha512:
         hash = crypto.sha512;
-        break;
     }
     const secret = "";
     final targetText = "${password}${secret}:${domain}";

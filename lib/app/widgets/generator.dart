@@ -8,8 +8,8 @@ import 'package:genpass/app/widgets/result_row.dart';
 
 class GeneratorSection extends StatelessWidget {
   const GeneratorSection._({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static Widget withIndex(BuildContext context, int index) {
     return ProviderScope(
@@ -27,16 +27,13 @@ class GeneratorSection extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        SizedBox(height: 8.0),
         _GeneratorTitle(),
-        Padding(
-          padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
-          child: _PasswordResultRow(),
-        ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
-          child: _PinResultRow(),
-        ),
-        Divider(),
+        _PasswordResultRow(),
+        SizedBox(height: 8.0),
+        _PinResultRow(),
+        SizedBox(height: 24.0),
+        Divider(height: 1.0),
       ],
     );
   }
@@ -44,8 +41,8 @@ class GeneratorSection extends StatelessWidget {
 
 class _PasswordResultRow extends ConsumerWidget {
   const _PasswordResultRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -57,8 +54,7 @@ class _PasswordResultRow extends ConsumerWidget {
       icon: kIconPassword,
       value: value,
       onVisiblityChanged: (value) {
-        final ctrl = ref.watch(passwordVisibilityProvider(index).notifier);
-        ctrl.state = value;
+        ref.read(passwordVisibilityProvider(index).notifier).state = value;
       },
     );
   }
@@ -66,8 +62,8 @@ class _PasswordResultRow extends ConsumerWidget {
 
 class _PinResultRow extends ConsumerWidget {
   const _PinResultRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -79,8 +75,7 @@ class _PinResultRow extends ConsumerWidget {
       icon: kIconPin,
       value: value,
       onVisiblityChanged: (value) {
-        final ctrl = ref.watch(pinVisibilityProvider(index).notifier);
-        ctrl.state = value;
+        ref.read(pinVisibilityProvider(index).notifier).state = value;
       },
     );
   }
@@ -88,57 +83,58 @@ class _PinResultRow extends ConsumerWidget {
 
 class _GeneratorTitle extends ConsumerWidget {
   const _GeneratorTitle({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_GeneratorTitle.build");
-    final number = ref.watch(selectedSettingIndexProvider);
     final themeData = Theme.of(context);
-    final fontSize = themeData.textTheme.bodyMedium!.fontSize!;
-    const iconButtonConstraints = BoxConstraints(
-      minWidth: 32.0,
-      minHeight: 24.0,
+    final number = ref.watch(selectedSettingIndexProvider);
+    return Row(
+      children: [
+        Text(
+          "Generator ${number + 1}",
+          style: themeData.textTheme.titleSmall,
+        ),
+        const SizedBox(width: 8.0),
+        _IconButton(
+          iconData: Icons.settings,
+          onPressed: () {
+            SettingPage.push(context, number);
+          },
+        ),
+        _IconButton(
+          iconData: Icons.delete,
+          onPressed: () {
+            final notifier = ref.read(settingListProvider.notifier);
+            Future.delayed(Duration.zero, () => notifier.removeAt(number));
+          },
+        ),
+      ],
     );
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 0.0),
-      child: Row(
-        children: [
-          Text(
-            "Generator ${number + 1}",
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(width: 8.0),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            iconSize: fontSize,
-            color: themeData.colorScheme.secondaryContainer,
-            padding: const EdgeInsets.all(0.0),
-            constraints: iconButtonConstraints,
-            onPressed: () async {
-              await SettingPage.push(context, number);
-              final ctrl = ref.read(settingListProvider.notifier);
-              await ctrl.save();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            iconSize: fontSize,
-            color: themeData.colorScheme.secondaryContainer,
-            padding: const EdgeInsets.all(0.0),
-            constraints: iconButtonConstraints,
-            onPressed: () async {
-              final ctrl = ref.read(settingListProvider.notifier);
-              ctrl.removeAt(number);
-              await ctrl.save();
-            },
-          ),
-        ],
-      ),
+  }
+}
+
+class _IconButton extends StatelessWidget {
+  const _IconButton({
+    super.key,
+    required this.iconData,
+    this.onPressed,
+  });
+
+  final IconData iconData;
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final themeData = Theme.of(context);
+    return IconButton(
+      icon: Icon(iconData),
+      color: themeData.colorScheme.tertiary,
+      padding: const EdgeInsets.all(0.0),
+      onPressed: onPressed,
     );
   }
 }

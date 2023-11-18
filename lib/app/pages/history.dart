@@ -24,8 +24,8 @@ final _filteredHistoryProvider = Provider.autoDispose<Iterable<String>>((ref) {
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage._({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static Future<String?> push(BuildContext context) {
     return Navigator.of(context).push<String>(
@@ -54,8 +54,8 @@ class HistoryPage extends StatelessWidget {
 
 class _SearchTextField extends ConsumerWidget {
   const _SearchTextField({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -75,9 +75,9 @@ class _SearchTextField extends ConsumerWidget {
 
 class _HistoryListView extends ConsumerWidget {
   const _HistoryListView({
-    Key? key,
+    super.key,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   final ValueChanged<String> onSelected;
 

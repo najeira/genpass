@@ -16,8 +16,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  shared_preferences_foundation: e2dae3258e06f44cc55f49d42024fd8dd03c590c
+  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
 
-PODFILE CHECKSUM: b0cc1fdf1eda0fefb5163971bbf18550427d02c4
+PODFILE CHECKSUM: ff0a9a3ce75ee73f200ca7e2f47745698c917ef9
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.13.0

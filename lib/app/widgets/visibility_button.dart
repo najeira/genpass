@@ -4,11 +4,11 @@ import 'package:genpass/app/gloabls.dart' show log;
 
 class VisibilityButton extends StatelessWidget {
   const VisibilityButton({
-    Key? key,
+    super.key,
     required this.enable,
     required this.visible,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   final bool enable;
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:logging/logging.dart';
 
-late final String kAppName = _getAppName();
+final String kAppName = _getAppName();
 
 //const double kFontSize = 18.0;
 const double kInputIconSize = 24.0;
