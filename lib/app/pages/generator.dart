@@ -14,8 +14,8 @@ import 'history.dart';
 
 class GenPassPage extends ConsumerStatefulWidget {
   const GenPassPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState createState() {
@@ -90,8 +90,8 @@ class _HelpButton extends StatelessWidget {
 
 class _GeneratorBody extends StatelessWidget {
   const _GeneratorBody({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +114,8 @@ class _GeneratorBody extends StatelessWidget {
 
 class _MasterInputRow extends ConsumerWidget {
   const _MasterInputRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -145,8 +145,8 @@ class _MasterInputRow extends ConsumerWidget {
 
 class _DomainInputRow extends ConsumerWidget {
   const _DomainInputRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -182,9 +182,9 @@ class _DomainInputRow extends ConsumerWidget {
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({
-    Key? key,
+    super.key,
     this.title,
-  }) : super(key: key);
+  });
 
   final String? title;
 
@@ -201,8 +201,8 @@ class _SectionTitle extends StatelessWidget {
 
 class _GeneratorList extends ConsumerWidget {
   const _GeneratorList({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

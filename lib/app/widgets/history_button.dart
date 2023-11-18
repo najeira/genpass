@@ -4,9 +4,9 @@ import 'package:genpass/app/gloabls.dart' show log;
 
 class HistoryButton extends StatelessWidget {
   const HistoryButton({
-    Key? key,
+    super.key,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   final VoidCallback onPressed;
 

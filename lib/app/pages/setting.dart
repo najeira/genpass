@@ -13,9 +13,9 @@ final _scopedSettingProvider = StateProvider<Setting>(
 
 class SettingPage extends StatelessWidget {
   const SettingPage._({
-    Key? key,
+    super.key,
     required this.index,
-  }) : super(key: key);
+  });
 
   final int index;
 
@@ -80,8 +80,8 @@ class SettingPage extends StatelessWidget {
 
 class _PasswordLengthSlider extends ConsumerWidget {
   const _PasswordLengthSlider({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -106,8 +106,8 @@ class _PasswordLengthSlider extends ConsumerWidget {
 
 class _PinLengthSlider extends ConsumerWidget {
   const _PinLengthSlider({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -132,14 +132,14 @@ class _PinLengthSlider extends ConsumerWidget {
 
 class _Slider extends StatelessWidget {
   const _Slider({
-    Key? key,
+    super.key,
     required this.onChanged,
     required this.icon,
     required this.title,
     required this.value,
     required this.min,
     required this.max,
-  }) : super(key: key);
+  });
 
   final ValueChanged<int> onChanged;
   final IconData icon;
@@ -174,8 +174,8 @@ class _Slider extends StatelessWidget {
 
 class _Algorithms extends ConsumerWidget {
   const _Algorithms({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -250,7 +250,6 @@ class _Dialog extends StatelessWidget {
           },
         ),
         ElevatedButton(
-          child: const Text("OK"),
           style: ElevatedButton.styleFrom(
             foregroundColor: themeData.colorScheme.onPrimary,
             backgroundColor: themeData.colorScheme.primary,
@@ -258,6 +257,7 @@ class _Dialog extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop(true);
           },
+          child: const Text("OK"),
         ),
       ],
     );

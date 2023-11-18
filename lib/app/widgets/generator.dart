@@ -8,8 +8,8 @@ import 'package:genpass/app/widgets/result_row.dart';
 
 class GeneratorSection extends StatelessWidget {
   const GeneratorSection._({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static Widget withIndex(BuildContext context, int index) {
     return ProviderScope(
@@ -41,8 +41,8 @@ class GeneratorSection extends StatelessWidget {
 
 class _PasswordResultRow extends ConsumerWidget {
   const _PasswordResultRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,8 +63,8 @@ class _PasswordResultRow extends ConsumerWidget {
 
 class _PinResultRow extends ConsumerWidget {
   const _PinResultRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -85,8 +85,8 @@ class _PinResultRow extends ConsumerWidget {
 
 class _GeneratorTitle extends ConsumerWidget {
   const _GeneratorTitle({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

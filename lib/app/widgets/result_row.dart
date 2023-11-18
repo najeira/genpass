@@ -10,12 +10,12 @@ import 'visibility_button.dart';
 
 class ResultRow extends StatelessWidget {
   const ResultRow({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.icon,
     required this.onVisiblityChanged,
-  }) : super(key: key);
+  });
 
   final String title;
   final Value value;

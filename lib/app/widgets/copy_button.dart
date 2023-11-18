@@ -4,10 +4,10 @@ import 'package:genpass/app/gloabls.dart' show log;
 
 class CopyButton extends StatelessWidget {
   const CopyButton({
-    Key? key,
+    super.key,
     required this.enable,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   final bool enable;
 

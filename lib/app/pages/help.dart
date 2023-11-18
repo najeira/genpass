@@ -7,8 +7,8 @@ import 'package:genpass/app/widgets/setting_caption.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage._({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static Future<void> push(BuildContext context) {
     return Navigator.of(context).push<void>(
@@ -43,8 +43,8 @@ class HelpPage extends StatelessWidget {
 
 class _ThemeModeRow extends ConsumerWidget {
   const _ThemeModeRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -95,8 +95,8 @@ class _ThemeModeRow extends ConsumerWidget {
 
 class _AboutRow extends StatelessWidget {
   const _AboutRow({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +144,6 @@ class _Dialog extends StatelessWidget {
       ),
       actions: <Widget>[
         ElevatedButton(
-          child: const Text("OK"),
           style: ElevatedButton.styleFrom(
             foregroundColor: themeData.colorScheme.onPrimary,
             backgroundColor: themeData.colorScheme.primary,
@@ -152,6 +151,7 @@ class _Dialog extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop(true);
           },
+          child: const Text("OK"),
         ),
       ],
     );

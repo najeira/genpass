@@ -4,10 +4,10 @@ import 'package:genpass/app/gloabls.dart' show log;
 
 class ResultText extends StatelessWidget {
   const ResultText({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
-  }) : super(key: key);
+  });
 
   final String title;
   final String value;
@@ -42,9 +42,9 @@ class _Segment {
 
 class _PasswordText extends StatelessWidget {
   _PasswordText({
-    Key? key,
+    super.key,
     required String value,
-  }) : super(key: key) {
+  }) {
     segments = parseString(value);
   }
 

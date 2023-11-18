@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class SettingCaption extends StatelessWidget {
   const SettingCaption({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final String title;

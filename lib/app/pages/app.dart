@@ -9,8 +9,8 @@ import 'generator.dart';
 // The root of the application, does not have a screen.
 class MyApp extends StatelessWidget {
   const MyApp({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +42,8 @@ class _MyApp extends ConsumerWidget {
   const _MyApp({
     required this.lightTheme,
     required this.darkTheme,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final ThemeData lightTheme;
 
@@ -66,8 +66,8 @@ class _MyApp extends ConsumerWidget {
 // Loading at startup and switching to the application screen.
 class LaunchPage extends ConsumerWidget {
   const LaunchPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -83,8 +83,8 @@ class LaunchPage extends ConsumerWidget {
 // Loading
 class LoadingPage extends StatelessWidget {
   const LoadingPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
