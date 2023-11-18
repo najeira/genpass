@@ -3,7 +3,7 @@ description: A password generator app written by Flutter/Dart.
 
 publish_to: 'none'
 
-version: 2.6.0+2060000
+version: 3.0.0+3000000
 
 environment:
   flutter: ^3.13.0
