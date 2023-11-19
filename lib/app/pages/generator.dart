@@ -8,23 +8,21 @@ import 'package:genpass/app/widgets/history_button.dart';
 import 'package:genpass/app/widgets/input_row.dart';
 import 'package:genpass/app/widgets/visibility_button.dart';
 import 'package:genpass/domain/settings.dart';
+import 'package:genpass/service/clipboard.dart';
 
 import 'help.dart';
 import 'history.dart';
 
-class GenPassPage extends ConsumerStatefulWidget {
+class GenPassPage extends StatefulWidget {
   const GenPassPage({
     super.key,
   });
 
   @override
-  ConsumerState createState() {
-    return _GenPassPageState();
-  }
+  State createState() => _GenPassPageState();
 }
 
-class _GenPassPageState extends ConsumerState<GenPassPage>
-    with WidgetsBindingObserver {
+class _GenPassPageState extends State<GenPassPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -41,7 +39,7 @@ class _GenPassPageState extends ConsumerState<GenPassPage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused) {
-      _addHistory();
+      _addHistory(context);
     }
   }
 
@@ -55,22 +53,8 @@ class _GenPassPageState extends ConsumerState<GenPassPage>
           _HelpButton(),
         ],
       ),
-      body: const _GeneratorBody(),
+      body: const _NotificationHandler(),
     );
-  }
-
-  Future<bool> _addHistory() async {
-    final domain = ref.read(domainInputTextProvider);
-    if (domain.isEmpty) {
-      log.config("domain is empty");
-      return false;
-    }
-
-    final history = ref.read(historyProvider);
-    history.add(domain);
-    await history.save();
-    log.config("domain ${domain} is added to history");
-    return true;
   }
 }
 
@@ -84,6 +68,28 @@ class _HelpButton extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.info),
       onPressed: () => HelpPage.push(context),
+    );
+  }
+}
+
+class _NotificationHandler extends StatelessWidget {
+  const _NotificationHandler({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ClipboardNotification>(
+      onNotification: (notification) {
+        _addHistory(context);
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(
+            content: Text("${notification.name} copied to clipboard"),
+          ),
+        );
+        return true;
+      },
+      child: const _GeneratorBody(),
     );
   }
 }
@@ -239,4 +245,18 @@ class _AddButton extends ConsumerWidget {
   Future<void> _onAddSetting(BuildContext context, WidgetRef ref) {
     return ref.read(settingListProvider.notifier).add(const Setting());
   }
+}
+
+Future<bool> _addHistory(BuildContext context) async {
+  final ps = ProviderScope.containerOf(context, listen: false);
+  final domain = ps.read(domainInputTextProvider);
+  if (domain.isEmpty) {
+    log.config("domain is empty");
+    return false;
+  }
+
+  final history = ps.read(historyProvider.notifier);
+  await history.add(domain);
+  log.config("domain ${domain} is added to history");
+  return true;
 }

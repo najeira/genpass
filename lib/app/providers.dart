@@ -10,7 +10,7 @@ final themeModeProvider = StateProvider<ThemeMode>((ref) {
   return ThemeMode.system;
 });
 
-final historyProvider = ChangeNotifierProvider<History>((ref) {
+final historyProvider = AsyncNotifierProvider<History, Set<String>>(() {
   return History();
 });
 

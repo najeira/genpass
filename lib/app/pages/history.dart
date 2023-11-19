@@ -3,23 +3,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:genpass/app/providers.dart';
 
-final _textEditingProvider =
-    ChangeNotifierProvider.autoDispose<TextEditingController>((ref) {
-  // read domain text when initializing
-  final domain = ref.read(domainInputTextProvider);
-  return TextEditingController(text: domain);
+final _inputTextProvider = StateProvider<String>((ref) {
+  return "";
 });
 
 final _filteredHistoryProvider = Provider.autoDispose<Iterable<String>>((ref) {
   final history = ref.watch(historyProvider);
-  final text = ref.watch(_textEditingProvider);
-  if (text.text.isEmpty) {
-    return history.entries;
-  } else {
-    return history.entries.where((String entry) {
-      return entry.contains(text.text);
-    });
-  }
+  final text = ref.watch(_inputTextProvider);
+  return history.when(
+    data: (entries) {
+      if (text.isEmpty) {
+        return entries;
+      }
+      return entries.where((String entry) {
+        return entry.contains(text);
+      });
+    },
+    error: (_, __) => <String>{},
+    loading: () => <String>{},
+  );
 });
 
 class HistoryPage extends StatelessWidget {
@@ -59,17 +61,26 @@ class _SearchTextField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final text = ref.watch(_textEditingProvider);
-    return TextField(
-      controller: text,
+    final domainText = ref.watch(domainInputTextProvider);
+    return TextFormField(
+      initialValue: domainText,
       decoration: const InputDecoration(
         hintText: "example.com",
       ),
       keyboardType: TextInputType.url,
+      textInputAction: TextInputAction.search,
       autofocus: false,
       autocorrect: false,
-      cursorColor: Colors.white,
+      enableSuggestions: true,
+      onChanged: (value) => _onChanged(context, value),
+      onFieldSubmitted: (value) => _onChanged(context, value),
     );
+  }
+
+  void _onChanged(BuildContext context, String value) {
+    ProviderScope.containerOf(context, listen: false)
+        .read(_inputTextProvider.notifier)
+        .state = value;
   }
 }
 

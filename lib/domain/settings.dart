@@ -56,7 +56,7 @@ class SettingList extends AsyncNotifier<List<Setting>> {
     return const Setting();
   }
 
-  Future<void> add(Setting item) async {
+  Future<void> add(Setting item) {
     final items = _items;
     if (items != null) {
       final newValue = List<Setting>.of(items);
@@ -65,7 +65,7 @@ class SettingList extends AsyncNotifier<List<Setting>> {
     } else {
       state = AsyncValue.data(<Setting>[item]);
     }
-    await _save();
+    return _save();
   }
 
   Future<void> removeAt(int index) async {
