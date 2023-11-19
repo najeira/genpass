@@ -6,8 +6,8 @@ import 'package:genpass/app/providers.dart';
 final _textEditingProvider =
     ChangeNotifierProvider.autoDispose<TextEditingController>((ref) {
   // read domain text when initializing
-  final domain = ref.read(domainTextEditingProvider);
-  return TextEditingController(text: domain.text);
+  final domain = ref.read(domainInputTextProvider);
+  return TextEditingController(text: domain);
 });
 
 final _filteredHistoryProvider = Provider.autoDispose<Iterable<String>>((ref) {

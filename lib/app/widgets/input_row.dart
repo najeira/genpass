@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:genpass/app/gloabls.dart';
 
 class InputRow extends StatelessWidget {
   const InputRow({
     super.key,
-    required this.controller,
+    required this.provider,
     required this.inputIcon,
     required this.textInputType,
     required this.labelText,
@@ -15,7 +16,7 @@ class InputRow extends StatelessWidget {
     required this.actionButton,
   });
 
-  final TextEditingController controller;
+  final StateProvider<String> provider;
   final IconData inputIcon;
   final TextInputType textInputType;
   final String labelText;
@@ -31,7 +32,6 @@ class InputRow extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: TextField(
-            controller: controller,
             decoration: InputDecoration(
               prefixIcon: Icon(inputIcon),
               labelText: labelText,
@@ -44,10 +44,18 @@ class InputRow extends StatelessWidget {
             autofocus: false,
             autocorrect: false,
             enableSuggestions: false,
+            onChanged: (value) => _onChanged(context, value),
+            onSubmitted: (value) => _onChanged(context, value),
           ),
         ),
         actionButton,
       ],
     );
+  }
+
+  void _onChanged(BuildContext context, String value) {
+    ProviderScope.containerOf(context, listen: false)
+        .read(provider.notifier)
+        .state = value;
   }
 }

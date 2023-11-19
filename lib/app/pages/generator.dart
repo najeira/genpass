@@ -60,16 +60,16 @@ class _GenPassPageState extends ConsumerState<GenPassPage>
   }
 
   Future<bool> _addHistory() async {
-    final domain = ref.read(domainTextEditingProvider);
-    if (domain.text.isEmpty) {
+    final domain = ref.read(domainInputTextProvider);
+    if (domain.isEmpty) {
       log.config("domain is empty");
       return false;
     }
 
     final history = ref.read(historyProvider);
-    history.add(domain.text);
+    history.add(domain);
     await history.save();
-    log.config("domain ${domain.text} is added to history");
+    log.config("domain ${domain} is added to history");
     return true;
   }
 }
@@ -120,11 +120,10 @@ class _MasterInputRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_MasterInputRow.build");
-    final text = ref.watch(masterTextEditingProvider);
     final visible = ref.watch(masterVisibleProvider);
     final errorText = ref.watch(masterErrorTextProvider);
     return InputRow(
-      controller: text,
+      provider: masterInputTextProvider,
       textInputType: TextInputType.visiblePassword,
       inputIcon: Icons.bubble_chart,
       labelText: "master password",
@@ -152,10 +151,9 @@ class _DomainInputRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     log.fine("_DomainInputRow.build");
-    final text = ref.watch(domainTextEditingProvider);
     final errorText = ref.watch(domainErrorTextProvider);
     return InputRow(
-      controller: text,
+      provider: domainInputTextProvider,
       textInputType: TextInputType.url,
       inputIcon: Icons.business,
       labelText: "domain / site",
@@ -171,7 +169,7 @@ class _DomainInputRow extends ConsumerWidget {
   Future<void> _showHistoryPage(BuildContext context, WidgetRef ref) {
     return HistoryPage.push(context).then((String? domainText) {
       if (domainText != null && domainText.isNotEmpty) {
-        ref.read(domainTextEditingProvider).text = domainText;
+        ref.read(domainInputTextProvider.notifier).state = domainText;
         log.config("domain is ${domainText}");
       }
     });

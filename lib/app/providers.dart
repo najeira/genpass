@@ -6,9 +6,8 @@ import 'package:genpass/domain/result.dart';
 import 'package:genpass/domain/settings.dart';
 import 'package:genpass/service/crypto.dart';
 
-final themeModeProvider =
-    StateNotifierProvider<StateController<ThemeMode>, ThemeMode>((ref) {
-  return StateController<ThemeMode>(ThemeMode.system);
+final themeModeProvider = StateProvider<ThemeMode>((ref) {
+  return ThemeMode.system;
 });
 
 final historyProvider = ChangeNotifierProvider<History>((ref) {
@@ -47,14 +46,13 @@ final isLaunchingProvider = Provider<bool>((ref) {
 
 final selectedSettingIndexProvider = Provider<int>((ref) => 0);
 
-final masterTextEditingProvider =
-    ChangeNotifierProvider<TextEditingController>((ref) {
-  return TextEditingController();
+final masterInputTextProvider = StateProvider<String>((ref) {
+  return "";
 });
 
 final masterErrorTextProvider = Provider<String?>((ref) {
-  final text = ref.watch(masterTextEditingProvider);
-  if (text.text.isEmpty || text.text.length < 8) {
+  final text = ref.watch(masterInputTextProvider);
+  if (text.isEmpty || text.length < 8) {
     return "enter 8 or more characters";
   }
   return null;
@@ -65,27 +63,26 @@ final masterVisibleProvider =
   return StateController<bool>(false);
 });
 
-final domainTextEditingProvider =
-    ChangeNotifierProvider<TextEditingController>((ref) {
-  return TextEditingController();
+final domainInputTextProvider = StateProvider<String>((ref) {
+  return "";
 });
 
 final domainErrorTextProvider = Provider<String?>((ref) {
-  final text = ref.watch(domainTextEditingProvider);
-  if (text.text.isEmpty) {
+  final text = ref.watch(domainInputTextProvider);
+  if (text.isEmpty) {
     return "enter";
   }
   return null;
 });
 
-final passwordVisibilityProvider = StateNotifierProvider.family
-    .autoDispose<StateController<bool>, bool, int>((ref, index) {
-  return StateController<bool>(false);
+final passwordVisibilityProvider =
+    StateProvider.family.autoDispose<bool, int>((ref, index) {
+  return false;
 });
 
-final pinVisibilityProvider = StateNotifierProvider.family
-    .autoDispose<StateController<bool>, bool, int>((ref, index) {
-  return StateController<bool>(false);
+final pinVisibilityProvider =
+    StateProvider.family.autoDispose<bool, int>((ref, index) {
+  return false;
 });
 
 const _kEmptyResult = Result(
@@ -94,13 +91,9 @@ const _kEmptyResult = Result(
 );
 
 final resultProvider = Provider.family.autoDispose<Result, int>((ref, index) {
-  final master = ref.watch(masterTextEditingProvider.select(
-    (value) => value.text,
-  ));
+  final master = ref.watch(masterInputTextProvider);
   final masterError = ref.watch(masterErrorTextProvider);
-  final domain = ref.watch(domainTextEditingProvider.select(
-    (value) => value.text,
-  ));
+  final domain = ref.watch(domainInputTextProvider);
   final domainError = ref.watch(domainErrorTextProvider);
   final settings = ref.watch(settingListProvider);
   return settings.when(
