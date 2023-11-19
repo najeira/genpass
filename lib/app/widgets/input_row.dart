@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:genpass/app/gloabls.dart';
 
-class InputRow extends StatelessWidget {
+class InputRow extends ConsumerStatefulWidget {
   const InputRow({
     super.key,
     required this.provider,
@@ -26,21 +26,42 @@ class InputRow extends StatelessWidget {
   final Widget actionButton;
 
   @override
+  ConsumerState<InputRow> createState() => _InputRowState();
+}
+
+class _InputRowState extends ConsumerState<InputRow> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    log.fine("InputRow(${labelText}).build");
+    log.fine("InputRow(${widget.labelText}).build");
+    ref.listen(widget.provider, _onProviderChanged);
     return Row(
       children: <Widget>[
         Expanded(
           child: TextField(
+            controller: _controller,
             decoration: InputDecoration(
-              prefixIcon: Icon(inputIcon),
-              labelText: labelText,
-              hintText: hintText,
-              errorText: errorText,
+              prefixIcon: Icon(widget.inputIcon),
+              labelText: widget.labelText,
+              hintText: widget.hintText,
+              errorText: widget.errorText,
               filled: true,
             ),
-            keyboardType: textInputType,
-            obscureText: obscureText,
+            keyboardType: widget.textInputType,
+            obscureText: widget.obscureText,
             autofocus: false,
             autocorrect: false,
             enableSuggestions: false,
@@ -48,14 +69,21 @@ class InputRow extends StatelessWidget {
             onSubmitted: (value) => _onChanged(context, value),
           ),
         ),
-        actionButton,
+        widget.actionButton,
       ],
     );
   }
 
   void _onChanged(BuildContext context, String value) {
     ProviderScope.containerOf(context, listen: false)
-        .read(provider.notifier)
+        .read(widget.provider.notifier)
         .state = value;
+  }
+
+  void _onProviderChanged(String? previous, String next) {
+    if (_controller.text != next) {
+      log.fine("InputRow(${widget.labelText})._onProviderChanged");
+      _controller.text = next;
+    }
   }
 }
