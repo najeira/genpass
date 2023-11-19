@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:genpass/app/gloabls.dart';
 import 'package:genpass/app/providers.dart';
 
-final _textEditingProvider =
-    ChangeNotifierProvider.autoDispose<TextEditingController>((ref) {
-  // read domain text when initializing
-  final domain = ref.read(domainTextEditingProvider);
-  return TextEditingController(text: domain.text);
+final _filterTextProvider = StateProvider.autoDispose<String>((ref) {
+  final text = ref.watch(domainInputTextProvider);
+  log.fine("_filterTextProvider: ${text}");
+  return text;
 });
 
 final _filteredHistoryProvider = Provider.autoDispose<Iterable<String>>((ref) {
   final history = ref.watch(historyProvider);
-  final text = ref.watch(_textEditingProvider);
-  if (text.text.isEmpty) {
-    return history.entries;
-  } else {
-    return history.entries.where((String entry) {
-      return entry.contains(text.text);
-    });
-  }
+  final text = ref.watch(_filterTextProvider);
+  return history.when(
+    data: (entries) {
+      if (text.isEmpty) {
+        return entries;
+      }
+      log.fine("_filteredHistoryProvider: ${text}");
+      return entries.where((String entry) {
+        return entry.contains(text);
+      });
+    },
+    error: (_, __) => <String>{},
+    loading: () => <String>{},
+  );
 });
 
 class HistoryPage extends StatelessWidget {
@@ -28,7 +34,7 @@ class HistoryPage extends StatelessWidget {
   });
 
   static Future<String?> push(BuildContext context) {
-    return Navigator.of(context).push<String>(
+    return Navigator.of(context).push<String?>(
       MaterialPageRoute<String>(
         builder: (BuildContext context) {
           return const HistoryPage._();
@@ -43,11 +49,7 @@ class HistoryPage extends StatelessWidget {
       appBar: AppBar(
         title: const _SearchTextField(),
       ),
-      body: _HistoryListView(
-        onSelected: (String value) {
-          Navigator.maybeOf(context)?.maybePop(value);
-        },
-      ),
+      body: const _HistoryListView(),
     );
   }
 }
@@ -59,27 +61,36 @@ class _SearchTextField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final text = ref.watch(_textEditingProvider);
-    return TextField(
-      controller: text,
+    final domainText = ref.watch(_filterTextProvider);
+    return TextFormField(
+      initialValue: domainText,
       decoration: const InputDecoration(
+        // icon: Icon(Icons.filter_alt_outlined),
         hintText: "example.com",
+        filled: true,
+        // suffixIcon: Icon(Icons.filter_alt_outlined),
       ),
       keyboardType: TextInputType.url,
+      textInputAction: TextInputAction.search,
       autofocus: false,
       autocorrect: false,
-      cursorColor: Colors.white,
+      enableSuggestions: true,
+      onChanged: (value) => _onChanged(context, value),
+      onFieldSubmitted: (value) => _onChanged(context, value),
     );
+  }
+
+  void _onChanged(BuildContext context, String value) {
+    ProviderScope.containerOf(context, listen: false)
+        .read(_filterTextProvider.notifier)
+        .state = value;
   }
 }
 
 class _HistoryListView extends ConsumerWidget {
   const _HistoryListView({
     super.key,
-    required this.onSelected,
   });
-
-  final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -87,31 +98,29 @@ class _HistoryListView extends ConsumerWidget {
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: entries.length,
-      itemBuilder: (BuildContext context, int index) {
-        return _buildListTile(context, entries.elementAt(index));
-      },
+      itemBuilder: (BuildContext context, int index) =>
+          _ListTile(entries.elementAt(index)),
     );
   }
+}
 
-  Widget _buildListTile(BuildContext context, String value) {
-    final themeData = Theme.of(context);
-    final textTheme = themeData.textTheme;
-    return InkWell(
+class _ListTile extends StatelessWidget {
+  const _ListTile(
+    this.value, {
+    super.key,
+  });
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
       key: ValueKey<String>(value),
-      onTap: () {
-        onSelected(value);
-      },
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: Divider.createBorderSide(context),
-          ),
-        ),
-        child: Text(
-          value,
-          style: textTheme.bodyMedium,
-        ),
+      onTap: () => Navigator.of(context).pop(value),
+      title: Text(value),
+      leading: const Icon(Icons.business),
+      shape: Border(
+        bottom: Divider.createBorderSide(context),
       ),
     );
   }
