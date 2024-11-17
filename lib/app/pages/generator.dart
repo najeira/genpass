@@ -128,10 +128,12 @@ class _MasterInputRow extends ConsumerWidget {
     log.fine("_MasterInputRow.build");
     final visible = ref.watch(masterVisibleProvider);
     final errorText = ref.watch(masterErrorTextProvider);
+    final iconData = ref.watch(masterIconProvider);
     return InputRow(
       provider: masterInputTextProvider,
       textInputType: TextInputType.visiblePassword,
       inputIcon: Icons.bubble_chart,
+      suffixIcon: iconData,
       labelText: "master password",
       hintText: "your master password",
       errorText: errorText,

@@ -58,6 +58,20 @@ final masterErrorTextProvider = Provider<String?>((ref) {
   return null;
 });
 
+final masterIconProvider = Provider<IconData?>((ref) {
+  final text = ref.watch(masterInputTextProvider);
+  final errorText = ref.watch(masterErrorTextProvider);
+  if (errorText != null) {
+    return null;
+  }
+  const iconStart = 0xe000;
+  const range = 0xf8ff - iconStart;
+  final checksum = Crypto.checksum(text);
+  final index = checksum % range;
+  final icon = IconData(iconStart + index, fontFamily: "MaterialIcons");
+  return icon;
+});
+
 final masterVisibleProvider =
     StateNotifierProvider<StateController<bool>, bool>((ref) {
   return StateController<bool>(false);
