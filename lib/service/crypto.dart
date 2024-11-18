@@ -1,4 +1,5 @@
 import 'dart:convert' show base64, utf8;
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as crypto;
 
@@ -181,4 +182,22 @@ class Crypto {
     "6793", "9480", "8957", "0859", "7394", "6827", "6093",
     "7063", "8196", "9539", "0439", "8438", "9047", "8557",
   ];
+
+  static int checksum(String password) {
+    final bytes = utf8.encode(password);
+    final result = _number(bytes);
+    return result;
+  }
+
+  /// Gets unsiged integer of [bitLength]-bit from the message digest.
+  static int _number(Uint8List bytes) {
+    const bitLength = 64 >>> 3;
+    int result = 0;
+    int n = bytes.length;
+    for (int i = n > bitLength ? n - bitLength : 0; i < n; i++) {
+      result <<= 8;
+      result |= bytes[i];
+    }
+    return result;
+  }
 }

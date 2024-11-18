@@ -9,6 +9,7 @@ import 'package:genpass/domain/settings.dart';
 
 final _scopedSettingProvider = StateProvider<Setting>(
   (ref) => const Setting(),
+  dependencies: const [],
 );
 
 class SettingPage extends StatelessWidget {

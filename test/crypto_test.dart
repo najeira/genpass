@@ -21,9 +21,9 @@ class _CryptoTestCase {
 
 void main() {
   for (final tc in testCases) {
-    test(
-        "${tc.masterPassword} ${tc.domainSite} ${tc.hashAlgorithm} ${tc.length}",
-        () {
+    final name = "${tc.masterPassword} ${tc.domainSite} "
+        "${tc.hashAlgorithm} ${tc.length} ${tc.expected}";
+    test(name, () {
       final res = Crypto.generatePassword(
         tc.hashAlgorithm,
         tc.domainSite,
@@ -33,6 +33,29 @@ void main() {
       expect(res, tc.expected);
     });
   }
+
+  _testPin();
+}
+
+void _testPin() {
+  test("generatePin", () {
+    expect(
+      Crypto.generatePin(
+        "example.com",
+        "test",
+        4,
+      ),
+      "1306",
+    );
+    expect(
+      Crypto.generatePin(
+        "example.com",
+        "わかよたれそつねならむ",
+        4,
+      ),
+      "9417",
+    );
+  });
 }
 
 const testCases = <_CryptoTestCase>[
