@@ -5,6 +5,7 @@ import 'package:genpass/app/gloabls.dart';
 import 'package:genpass/app/providers.dart';
 import 'package:genpass/app/widgets/generator.dart';
 import 'package:genpass/app/widgets/history_button.dart';
+import 'package:genpass/app/widgets/identicon.dart';
 import 'package:genpass/app/widgets/input_row.dart';
 import 'package:genpass/app/widgets/visibility_button.dart';
 import 'package:genpass/domain/settings.dart';
@@ -128,12 +129,10 @@ class _MasterInputRow extends ConsumerWidget {
     log.fine("_MasterInputRow.build");
     final visible = ref.watch(masterVisibleProvider);
     final errorText = ref.watch(masterErrorTextProvider);
-    final iconData = ref.watch(masterIconProvider);
     return InputRow(
       provider: masterInputTextProvider,
       textInputType: TextInputType.visiblePassword,
-      inputIcon: Icons.bubble_chart,
-      suffixIcon: iconData,
+      prefixIcon: const _MasterSuffixIcon(),
       labelText: "master password",
       hintText: "your master password",
       errorText: errorText,
@@ -151,6 +150,25 @@ class _MasterInputRow extends ConsumerWidget {
   }
 }
 
+class _MasterSuffixIcon extends ConsumerWidget {
+  const _MasterSuffixIcon({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = ref.watch(masterInputTextProvider);
+    if (text.isEmpty) {
+      return const Icon(Icons.key_outlined);
+    }
+    return Identicon(
+      text,
+      grid: 5,
+      padding: 8.0,
+    );
+  }
+}
+
 class _DomainInputRow extends ConsumerWidget {
   const _DomainInputRow({
     super.key,
@@ -163,7 +181,7 @@ class _DomainInputRow extends ConsumerWidget {
     return InputRow(
       provider: domainInputTextProvider,
       textInputType: TextInputType.url,
-      inputIcon: Icons.business,
+      prefixIcon: const Icon(Icons.business),
       labelText: "domain / site",
       hintText: "example.com",
       errorText: errorText,
