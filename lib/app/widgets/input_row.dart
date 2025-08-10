@@ -7,8 +7,7 @@ class InputRow extends ConsumerStatefulWidget {
   const InputRow({
     super.key,
     required this.provider,
-    required this.inputIcon,
-    this.suffixIcon,
+    required this.prefixIcon,
     required this.textInputType,
     required this.labelText,
     required this.hintText,
@@ -18,8 +17,7 @@ class InputRow extends ConsumerStatefulWidget {
   });
 
   final StateProvider<String> provider;
-  final IconData inputIcon;
-  final IconData? suffixIcon;
+  final Widget prefixIcon;
   final TextInputType textInputType;
   final String labelText;
   final String hintText;
@@ -56,8 +54,7 @@ class _InputRowState extends ConsumerState<InputRow> {
           child: TextField(
             controller: _controller,
             decoration: InputDecoration(
-              prefixIcon: Icon(widget.inputIcon),
-              suffixIcon: widget.suffixIcon != null ? Icon(widget.suffixIcon) : null,
+              prefixIcon: widget.prefixIcon,
               labelText: widget.labelText,
               hintText: widget.hintText,
               errorText: widget.errorText,
